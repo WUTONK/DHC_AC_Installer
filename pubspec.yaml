@@ -27,9 +27,13 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+###依赖项
 dependencies:
   flutter:
     sdk: flutter
+  win32_registry: ^1.1.2 #读写注册表和获取windwos版本依赖性
+  ffi: ^2.1.0 #读写注册表和获取windwos版本依赖性
+  device_info_plus: ^9.1.2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -88,3 +92,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+
