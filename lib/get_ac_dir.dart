@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:convert';
+
 // 函数：获取指定游戏的根目录
 // 参数：
 //   - vdfFilePath: VDF文件的路径
@@ -15,14 +18,19 @@ String getGameRootDirectory(String vdfFilePath, String gameId) {
   String rootDirectory = '';
 
   // 遍历解析后的VDF数据以查找游戏根目录
-  if (vdfData.containsKey("libraryfolders")) {
-    Map<String, dynamic> libraryFolders = vdfData["libraryfolders"];
-    for (var folder in libraryFolders.values) {
-      // 检查是否包含指定游戏的ID
-      if (folder.containsKey("apps") && folder["apps"].containsKey(gameId)) {
-        // 构建游戏根目录路径
-        rootDirectory = folder["path"] + '\\steamapps\\common\\assettocorsa';
-        break;
+  for (var key in vdfData.keys) {
+    // 获取子项
+    var item = vdfData[key];
+    if (item.containsKey("apps")) {
+      var apps = item["apps"];
+      for (var appKey in apps.keys) {
+        if (appKey == gameId) {
+          // 如果包含指定游戏的ID，则返回该子项的路径
+          if (item.containsKey("path")) {
+            rootDirectory = item["path"] + '\\SteamLibrary';
+            return rootDirectory;
+          }
+        }
       }
     }
   }
@@ -34,7 +42,7 @@ String getGameRootDirectory(String vdfFilePath, String gameId) {
 // 参数：vdfString - VDF格式的字符串
 // 返回值：解析后的Map对象
 Map<String, dynamic> _parseVDF(String vdfString) {
-  Map<String, dynamic> result = {}; // 存储解析结果的Map result中文：结果
+  Map<String, dynamic> result = {}; // 存储解析结果的Map
   List<String> lines = LineSplitter.split(vdfString).toList(); // 将字符串按行分割为列表
   List<String> stack = []; // 用于跟踪解析过程中的嵌套结构
 
@@ -58,8 +66,8 @@ Map<String, dynamic> _parseVDF(String vdfString) {
 }
 
 void main() {
-  String gameId = "244210"; // 要查找的游戏ID
-  String vdfFilePath = "path/to/your/vdf/file.vdf"; // VDF文件路径
+  String gameId = "413150"; // 要查找的游戏ID
+  String vdfFilePath = "E:\\steam\\steamapps\\libraryfolders.vdf"; // VDF文件路径
 
   // 调用函数获取游戏根目录
   String gameRootDirectory = getGameRootDirectory(vdfFilePath, gameId);
