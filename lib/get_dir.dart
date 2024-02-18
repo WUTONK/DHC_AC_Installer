@@ -54,7 +54,8 @@ Map<String, dynamic> _vdfToMap(String vdfContent) {
 
       var value = parts[2].replaceAll('"', '');
       stack.last[key] = value; // 在堆栈顶部(last)的Map中添加键值对
-
+      print(stack);
+      
     } else if (line == '{') { //如果如果行以'{'开始
       if(mapName != ''){
       print(stack);
