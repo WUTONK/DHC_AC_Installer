@@ -35,6 +35,7 @@ dependencies:
   ffi: ^2.1.0 #读写注册表和获取windwos版本依赖性
   device_info_plus: ^9.1.2 #获取系统信息
   fluttertoast: ^8.0.0 #toast提示
+  vdf: ^1.1.0 #.vdf文件解析
 
 
 
