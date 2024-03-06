@@ -23,11 +23,11 @@ void main() {
     },
   };
 
-  var targetKey = 'innerKey3'; // 目标 Map 的键
+  var targetKey = '114514'; // 神力科莎app号
   var mapToAdd = {'nestedInnerKey9': 'nestedValue9'}; // 要添加的新 Map
   var mirrorMap = <dynamic, dynamic>{}; //由于dart不允许遍历途中修改数据，使用镜像暂存来绕过限制
 
-  // 递归查找目标键名，并在其所属的外部 Map 中添加新 Map，如果始终没有查找到，返回Null
+  // 递归查找神力科莎app号所属的path父map，如果没有返回null
     Map<dynamic, dynamic>? addToOuterMap(Map nMap,mMap) {
       
       var testValue = {'a':1};
@@ -58,6 +58,7 @@ void main() {
       if (foundKey) {
         return testValue;
       } else {
+        print("查找失败");
         return null;
       }
 
