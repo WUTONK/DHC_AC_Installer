@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "E:/programming/flutter/project/DHC_AC_installer/dhc_ac_installer/linux"
+    "vscode_custom_css.imports": [
+        "file:///C:/Users/Administrator/.vscode/extensions/webrender.synthwave-x-fluoromachine-0.0.14/synthwave-x-fluoromachine.css"
+        ],
+        "cmake.sourceDirectory": "E:/programming/flutter/project/DHC_AC_installer/dhc_ac_installer/windows/flutter"
 }

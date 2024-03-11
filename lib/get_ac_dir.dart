@@ -1,45 +1,83 @@
+import 'package:vdf/vdf.dart';
 import 'dart:io';
 import 'dart:convert';
 
-// 函数：获取指定游戏的根目录
-// 参数：
-//   - vdfFilePath: VDF文件的路径
-//   - gameId: 指定游戏的ID
-// 返回值：游戏的根目录（如果找到），否则返回空字符串
-String getGameRootDirectory(String vdfFilePath, String gameId) {
-  // 读取VDF文件
-  File file = File(vdfFilePath);
-  if (!file.existsSync()) {
-    return '错误：未能找到VDF文件，可能是由于你安装的是盗版神力科莎，如果仍要安装，请手动指定安装目录'; // 如果文件不存在，返回错误信息
+void main() async {
+  // 定义游戏 ID 和 VDF 文件路径
+  final gameId = 244210;
+  // TODO：和get_steam_directory联通，自动获取路径
+  // String libraryFoldersFilePath = "E:\\steam\\steamapps\\libraryfolders.vdf";
+  String libraryFoldersFilePath = "test\\vdf_example\\libraryfolders.vdf";
+
+  // 定义 vdfStr 变量
+  String libraryFoldersStr;
+
+  // 异步读取vdf文件内容
+  libraryFoldersStr = await GetVdfString(libraryFoldersFilePath);
+
+  // 检测文件内容
+  print(libraryFoldersStr);
+
+  // 解析 VDF 文件
+  var libraryFolders = vdf.decode(libraryFoldersStr);
+  print(libraryFolders);
+
+  final path = getGameStoragePath(libraryFolders, gameId);
+  if (path != null) {
+    print('游戏 "${gameId}" 存储在 "${path}"');
+  } else {
+    print('未找到游戏 "${gameId}"');
+  }
+}
+
+// 定义 GetVdfString 函数
+Future<String> GetVdfString(String vdfFilePath) async {
+  // 读取文件内容
+  var vdfStr = await File(vdfFilePath).readAsString();
+
+  // 返回文件内容
+  return vdfStr;
+}
+
+/// 获取 Steam 游戏存储路径
+///
+/// 参数：
+///   libraryFolders: `libraryfolders.vdf` 文件内容解析后的 Map 对象
+///   gameId: 目标游戏 ID
+///
+/// 返回值：
+///   游戏存储路径，如果未找到则返回 null
+String? getGameStoragePath(Map<String, dynamic> libraryFolders, int gameId) {
+  // 遍历所有存储盘
+  for (var i = 0; i < libraryFolders['libraryfolders'].length; i++) {
+    final folder = libraryFolders['libraryfolders'][i.toString()];
+    print(folder);
+
+    // 获取存储盘路径
+    final path = folder['path'];
+
+    // 检查该存储盘是否存在目标游戏
+    if (folder['apps'].containsKey('$gameId')) {
+      // 找到游戏，返回存储盘路径
+      return path;
+    }
   }
 
-  // 解析VDF文件
-  Map<String, dynamic> vdfData = _parseVDF(file.readAsStringSync());
-  String rootDirectory = '';
-
-
-  return rootDirectory; // 返回游戏根目录
+  // 未找到游戏
+  return null;
 }
 
-// parseVDF函数：解析VDF格式的数据
-// 参数：vdfString - VDF格式的字符串
-// 返回值：解析后的Map对象
-Map<String, dynamic> _parseVDF(String vdfString) {
-  Map<String, dynamic> result = {}; // 存储解析结果的Map
-  List<String> lines = LineSplitter.split(vdfString).toList(); // 将字符串按行分割为列表
-  List<String> stack = []; // 用于跟踪解析过程中的嵌套结构
 
 
-  return result; // 返回解析后的Map
-}
+///TODO:下面是之前残留的代码，把类似的检测逻辑做出来
+// String getGameRootDirectory(String vdfFilePath, String gameId) {
+//   // 读取VDF文件
+//   File file = File(vdfFilePath);
+//   if (!file.existsSync()) {
+//     return '错误：未能找到VDF文件，可能是由于你安装的是盗版神力科莎，如果仍要安装，请手动指定安装目录'; // 如果文件不存在，返回错误信息
+//   }
 
-void main() {
-  String gameId = "413150"; // 要查找的游戏ID
-  String vdfFilePath = "E:\\steam\\steamapps\\libraryfolders.vdf"; // VDF文件路径
+// }
 
-  // 调用函数获取游戏根目录
-  String gameRootDirectory = getGameRootDirectory(vdfFilePath, gameId);
-  
-  // 打印结果
-  print('游戏根目录在"$gameId" is: $gameRootDirectory');
-}
+
+

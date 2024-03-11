@@ -39,6 +39,8 @@ String findSteamInstallDirectory() {
     }
   } catch (e) {
     print('无法从注册表中获取Steam安装路径，出现错误：$e');
+    print("可能是你没有安装steam，本软件可能无法正常在盗版神力科莎上运行或自动获取安装路径，请手动选择安装路径");
+    //TODO: 这里做个手动安装选项的跳转
   }
   return "null";
 }
