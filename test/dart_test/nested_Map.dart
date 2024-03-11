@@ -1,87 +1,58 @@
 
-void main() {
-  var nestedMap = {
-    'outerKey1': {
-      'innerKey1': {
-        'nestedInnerKey1': 'nestedValue1',
-        'nestedInnerKey2': 'nestedValue2',
+/// 获取 Steam 游戏存储路径
+///
+/// 参数：
+///   libraryFolders: `libraryfolders.vdf` 文件内容解析后的 Map 对象
+///   gameId: 目标游戏 ID
+///
+/// 返回值：
+///   游戏存储路径，如果未找到则返回 null
+
+void main(){
+
+  final libraryFolders = {
+    'libraryfolders': {
+      '0': {
+        'path': 'E:\\steam',
+        'apps': {
+          '244210': '44949522749',
+        },
       },
-      'innerKey2': {
-        'nestedInnerKey3': 'nestedValue3',
-        'nestedInnerKey4': 'nestedValue4',
-      },
-    },
-    'outerKey2': {
-      'innerKey3': {
-        'nestedInnerKey5': 'nestedValue5',
-        'nestedInnerKey6': 'nestedValue6',
-      },
-      'innerKey4': {
-        'nestedInnerKey7': 'nestedValue7',
-        'nestedInnerKey8': 'nestedValue8',
+      '1': {
+        'path': 'C:\\SteamLibrary',
+        'apps': {},
       },
     },
   };
+  final gameId = 244210;
 
-  var targetKey = '114514'; // 神力科莎app号
-  var mapToAdd = {'nestedInnerKey9': 'nestedValue9'}; // 要添加的新 Map
-  var mirrorMap = <dynamic, dynamic>{}; //由于dart不允许遍历途中修改数据，使用镜像暂存来绕过限制
+  final path = getGameStoragePath(libraryFolders, gameId);
+  if (path != null) {
+    print('游戏 "${gameId}" 存储在 "${path}"');
+  } else {
+    print('未找到游戏 "${gameId}"');
+  }
 
-  // 递归查找神力科莎app号所属的path父map，如果没有返回null
-    Map<dynamic, dynamic>? addToOuterMap(Map nMap,mMap) {
-      
-      var testValue = {'a':1};
-      bool foundKey = false;
-      mMap = {...nMap}; //**在dart中，如果直接赋值一个变量给另一个变量默认是引用而不是复制，使用扩展运算符{...}来复制**
-
-      void recursiveAdd(Map map) {
-        for (var entry in map.entries) {
-          var key = entry.key;
-          var value = entry.value;
-          if (key == targetKey) {
-            // 在外部 Map 中添加新 Map
-            mMap['testKey1'] = mapToAdd;
-            print('添加成功！');
-            print(mMap);
-            foundKey = true;
-            break;
-          } else if (value is Map && !foundKey) {
-            // 继续递归查找
-            addToOuterMap(value,mMap);
-          }
-        };
-        return;
-      }
-
-      recursiveAdd(nMap);
-      
-      if (foundKey) {
-        return testValue;
-      } else {
-        print("查找失败");
-        return null;
-      }
-
-    }
-
-  // 调用递归函数开始查找并添加
-  var a = addToOuterMap(nestedMap,mirrorMap);
-  print(nestedMap['outerKey1']); // 输出：{innerKey1: {nestedInnerKey1: nestedValue1, nestedInnerKey2: nestedValue2, outerKey3: {nestedInnerKey9: nestedValue9}}, innerKey2: {nestedInnerKey3: nestedValue3, nestedInnerKey4: nestedValue4}}
 }
 
+String? getGameStoragePath(Map<String, dynamic> libraryFolders, int gameId) {
+  // 遍历所有存储盘
+  for (var i = 0; i < libraryFolders['libraryfolders'].length; i++) {
+    String intI = i.toString();
+    final folder = libraryFolders['libraryfolders'][intI];
+    print(folder);
 
-// // 递归查找目标键名，并在其所属的外部 Map 中添加新 Map
-//   void addToOuterMap(Map nestedMap) {
-//     nestedMap.forEach((key, value) {
-//       if (key == targetKey) {
-//         // 在外部 Map 中添加新 Map
-//         nestedMap['outerKey3'] = mapToAdd;
-//         print('添加成功！');
-//         print(nestedMap);
-//         return;
-//       } else if (value is Map) {
-//         // 继续递归查找
-//         addToOuterMap(value);
-//       }
-//     });
-//   }
+    // 获取存储盘路径
+    final path = folder['path'];
+
+    // 检查该存储盘是否存在目标游戏
+    if (folder['apps'].containsKey('$gameId')) {
+      // 找到游戏，返回存储盘路径
+      return path;
+    }
+  }
+
+  // 未找到游戏
+  return null;
+}
+
