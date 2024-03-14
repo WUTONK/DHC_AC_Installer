@@ -1,3 +1,5 @@
+//文件作用：获取神力科莎目录
+
 import 'package:vdf/vdf.dart';
 import 'dart:io';
 import 'dart:convert';

@@ -36,6 +36,8 @@ dependencies:
   device_info_plus: ^9.1.2 #获取系统信息
   fluttertoast: ^8.0.0 #toast提示
   vdf: ^1.1.0 #.vdf文件解析
+  archive: ^3.4.10 #文件解压缩
+  path: ^1.8.3 #路径用
 
 
 
