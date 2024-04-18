@@ -1,7 +1,7 @@
 name: dhc_vcl
 description: "A new Flutter package project."
 version: 0.0.1
-homepage:
+homepage: 'none' #TODO:这里是包主页链接，到时候发布了加上
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -10,6 +10,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  fluent_ui: ^4.8.7 #fluent_ui库
+  win32_registry: ^1.1.2 #读写注册表和获取windwos版本依赖性
+  ffi: ^2.1.0 #读写注册表和获取windwos版本依赖性
+  device_info_plus: ^9.1.2 #获取系统信息
+  fluttertoast: ^8.0.0 #toast提示
+  vdf: ^1.1.0 #.vdf文件解析
+  archive: ^3.4.10 #文件解压缩
+  path: ^1.8.3 #路径用
+  flutter_swiper_null_safety: ^1.0.2 #轮播图和抽屉用
+  flutter_localizations: #TODO:实现i18n本地化
+    sdk: flutter
+  intl: any
 
 dev_dependencies:
   flutter_test:

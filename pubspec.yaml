@@ -31,6 +31,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  dhc_vcl: #自编VCL（GUI组件包）
+    path: ./dhc_vcl/
+
+  fluent_ui: ^4.8.7 #fluent_ui库
   win32_registry: ^1.1.2 #读写注册表和获取windwos版本依赖性
   ffi: ^2.1.0 #读写注册表和获取windwos版本依赖性
   device_info_plus: ^9.1.2 #获取系统信息

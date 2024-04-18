@@ -1,4 +1,4 @@
-# 这里是东濠涌首都高安装器的GUI包！
+# 这里是东濠涌首都高安装器的GUI包
 
 <!--
 This README describes the package. If you publish this package to pub.dev,
