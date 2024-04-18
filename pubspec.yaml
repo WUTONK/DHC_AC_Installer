@@ -44,12 +44,17 @@ dependencies:
   archive: ^3.4.10 #文件解压缩
   path: ^1.8.3 #路径用
   flutter_swiper_null_safety: ^1.0.2 #轮播图和抽屉用
-
-
+  flutter_localizations: #国际化用 使用方法https://blog.csdn.net/ifmylove2011/article/details/125797598
+    sdk: flutter 
+  intl: ^0.18.1 #flutter_localizations依赖项 （为避免上传pubspec.lock所以重复绑定）
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  
+#开启国际化 
+flutter_intl:
+  enabled: true
 
 dev_dependencies:
   flutter_test:
@@ -64,7 +69,6 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -72,18 +76,14 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
