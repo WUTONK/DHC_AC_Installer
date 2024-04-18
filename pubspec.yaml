@@ -38,6 +38,7 @@ dependencies:
   vdf: ^1.1.0 #.vdf文件解析
   archive: ^3.4.10 #文件解压缩
   path: ^1.8.3 #路径用
+  flutter_swiper_null_safety: ^1.0.2 #轮播图和抽屉用
 
 
 
