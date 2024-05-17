@@ -36,7 +36,7 @@ SystemVersionSatisfy() {
       return (res,Satisfy);
     }
   } else {
-    const res = "肥肠爆芡，本应用不支持在windows10以下或其他系统环境下运行，不过看你都用linux玩游戏了，模组绝对可以自己装吧( •̀ ω •́ )✧";
+    const res = "本应用不支持在windows10以下或其他系统环境下运行（你可能将应用运行在了linux虚拟环境中，本项目不支持linux）";
     return (res,Satisfy);
   }
 }
