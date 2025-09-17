@@ -63,14 +63,14 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   // IPC handler for API requests
-  ipcMain.handle('api-request', async (_, url) => {
+  ipcMain.handle('api-request', async (event, url) => {
     try {
       const response = await fetch(url)
       const data = await response.json()
-
+      
       // 返回完整的响应信息，包括状态码
-      return {
-        success: true,
+      return { 
+        success: true, 
         data,
         status: response.status,
         statusText: response.statusText,
@@ -78,8 +78,8 @@ app.whenReady().then(() => {
         headers: Object.fromEntries(response.headers.entries())
       }
     } catch (error) {
-      return {
-        success: false,
+      return { 
+        success: false, 
         error: error instanceof Error ? error.message : String(error),
         status: 0,
         statusText: 'Network Error',

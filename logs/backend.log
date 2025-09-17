@@ -6,18 +6,12 @@
 
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
-2025/09/18 02:25:23 Backend Server is running on port http://127.0.0.1:19810
-2025/09/18 02:25:23 Frontend login page is running on path http://localhost:11451
+2025/09/18 02:30:23 Backend Server is running on port http://127.0.0.1:19810
+2025/09/18 02:30:23 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
 use getGamePath function
-[GIN] 2025/09/18 - 02:25:29 | 200 |     187.708µs |       127.0.0.1 | GET      "/api/GetGamePath"
+[GIN] 2025/09/18 - 02:31:09 | 200 |     223.625µs |       127.0.0.1 | GET      "/api/GetGamePath"
 use getGamePath function
-[GIN] 2025/09/18 - 02:25:32 | 200 |        45.5µs |       127.0.0.1 | GET      "/api/GetGamePath"
-use getGamePath function
-[GIN] 2025/09/18 - 02:26:42 | 200 |     269.125µs |       127.0.0.1 | GET      "/api/GetGamePath"
-use getGamePath function
-[GIN] 2025/09/18 - 02:26:43 | 200 |      52.583µs |       127.0.0.1 | GET      "/api/GetGamePath"
-use getGamePath function
-[GIN] 2025/09/18 - 02:27:59 | 200 |        74.5µs |       127.0.0.1 | GET      "/api/GetGamePath"
+[GIN] 2025/09/18 - 02:33:21 | 200 |      75.584µs |       127.0.0.1 | GET      "/api/GetGamePath"

@@ -6,8 +6,8 @@ vite v7.1.5 building SSR bundle for development...
 transforming...
 ✓ 2 modules transformed.
 rendering chunks...
-out/main/index.js  2.19 kB
-✓ built in 40ms
+out/main/index.js  2.23 kB
+✓ built in 41ms
 
 build the electron main process successfully
 
@@ -31,16 +31,20 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
-02:25:49 [vite] (client) hmr update /src/App.tsx
-02:25:57 [vite] (client) hmr update /src/App.tsx
-02:26:02 [vite] (client) hmr update /src/App.tsx
-02:26:02 [vite] (client) hmr update /src/App.tsx
-02:26:02 [vite] (client) hmr update /src/App.tsx
-02:26:02 [vite] (client) hmr update /src/App.tsx
-02:26:02 [vite] (client) hmr update /src/App.tsx
-02:26:31 [vite] (client) hmr update /src/App.tsx
-02:26:45 [vite] (client) hmr update /src/App.tsx
-02:26:54 [vite] (client) hmr update /src/App.tsx
-02:26:59 [vite] (client) hmr update /src/App.tsx
-02:27:00 [vite] (client) hmr update /src/App.tsx
-02:27:43 [vite] (client) hmr update /src/App.tsx
+Open dev tool...
+[94600:0918/023032.799007:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[94600:0918/023032.799077:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[94600:0918/023033.254905:ERROR:CONSOLE:1] "Uncaught (in promise) SyntaxError: Unexpected token 'H', "HTTP/1.1 4"... is not valid JSON", source: devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@048e9975055de8ae447fc7e78333f22b7061e4bc/&can_dock=true&toolbarColor=rgba(223,223,223,1)&textColor=rgba(0,0,0,1)&experiments=true (1)
+02:32:46 [vite] (client) hmr update /src/App.tsx
+02:33:10 [vite] (client) hmr update /src/App.tsx
+02:33:12 [vite] (client) hmr update /src/App.tsx
+02:33:18 [vite] (client) hmr update /src/App.tsx
+Open dev tool...
+[94600:0918/023325.477584:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[94600:0918/023325.477665:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+02:33:49 [vite] (client) hmr update /src/App.tsx
+02:33:52 [vite] (client) hmr update /src/App.tsx
+02:33:54 [vite] (client) hmr update /src/App.tsx
+02:34:52 [vite] (client) page reload src/main.tsx
+02:48:04 [vite] (client) hmr update /src/App.tsx
+02:48:17 [vite] (client) hmr update /src/App.tsx

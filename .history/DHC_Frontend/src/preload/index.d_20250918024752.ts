@@ -4,9 +4,9 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      requestApi: (url: string) => Promise<{
-        success: boolean;
-        data?: unknown;
+      requestApi: (url: string) => Promise<{ 
+        success: boolean; 
+        data?: any; 
         error?: string;
         status: number;
         statusText: string;

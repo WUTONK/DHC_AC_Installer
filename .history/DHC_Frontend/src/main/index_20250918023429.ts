@@ -66,25 +66,15 @@ app.whenReady().then(() => {
   ipcMain.handle('api-request', async (_, url) => {
     try {
       const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
       const data = await response.json()
-
-      // 返回完整的响应信息，包括状态码
-      return {
-        success: true,
-        data,
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      }
+      return { success: true, data }
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        status: 0,
-        statusText: 'Network Error',
-        ok: false
-      }
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   })
 

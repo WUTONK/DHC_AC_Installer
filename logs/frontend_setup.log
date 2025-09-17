@@ -6,4 +6,4 @@ Already up to date
 > echo 'Skipping electron-builder install-app-deps due to pnpm issue'
 
 Skipping electron-builder install-app-deps due to pnpm issue
-Done in 469ms using pnpm v10.12.4
+Done in 584ms using pnpm v10.12.4
