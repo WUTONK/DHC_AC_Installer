@@ -1,0 +1,46 @@
+
+> dhc-frontend@1.0.0 dev /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend
+> electron-vite dev
+
+vite v7.1.5 building SSR bundle for development...
+transforming...
+✓ 2 modules transformed.
+rendering chunks...
+out/main/index.js  2.19 kB
+✓ built in 40ms
+
+build the electron main process successfully
+
+-----
+
+vite v7.1.5 building SSR bundle for development...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  0.49 kB
+✓ built in 8ms
+
+build the electron preload files successfully
+
+-----
+
+dev server running for the electron renderer process at:
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+start electron app...
+
+02:25:49 [vite] (client) hmr update /src/App.tsx
+02:25:57 [vite] (client) hmr update /src/App.tsx
+02:26:02 [vite] (client) hmr update /src/App.tsx
+02:26:02 [vite] (client) hmr update /src/App.tsx
+02:26:02 [vite] (client) hmr update /src/App.tsx
+02:26:02 [vite] (client) hmr update /src/App.tsx
+02:26:02 [vite] (client) hmr update /src/App.tsx
+02:26:31 [vite] (client) hmr update /src/App.tsx
+02:26:45 [vite] (client) hmr update /src/App.tsx
+02:26:54 [vite] (client) hmr update /src/App.tsx
+02:26:59 [vite] (client) hmr update /src/App.tsx
+02:27:00 [vite] (client) hmr update /src/App.tsx
+02:27:43 [vite] (client) hmr update /src/App.tsx
