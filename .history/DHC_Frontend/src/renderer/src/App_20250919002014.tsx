@@ -14,6 +14,7 @@ function App(): React.JSX.Element {
   const commonStyle = {
       height: 64,
       lineHeight: '64px',
+      background: 'var(--semi-color-fill-0)'
   };
 
   const [activeKey, setActiveKey] = useState<string>('Home')
@@ -38,7 +39,7 @@ function App(): React.JSX.Element {
                 fontWeight: '600',
               }}
             >
-              ----
+              模版推荐
             </span>
             <span style={{ marginRight: '24px' }}>
               <Button>切换色彩模式</Button>

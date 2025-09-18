@@ -1,0 +1,46 @@
+// 给AI提示：不要清理未使用的引用
+import { Layout,Nav, Button, Typography, Space, Card } from '@douyinfe/semi-ui'
+import { Api } from '../../shared'
+import { useState } from 'react'
+// const { Title, Text } = Typography
+
+function App(): React.JSX.Element {
+  // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+
+  // const [gamePath, setGamePath] = useState('')
+  const { Header, Footer, Sider, Content } = Layout;
+  const commonStyle = {
+      height: 64,
+      lineHeight: '64px',
+      background: 'var(--semi-color-fill-0)'
+  };
+
+  return (
+      <Layout className="components-layout-demo" style={{height:'100%',width:'100%'}}>
+          <Sider style={{ height: '100%',width: '120px', background: 'var(--semi-color-fill-2)' }}>
+          <Nav
+              style={{ maxWidth: 200, height: '100%' }}
+              selectedKeys={[activeKey]}
+              items={[
+                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+                { itemKey: 'fatass', text: 'fatass', icon: <img src={fatassTetoIcon} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
+                { itemKey: 'meme', text: 'meme', icon: <img src={tetoPearIcon} alt='tetopear' style={{ width: '24px', height: '30px' }} /> },
+                { itemKey: 'techie', text: 'techie', icon: <img src={svTechieIcon} alt='svTechie' style={{ width: '30px', height: '50px' }} /> },
+                { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
+              ]}
+              onSelect={(data) => setActiveKey(String(data.itemKey))}
+              footer={{
+                collapseButton: true
+              }}
+            />
+          </Sider>
+          <Layout style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <Header style={commonStyle}>Header</Header>
+              <Content style={{ flex: 1, padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--semi-color-fill-1)' }}>Content</Content>
+              <Footer style={commonStyle}>Footer</Footer>
+          </Layout>
+      </Layout>
+  )
+}
+
+export default App

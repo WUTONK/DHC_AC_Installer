@@ -14,6 +14,7 @@ function App(): React.JSX.Element {
   const commonStyle = {
       height: 64,
       lineHeight: '64px',
+      background: 'var(--semi-color-fill-0)'
   };
 
   const [activeKey, setActiveKey] = useState<string>('Home')
@@ -38,7 +39,7 @@ function App(): React.JSX.Element {
                 fontWeight: '600',
               }}
             >
-              ----
+              模版推荐
             </span>
             <span style={{ marginRight: '24px' }}>
               <Button>切换色彩模式</Button>
@@ -61,8 +62,8 @@ function App(): React.JSX.Element {
           items={[
             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
             { itemKey: 'fatass', text: 'fatass', icon: <img src={""} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
-            { itemKey: 'meme', text: 'meme', icon: <img src={""} alt='tetopear' style={{ width: '24px', height: '24px' }} /> },
-            { itemKey: 'techie', text: 'techie', icon: <img src={""} alt='svTechie' style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'meme', text: 'meme', icon: <img src={""} alt='tetopear' style={{ width: '24px', height: '30px' }} /> },
+            { itemKey: 'techie', text: 'techie', icon: <img src={""} alt='svTechie' style={{ width: '30px', height: '50px' }} /> },
             { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
           ]}
           onSelect={(data) => setActiveKey(String(data.itemKey))}

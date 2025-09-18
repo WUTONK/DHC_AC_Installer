@@ -14,6 +14,7 @@ function App(): React.JSX.Element {
   const commonStyle = {
       height: 64,
       lineHeight: '64px',
+      background: 'var(--semi-color-fill-0)'
   };
 
   const [activeKey, setActiveKey] = useState<string>('Home')
@@ -24,7 +25,7 @@ function App(): React.JSX.Element {
       <div>
         <Nav mode='horizontal' defaultSelectedKeys={['Home']} style={{ ...commonStyle }}>
           <Nav.Header>
-            <img src={""} alt="Logo" style={{ height: '32px' }}></img>
+            <img src={} alt="Logo" style={{ height: '32px' }}></img>
           </Nav.Header>
           <span
             style={{
@@ -38,10 +39,10 @@ function App(): React.JSX.Element {
                 fontWeight: '600',
               }}
             >
-              ----
+              模版推荐
             </span>
             <span style={{ marginRight: '24px' }}>
-              <Button>切换色彩模式</Button>
+              <Button onClick={darkModeToggle}>切换色彩模式</Button>
             </span>
           </span>
           <Nav.Footer>
@@ -60,9 +61,9 @@ function App(): React.JSX.Element {
           selectedKeys={[activeKey]}
           items={[
             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
-            { itemKey: 'fatass', text: 'fatass', icon: <img src={""} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
-            { itemKey: 'meme', text: 'meme', icon: <img src={""} alt='tetopear' style={{ width: '24px', height: '24px' }} /> },
-            { itemKey: 'techie', text: 'techie', icon: <img src={""} alt='svTechie' style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'fatass', text: 'fatass', icon: <img src={fatassTetoIcon} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'meme', text: 'meme', icon: <img src={tetoPearIcon} alt='tetopear' style={{ width: '24px', height: '30px' }} /> },
+            { itemKey: 'techie', text: 'techie', icon: <img src={svTechieIcon} alt='svTechie' style={{ width: '30px', height: '50px' }} /> },
             { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
           ]}
           onSelect={(data) => setActiveKey(String(data.itemKey))}
@@ -73,15 +74,16 @@ function App(): React.JSX.Element {
       </Sider>
 
       <Content>
-        {/* {renderPage(activeKey)} */}
+        {renderPage(activeKey)}
       </Content>
     </Layout>
 
     <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
   </Layout>
+
+  {/* <Button onClick={ipcHandle}>Hello Semi</Button>
+  <Button onClick={darkModeToggle}>darkMode</Button> */}
   )
-
-
 }
 
 export default App

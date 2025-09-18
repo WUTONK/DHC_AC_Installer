@@ -6,8 +6,8 @@ vite v7.1.5 building SSR bundle for development...
 transforming...
 ✓ 2 modules transformed.
 rendering chunks...
-out/main/index.js  2.23 kB
-✓ built in 41ms
+out/main/index.js  2.51 kB
+✓ built in 38ms
 
 build the electron main process successfully
 
@@ -31,20 +31,91 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
-Open dev tool...
-[94600:0918/023032.799007:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-[94600:0918/023032.799077:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-[94600:0918/023033.254905:ERROR:CONSOLE:1] "Uncaught (in promise) SyntaxError: Unexpected token 'H', "HTTP/1.1 4"... is not valid JSON", source: devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@048e9975055de8ae447fc7e78333f22b7061e4bc/&can_dock=true&toolbarColor=rgba(223,223,223,1)&textColor=rgba(0,0,0,1)&experiments=true (1)
-02:32:46 [vite] (client) hmr update /src/App.tsx
-02:33:10 [vite] (client) hmr update /src/App.tsx
-02:33:12 [vite] (client) hmr update /src/App.tsx
-02:33:18 [vite] (client) hmr update /src/App.tsx
-Open dev tool...
-[94600:0918/023325.477584:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-[94600:0918/023325.477665:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-02:33:49 [vite] (client) hmr update /src/App.tsx
-02:33:52 [vite] (client) hmr update /src/App.tsx
-02:33:54 [vite] (client) hmr update /src/App.tsx
-02:34:52 [vite] (client) page reload src/main.tsx
-02:48:04 [vite] (client) hmr update /src/App.tsx
-02:48:17 [vite] (client) hmr update /src/App.tsx
+00:19:26 [vite] Internal server error: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/App.tsx: JSX attributes must only be assigned a non-empty expression. (64:64)
+
+  62 |           items={[
+  63 |             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+> 64 |             { itemKey: 'fatass', text: 'fatass', icon: <img src={} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
+     |                                                                 ^
+  65 |             { itemKey: 'meme', text: 'meme', icon: <img src={} alt='tetopear' style={{ width: '24px', height: '30px' }} /> },
+  66 |             { itemKey: 'techie', text: 'techie', icon: <img src={} alt='svTechie' style={{ width: '30px', height: '50px' }} /> },
+  67 |             { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
+  Plugin: vite:react-babel
+  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/App.tsx:64:64
+  62 |            items={[
+  63 |              { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+  64 |  ...        { itemKey: 'fatass', text: 'fatass', icon: <img src={} alt="fatass" style={{ width: '24px', height: '24px'...
+     |                                                                 ^
+  65 |              { itemKey: 'meme', text: 'meme', icon: <img src={} alt='tetopear' style={{ width: '24px', height: '30px' ...
+  66 |              { itemKey: 'techie', text: 'techie', icon: <img src={} alt='svTechie' style={{ width: '30px', height: '50...
+      at constructor (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:367:19)
+      at TypeScriptParserMixin.raise (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:6630:19)
+      at TypeScriptParserMixin.jsxParseAttributeValue (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4639:16)
+      at TypeScriptParserMixin.jsxParseAttribute (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4686:38)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4700:28)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10067:18)
+      at TypeScriptParserMixin.jsxParseOpeningElementAt (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4695:17)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4719:33)
+      at TypeScriptParserMixin.jsxParseElement (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4782:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4792:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11085:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11070:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11050:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9857:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10903:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10908:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10885:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10835:21)
+      at /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9795:39
+      at TypeScriptParserMixin.tryParse (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:6938:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9795:18)
+      at /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10804:39
+      at TypeScriptParserMixin.allowInAnd (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12436:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10804:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12503:17)
+      at TypeScriptParserMixin.parseObjectProperty (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11960:83)
+      at TypeScriptParserMixin.parseObjPropValue (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11988:100)
+      at TypeScriptParserMixin.parseObjPropValue (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9764:18)
+      at TypeScriptParserMixin.parsePropertyDefinition (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11925:17)
+      at TypeScriptParserMixin.parseObjectLike (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11840:21)
+      at TypeScriptParserMixin.parseExprAtom (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11343:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:4797:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11085:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11070:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11050:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9857:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10903:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10908:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10885:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10835:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9806:20)
+      at /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10804:39
+      at TypeScriptParserMixin.allowInAnd (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12436:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:10804:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12503:17)
+      at TypeScriptParserMixin.parseExprListItem (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12185:18)
+      at TypeScriptParserMixin.parseExprList (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12160:22)
+      at TypeScriptParserMixin.parseArrayLike (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:12067:26)
+      at TypeScriptParserMixin.parseArrayLike (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:9273:24)
+      at TypeScriptParserMixin.parseExprAtom (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/@babel+parser@7.28.4/node_modules/@babel/parser/lib/index.js:11339:23)
+00:19:26 [vite] (client) Pre-transform error: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/App.tsx: JSX attributes must only be assigned a non-empty expression. (64:64)
+
+  62 |           items={[
+  63 |             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+> 64 |             { itemKey: 'fatass', text: 'fatass', icon: <img src={} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
+     |                                                                 ^
+  65 |             { itemKey: 'meme', text: 'meme', icon: <img src={} alt='tetopear' style={{ width: '24px', height: '30px' }} /> },
+  66 |             { itemKey: 'techie', text: 'techie', icon: <img src={} alt='svTechie' style={{ width: '30px', height: '50px' }} /> },
+  67 |             { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
+  Plugin: vite:react-babel
+  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/App.tsx:64:64
+  62 |            items={[
+  63 |              { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+  64 |  ...        { itemKey: 'fatass', text: 'fatass', icon: <img src={} alt="fatass" style={{ width: '24px', height: '24px'...
+     |                                                                 ^
+  65 |              { itemKey: 'meme', text: 'meme', icon: <img src={} alt='tetopear' style={{ width: '24px', height: '30px' ...
+  66 |              { itemKey: 'techie', text: 'techie', icon: <img src={} alt='svTechie' style={{ width: '30px', height: '50...
+00:20:14 [vite] (client) hmr update /src/App.tsx
+00:20:30 [vite] (client) hmr update /src/App.tsx
+00:20:46 [vite] (client) hmr update /src/App.tsx
+00:20:53 [vite] (client) hmr update /src/App.tsx

@@ -4,7 +4,7 @@ import { DefaultApi,Configuration } from "../api";
 const ipcFetch = async (url: string): Promise<Response> => {
   const result = await window.api.requestApi(url)
 
-  // 返回HTTP状态码和响应信息
+  // 使用真实的HTTP状态码和响应信息
   const response = new Response(JSON.stringify(result.data), {
     status: result.status,
     statusText: result.statusText,

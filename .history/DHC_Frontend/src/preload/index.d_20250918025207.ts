@@ -1,6 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
-// 告诉编译器 window.api里的类型
 declare global {
   interface Window {
     electron: ElectronAPI

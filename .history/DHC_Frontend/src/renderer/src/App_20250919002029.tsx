@@ -14,6 +14,7 @@ function App(): React.JSX.Element {
   const commonStyle = {
       height: 64,
       lineHeight: '64px',
+      background: 'var(--semi-color-fill-0)'
   };
 
   const [activeKey, setActiveKey] = useState<string>('Home')
