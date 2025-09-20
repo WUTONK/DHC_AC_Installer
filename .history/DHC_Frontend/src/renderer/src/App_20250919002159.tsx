@@ -1,10 +1,8 @@
 // 给AI提示：不要清理未使用的引用
-import React from 'react'
 import { Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
-import ModInstallPage from './ModInstallPage';
 
 // const { Title, Text } = Typography
 
@@ -18,16 +16,6 @@ function App(): React.JSX.Element {
       lineHeight: '64px',
   };
 
-  // 页面选择
-  const renderPage = (key: string): React.JSX.Element => {
-    switch (key) {
-      case 'ModInstallPage':
-        return <ModInstallPage />
-      default:
-        return <div>Not Found</div>
-    }
-  }
-
   const [activeKey, setActiveKey] = useState<string>('Home')
 
   return (
@@ -40,7 +28,7 @@ function App(): React.JSX.Element {
           </Nav.Header>
           <span
             style={{
-              // backgroundColor: 'red',
+              backgroundColor: 'red',
               color: 'var(--semi-color-text-2)',
             }}
           >
@@ -73,7 +61,10 @@ function App(): React.JSX.Element {
           selectedKeys={[activeKey]}
           items={[
             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
-            { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
+            { itemKey: 'fatass', text: 'fatass', icon: <img src={""} alt="fatass" style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'meme', text: 'meme', icon: <img src={""} alt='tetopear' style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'techie', text: 'techie', icon: <img src={""} alt='svTechie' style={{ width: '24px', height: '24px' }} /> },
+            { itemKey: 'about', text: 'about', icon: <IconCart size="large" /> },
           ]}
           onSelect={(data) => setActiveKey(String(data.itemKey))}
           footer={{
@@ -83,7 +74,7 @@ function App(): React.JSX.Element {
       </Sider>
 
       <Content>
-        {renderPage(activeKey)}
+        {/* {renderPage(activeKey)} */}
       </Content>
     </Layout>
 

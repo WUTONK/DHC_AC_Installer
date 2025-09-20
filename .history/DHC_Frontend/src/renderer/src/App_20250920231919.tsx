@@ -73,7 +73,6 @@ function App(): React.JSX.Element {
           selectedKeys={[activeKey]}
           items={[
             { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
-            { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
           ]}
           onSelect={(data) => setActiveKey(String(data.itemKey))}
           footer={{
