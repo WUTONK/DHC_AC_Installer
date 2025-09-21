@@ -2,6 +2,7 @@ import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/
 import { Api } from '../../shared'
 import { useEffect, useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
+import { title } from 'process';
 
 const { Text } = Typography
 
@@ -51,6 +52,17 @@ function ModInstallPage(): React.JSX.Element{
   }
   ,[loading])
 
+  // @---通知功能
+
+  // 通知模版
+  const notificationTemplate = (context:object):void => {
+    // 把展开属性放在后面就可以覆盖默认值
+    Notification.open({
+      duration:0,
+      ...context,
+    })
+  }
+
   return(
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -58,11 +70,7 @@ function ModInstallPage(): React.JSX.Element{
           <Button type='primary' onClick={
             ()=>{
               toggleProgress()
-              Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
-              })
+              notificationTemplate({title:'MapInstall...',content:'InstallContext',duration:1})
               // displayNotification()
             }
           } style={ModInstallButtonStyle}>Map</Button>
