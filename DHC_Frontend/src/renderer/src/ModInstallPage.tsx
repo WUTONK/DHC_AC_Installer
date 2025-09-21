@@ -51,7 +51,6 @@ function ModInstallPage(): React.JSX.Element{
   }
   ,[loading])
 
-
   return(
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -63,9 +62,10 @@ function ModInstallPage(): React.JSX.Element{
                 title: 'Hi, Bytedance',
                 content: 'ies dance dance dance',
                 duration: 3,
-            })
+              })
+              // displayNotification()
             }
-            } style={ModInstallButtonStyle}>Map</Button>
+          } style={ModInstallButtonStyle}>Map</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>
