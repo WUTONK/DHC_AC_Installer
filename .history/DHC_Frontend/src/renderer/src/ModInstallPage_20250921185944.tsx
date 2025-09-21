@@ -60,9 +60,10 @@ function ModInstallPage(): React.JSX.Element{
             ()=>{
               toggleProgress()
               Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
+                title: '安装开始',
+                content: 'Map模组安装已开始，请稍候...',
                 duration: 3,
+                position: 'topRight'
             })
             }
             } style={ModInstallButtonStyle}>Map</Button>

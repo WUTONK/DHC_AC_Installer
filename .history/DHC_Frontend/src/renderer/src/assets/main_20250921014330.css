@@ -1,0 +1,19 @@
+@import './base.css';
+
+/* 当 body 带有 theme-mode="dark" 时，覆盖背景色变量 */
+body[theme-mode="dark"] {
+  --color-background: #999;
+}
+
+
+/* 让应用占满窗口高度，并清理默认间距，确保 Footer 吸底 */
+html, body, #root {
+  height: 100%;
+}
+
+
+html, body {
+  margin: 0;
+}
+
+

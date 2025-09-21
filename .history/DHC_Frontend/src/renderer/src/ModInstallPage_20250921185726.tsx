@@ -1,4 +1,4 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
+import { Notification,Progress,Layout,Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useEffect, useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
@@ -56,16 +56,7 @@ function ModInstallPage(): React.JSX.Element{
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
         <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
-          <Button type='primary' onClick={
-            ()=>{
-              toggleProgress()
-              Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
-            })
-            }
-            } style={ModInstallButtonStyle}>Map</Button>
+          <Button type='primary' onClick={toggleProgress} style={ModInstallButtonStyle}>Map</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>

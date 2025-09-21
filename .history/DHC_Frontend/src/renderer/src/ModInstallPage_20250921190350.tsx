@@ -1,9 +1,5 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
+import { Notification,Progress,Layout,Button, Card, Toast} from '@douyinfe/semi-ui'
 import { useEffect, useState } from 'react'
-import { IconHome, IconCart } from '@douyinfe/semi-icons';
-
-const { Text } = Typography
 
 // @---模组安装DEMO
 // 功能：可以选择安装什么模组，安装进度条，安装日志输出（状态提示），安装完成提醒，目前安装状态显示
@@ -58,14 +54,16 @@ function ModInstallPage(): React.JSX.Element{
         <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
           <Button type='primary' onClick={
             ()=>{
+              console.log('按钮被点击了') // 调试日志
               toggleProgress()
               Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
+                title: '测试通知',
+                content: '这是一个测试通知，看看是否能正常显示',
+                duration: 5,
+                position: 'topRight'
             })
             }
-            } style={ModInstallButtonStyle}>Map</Button>
+            } style={ModInstallButtonStyle}>测试通知</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>

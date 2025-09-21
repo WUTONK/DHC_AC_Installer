@@ -6,13 +6,4 @@ Already up to date
 > echo 'Skipping electron-builder install-app-deps due to pnpm issue'
 
 Skipping electron-builder install-app-deps due to pnpm issue
-Done in 669ms using pnpm v10.12.4
-
-   ╭───────────────────────────────────────────────╮
-   │                                               │
-   │     Update available! 10.12.4 → 10.17.0.      │
-   │     Changelog: https://pnpm.io/v/10.17.0      │
-   │   To update, run: corepack use pnpm@10.17.0   │
-   │                                               │
-   ╰───────────────────────────────────────────────╯
-
+Done in 467ms using pnpm v10.12.4

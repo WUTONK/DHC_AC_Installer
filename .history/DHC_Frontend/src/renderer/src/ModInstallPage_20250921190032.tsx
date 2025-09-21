@@ -1,9 +1,5 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
+import { Notification,Progress,Layout,Button, Card} from '@douyinfe/semi-ui'
 import { useEffect, useState } from 'react'
-import { IconHome, IconCart } from '@douyinfe/semi-icons';
-
-const { Text } = Typography
 
 // @---模组安装DEMO
 // 功能：可以选择安装什么模组，安装进度条，安装日志输出（状态提示），安装完成提醒，目前安装状态显示
@@ -60,14 +56,31 @@ function ModInstallPage(): React.JSX.Element{
             ()=>{
               toggleProgress()
               Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
+                title: '安装开始',
+                content: 'Map模组安装已开始，请稍候...',
                 duration: 3,
+                position: 'topRight'
             })
             }
             } style={ModInstallButtonStyle}>Map</Button>
-          <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
-          <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
+          <Button type='secondary' onClick={() => {
+            toggleProgress()
+            Notification.open({
+              title: '安装开始',
+              content: 'CSP模组安装已开始，请稍候...',
+              duration: 3,
+              position: 'topRight'
+            })
+          }} style={ModInstallButtonStyle}>CSP</Button>
+          <Button type='tertiary' onClick={() => {
+            toggleProgress()
+            Notification.open({
+              title: '安装开始',
+              content: 'SOL模组安装已开始，请稍候...',
+              duration: 3,
+              position: 'topRight'
+            })
+          }} style={ModInstallButtonStyle}>SOL</Button>
         </Card>
       </Layout>
       {/* 通知和日志 */}

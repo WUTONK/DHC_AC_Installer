@@ -1,6 +1,6 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
+import { Layout,Nav, Button, Typography, Space, Card,Avatar, Notification, Toast} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
@@ -31,8 +31,14 @@ function App(): React.JSX.Element {
   const [activeKey, setActiveKey] = useState<string>('Home')
 
   return (
-    <Layout style={{ border: '1px solid var(--semi-color-border)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-    <Header style={{ ...commonStyle }}>
+    <>
+      {/* 通知容器 */}
+      <Notification />
+      {/* Toast容器 */}
+      <Toast />
+
+      <Layout style={{ border: '1px solid var(--semi-color-border)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Header style={{ ...commonStyle }}>
           <div>
             <Nav mode='horizontal' defaultSelectedKeys={['Home']} style={{ ...commonStyle }}>
               <Nav.Header>
@@ -87,8 +93,9 @@ function App(): React.JSX.Element {
           </Content>
         </Layout>
 
-    <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
-  </Layout>
+        <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
+      </Layout>
+    </>
   )
 
 

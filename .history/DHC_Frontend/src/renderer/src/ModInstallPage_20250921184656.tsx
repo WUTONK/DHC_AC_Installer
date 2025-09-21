@@ -1,4 +1,4 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
+import { Progress,Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useEffect, useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
@@ -53,32 +53,35 @@ function ModInstallPage(): React.JSX.Element{
 
 
   return(
-    <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
-      <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
-        <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
-          <Button type='primary' onClick={
-            ()=>{
-              toggleProgress()
-              Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
-            })
-            }
-            } style={ModInstallButtonStyle}>Map</Button>
+    <div style={{height:'100%', width:'100%', display:'flex', flexDirection:'column', padding: '20px'}}>
+      {/* 按钮区域 */}
+      <div style={{height: 200, display:'flex', alignItems:'center', justifyContent:'center', marginBottom: '20px'}}>
+        <Card style={{background: 'white', padding:'20px', display:'flex', justifyContent:'center', alignItems:'center', gap: '10px'}}>
+          <Button type='primary' onClick={toggleProgress} style={ModInstallButtonStyle}>Map</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>
-      </Layout>
-      {/* 通知和日志 */}
-      <Layout style={{backgroundColor:'rgba(101, 110, 212, 0.13)', height:'100',width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-        <Layout style={{backgroundColor:'rgba(213, 26, 26, 0.38)', width:'80%', display:'flex', justifyContent:'center', alignItems:'center', margin:'20px 0'}} >
-          <Progress style={{backgroundColor:'rgba(13, 182, 244, 0.91)',height:30,width:300}} percent={loadProgress} showInfo={true} format={()=> loadProgress + '%'} />
-        </Layout>
-      </Layout>
-    </Layout>
-
-    // 通知
+      </div>
+      
+      {/* 进度条区域 */}
+      <div style={{flex: 1, display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f5f5f5', borderRadius: '8px', padding: '40px'}}>
+        <div style={{width: '100%', maxWidth: '500px'}}>
+          <Progress
+            percent={loadProgress}
+            showInfo={true}
+            format={()=> `${loadProgress}%`}
+            stroke="#1890ff"
+            strokeWidth={8}
+            size="large"
+          />
+          {loading && (
+            <div style={{textAlign: 'center', marginTop: '10px', color: '#666'}}>
+              正在安装模组...
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
 

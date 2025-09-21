@@ -1,4 +1,4 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
+import { Progress,Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useEffect, useState } from 'react'
 import { IconHome, IconCart } from '@douyinfe/semi-icons';
@@ -56,29 +56,18 @@ function ModInstallPage(): React.JSX.Element{
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
         <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
-          <Button type='primary' onClick={
-            ()=>{
-              toggleProgress()
-              Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
-            })
-            }
-            } style={ModInstallButtonStyle}>Map</Button>
+          <Button type='primary' onClick={toggleProgress} style={ModInstallButtonStyle}>Map</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>
       </Layout>
-      {/* 通知和日志 */}
-      <Layout style={{backgroundColor:'rgba(101, 110, 212, 0.13)', height:'100',width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-        <Layout style={{backgroundColor:'rgba(213, 26, 26, 0.38)', width:'80%', display:'flex', justifyContent:'center', alignItems:'center', margin:'20px 0'}} >
-          <Progress style={{backgroundColor:'rgba(13, 182, 244, 0.91)',height:30,width:300}} percent={loadProgress} showInfo={true} format={()=> loadProgress + '%'} />
+      <Layout style={{backgroundColor:'rgb(101, 111, 212)', height:'5%',width:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>
+        <Layout style={{backgroundColor:'rgb(213, 26, 26)', width:'80%', display:'flex', justifyContent:'center', alignItems:'center', margin:'20px 0'}} >
+          <Progress percent={loadProgress} showInfo={true} format={()=> loadProgress + '%'} />
         </Layout>
       </Layout>
     </Layout>
 
-    // 通知
   )
 }
 

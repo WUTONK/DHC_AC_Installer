@@ -1,9 +1,5 @@
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
+import { Notification,Progress,Layout,Button, Card, Toast, Banner} from '@douyinfe/semi-ui'
 import { useEffect, useState } from 'react'
-import { IconHome, IconCart } from '@douyinfe/semi-icons';
-
-const { Text } = Typography
 
 // @---模组安装DEMO
 // 功能：可以选择安装什么模组，安装进度条，安装日志输出（状态提示），安装完成提醒，目前安装状态显示
@@ -54,18 +50,49 @@ function ModInstallPage(): React.JSX.Element{
 
   return(
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
+      {/* 测试Banner组件 */}
+      <Banner 
+        type="info" 
+        title="测试Banner" 
+        description="如果你能看到这个Banner，说明Semi UI组件正常工作"
+        style={{margin: '10px'}}
+      />
+      
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
         <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
           <Button type='primary' onClick={
             ()=>{
+              console.log('按钮被点击了') // 调试日志
+              console.log('Toast对象:', Toast) // 检查Toast对象是否存在
+              console.log('Notification对象:', Notification) // 检查Notification对象是否存在
+              
+              // 先测试简单的alert
+              alert('这是一个简单的alert测试')
+              
               toggleProgress()
-              Notification.open({
-                title: 'Hi, Bytedance',
-                content: 'ies dance dance dance',
-                duration: 3,
-            })
+              
+              // 测试Toast
+              try {
+                Toast.info('Toast测试：这是一个Toast消息')
+                console.log('Toast.info调用成功')
+              } catch (error) {
+                console.error('Toast.info调用失败:', error)
+              }
+              
+              // 测试Notification
+              try {
+                Notification.open({
+                  title: '测试通知',
+                  content: '这是一个测试通知，看看是否能正常显示',
+                  duration: 5,
+                  position: 'topRight'
+                })
+                console.log('Notification.open调用成功')
+              } catch (error) {
+                console.error('Notification.open调用失败:', error)
+              }
             }
-            } style={ModInstallButtonStyle}>Map</Button>
+            } style={ModInstallButtonStyle}>测试通知</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
         </Card>

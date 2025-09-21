@@ -87,8 +87,9 @@ function App(): React.JSX.Element {
           </Content>
         </Layout>
 
-    <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
-  </Layout>
+        <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
+      </Layout>
+    </>
   )
 
 
