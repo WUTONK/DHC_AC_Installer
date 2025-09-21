@@ -8,7 +8,7 @@ import ModInstallPage from './ModInstallPage';
 
 // const { Title, Text } = Typography
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   // const [gamePath, setGamePath] = useState('')
@@ -19,7 +19,7 @@ function App(): JSX.Element {
   };
 
   // 页面选择
-  const renderPage = (key: string): JSX.Element => {
+  const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
       case 'ModInstallPage':
         return <ModInstallPage />
