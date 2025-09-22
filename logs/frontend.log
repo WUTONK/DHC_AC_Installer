@@ -7,7 +7,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  2.51 kB
-✓ built in 47ms
+✓ built in 60ms
 
 build the electron main process successfully
 
@@ -18,7 +18,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.49 kB
-✓ built in 7ms
+✓ built in 11ms
 
 build the electron preload files successfully
 
@@ -31,14 +31,59 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
-22:42:49 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:42:58 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:43:12 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:43:20 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:44:07 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:44:09 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:44:13 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:44:17 [vite] (client) hmr update /src/ModInstallPage.tsx
-22:45:40 [vite] (client) hmr update /src/ModInstallPage.tsx
-2025-09-21 22:45:53.942 Electron[78116:10897745] error messaging the mach port for IMKCFRunLoopWakeUpReliable
-22:46:11 [vite] (client) hmr update /src/ModInstallPage.tsx
+00:43:07 [vite] (client) hmr update /src/ModInstallPage.tsx
+00:44:22 [vite] (client) hmr update /src/ModInstallPage.tsx
+00:45:05 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:46:15 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:46:56 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:46:58 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:05 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:14 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:17 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:27 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:41 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:43 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:43 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:51 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:53 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:47:54 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:48:27 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:48:29 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:48:41 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:48:44 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:48:47 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:07 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:12 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:13 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:13 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:22 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:24 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:26 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:52 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:49:54 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:01 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:08 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:11 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:13 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:21 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:22 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:50:24 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:36 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:37 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:39 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:45 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:47 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:48 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:51:48 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:54:43 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:54:45 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:54:46 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:07 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:09 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:11 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:34 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:36 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:55:36 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:57:13 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:57:19 [vite] (client) hmr update /src/ModInstallPage.tsx
+03:57:26 [vite] (client) hmr update /src/ModInstallPage.tsx
