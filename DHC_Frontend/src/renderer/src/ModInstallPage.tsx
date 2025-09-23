@@ -10,7 +10,7 @@ const { Text } = Typography
 // @---模组安装DEMO
 // 功能：可以选择安装什么模组，安装进度条，安装日志输出（状态提示），安装完成提醒，目前安装状态显示
 
-function ModInstallPage(): React.ReactNode{
+const ModInstallPage = (): React.JSX.Element => {
 
   // 按钮功能
   const ModInstallButtonStyle = {
@@ -85,6 +85,7 @@ function ModInstallPage(): React.ReactNode{
             ()=>{
               if(buttonLock){
                 buttonLockNotification()
+                return
               }
               toggleProgress()
               const notification = notificationTemplate({title:'MapInstall...',content:'InstallContext'})
