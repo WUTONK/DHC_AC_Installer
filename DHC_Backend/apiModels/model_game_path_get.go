@@ -10,6 +10,5 @@
 package models
 
 type GamePathGet struct {
-
 	GamePath string `json:"GamePath"`
 }

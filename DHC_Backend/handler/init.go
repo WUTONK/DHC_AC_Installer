@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"DHC_Backend/models"
+	models "DHC_Backend/apiModels"
 	// "crypto/rand"
 	// "encoding/base64"
 	"fmt"

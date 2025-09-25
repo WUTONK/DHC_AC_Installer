@@ -25,9 +25,41 @@ const r2:Result = 'fail'
 
 // 作业
 type Direction = 'up'|'down'|'left'|'right'
-const d1 = 'lef'
+const d1:Direction = 'left'
 
 
+//---交叉类型
+type WithTimestamps = { createdAt: Date; updateAt: Date };
+type WithId = { id:number };
+
+type Entity = WithId & WithTimestamps
+
+const e: Entity = {id:1, createdAt: new Date(), updateAt:new Date()}
+console.log(e)
+
+// 作业
+type Person = {name: string}
+type Contact = {email: string}
+
+type PersonContact = Person & Contact
+const p: PersonContact = {name:"WUTONK",email:'wjt474696120@gmail.com'}
+console.log(p)
 
 
+//---对象类型与可选/只读
+type Config = {
+  readonly appName: string;
+  port?: number;
+};
 
+const cfg: Config = {appName: "Demo"};
+// cfg.appName = "x"
+
+// 作业
+type Account = {
+  readonly username:string;
+  age?:number
+}
+
+const acc1:Account = {username:"WUTONK",age:18}
+console.log(acc1)
