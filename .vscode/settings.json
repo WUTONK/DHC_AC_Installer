@@ -1,0 +1,14 @@
+{
+// 解决code-runner使用/bin/sh路径导致的找不到 ts-node命令 问题
+  "code-runner.runInTerminal": true,
+  "code-runner.executorMapByFileExtension": {
+    ".mts": "/Users/wuzitong/Library/pnpm/tsx"
+  },
+  "code-runner.executorMap": {
+    "typescript": "/usr/local/bin/node --no-warnings --loader ts-node/esm",
+    "typescriptreact": "/usr/local/bin/node --no-warnings --loader ts-node/esm"
+  },
+  "code-runner.ignoreSelection": true
+}
+
+

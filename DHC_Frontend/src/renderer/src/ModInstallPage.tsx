@@ -1,14 +1,28 @@
 import React from 'react'
-import { Notification,Progress,Layout,Button, Typography, Card} from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
-import { useEffect, useState } from 'react'
-import { IconHome, IconCart } from '@douyinfe/semi-icons';
-import { title } from 'process';
-
-const { Text } = Typography
+import { Notification,Progress,Layout,Button, Card} from '@douyinfe/semi-ui'
+import { useEffect, useRef, useState } from 'react'
+// 移除未使用的导入
 
 // @---模组安装DEMO
 // 功能：可以选择安装什么模组，安装进度条，安装日志输出（状态提示），安装完成提醒，目前安装状态显示
+
+type AsyncLock = { locked: boolean; run: <T>(fn: () => Promise<T>) => Promise<T | undefined> }
+
+function useAsyncLock(): AsyncLock{
+  const [locked, setLocked] = useState<boolean>(false)
+
+  const run = async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
+    if (locked) return undefined
+    setLocked(true)
+    try {
+      return await fn()
+    } finally {
+      setLocked(false)
+    }
+  }
+
+  return { locked, run }
+}
 
 const ModInstallPage = (): React.JSX.Element => {
 
@@ -18,11 +32,13 @@ const ModInstallPage = (): React.JSX.Element => {
     width: 100,
     margin: '0 10px'
   }
-  const [buttonLock, setButtonLock] = useState<boolean>(false)
+  const { locked, run } = useAsyncLock()
 
   // 进度条功能
   const [loading, setLoading] = useState<boolean>(false)
   const [loadProgress,setLoadProgress] = useState(0)
+
+  const progressResolveRef = useRef<(() => void) | null>(null)
 
   const toggleProgress = (): void => {
     if (!loading){
@@ -30,8 +46,10 @@ const ModInstallPage = (): React.JSX.Element => {
     } else {
       setLoading(false)
     }
-
   }
+
+  // @---通知功能
+  const [currentNotification, setCurrentNotification] = useState<string | null>(null)
 
   useEffect(() => {
 
@@ -44,19 +62,19 @@ const ModInstallPage = (): React.JSX.Element => {
           if (currentNotification) {
             Notification.close(currentNotification)
           }
-          setButtonLock(false) // 解除按钮锁
+          if (progressResolveRef.current){
+            progressResolveRef.current()
+            progressResolveRef.current = null
+          }
           return 100;
         }
-        setButtonLock(true)
         return prev + 1;
       })
     },20)
 
     return () => window.clearInterval(progressInterval);
   }
-  ,[loading])
-
-  // @---通知功能
+  ,[loading, currentNotification])
 
   // 通知模版
   const notificationTemplate = (context:object): string => {
@@ -67,31 +85,23 @@ const ModInstallPage = (): React.JSX.Element => {
     })
   }
 
-  const buttonLockNotification = ():void => {
-    Notification.open({
-      duration:1,
-      title:'按钮🔒',
-      content:'有安装操作正在进行中...'
-    })
-  }
+  // 保留占位：若需要在锁定时提示，可在 useAsyncLock 内处理或使用 tooltip
 
-  const [currentNotification, setCurrentNotification] = useState<string | null>(null)
 
   return(
     <Layout style={{height:'100%',width:'100%', display:'flex',flexDirection:'column'}}>
       <Layout style={{height:200,display:'flex',alignItems:'center',justifyContent:'center'}}>
         <Card style={{background: 'white', margin:'0 20px', display:'flex', justifyContent:'center', alignItems:'center'}}>
-          <Button type='primary' onClick={
-            ()=>{
-              if(buttonLock){
-                buttonLockNotification()
-                return
-              }
-              toggleProgress()
+          <Button type='primary' disabled={locked} aria-busy={locked} onClick={
+            () => run(async () => {
+              if (!loading) setLoading(true)
               const notification = notificationTemplate({title:'MapInstall...',content:'InstallContext'})
               setCurrentNotification(notification)
-              setButtonLock(true)
-            }
+              await new Promise<void>((resolve) => {
+                progressResolveRef.current = resolve
+              })
+              setLoading(false)
+            })
           } style={ModInstallButtonStyle}>Map</Button>
           <Button type='secondary' onClick={toggleProgress} style={ModInstallButtonStyle}>CSP</Button>
           <Button type='tertiary' onClick={toggleProgress} style={ModInstallButtonStyle}>SOL</Button>
