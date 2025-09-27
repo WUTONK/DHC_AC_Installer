@@ -1,1 +1,5 @@
+# cursor code history
 .history/
+
+# cursor chat context
+.specstory/
