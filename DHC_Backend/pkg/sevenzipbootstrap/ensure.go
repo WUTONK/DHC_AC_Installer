@@ -31,7 +31,7 @@ import (
 // 参数:
 //   - installDir: 7z 可执行文件的安装目录路径
 //   - minVersion: 最低版本要求，格式为 "主版本.次版本"（如 "23.01"），空字符串表示不检查版本
-//   - targetVersion: 下载特定版本，格式为 "主版本.次版本"（如 "24.08"），空字符串表示自动检测最新版
+//   - targetVersion: 下载特定版本，格式为 "主版本.次版本"（如 "25.01"），空字符串表示自动检测最新版
 //   - sha256: SHA256 下载用校验值，空字符串表示不进行校验
 //
 // 返回值:
@@ -144,7 +144,7 @@ type downloadSpec struct {
 // getDownloadSpec 获取下载规格，支持自动检测最新版本
 //
 // 参数:
-//   - targetVersion: 目标版本，格式为 "主版本.次版本"（如 "24.08"），空字符串表示自动下载最新版
+//   - targetVersion: 目标版本，格式为 "主版本.次版本"（如 "25.01"），空字符串表示自动下载最新版
 //   - sha256: SHA256 校验值，空字符串表示不进行校验
 //
 // 返回值:
@@ -153,7 +153,7 @@ type downloadSpec struct {
 //
 // 功能说明:
 //   - 如果 targetVersion 为空，尝试从官方页面检测最新版本
-//   - 如果检测失败，回退到已知的最新版本(24.08)
+//   - 如果检测失败，回退到已知的最新版本(25.01)
 //   - 支持跨平台：Windows(MSI)、macOS/Linux(tar.xz)
 func getDownloadSpec(targetVersion string, sha256 string) (downloadSpec, error) {
 	// 如果未指定版本，尝试检测最新版本
@@ -161,7 +161,7 @@ func getDownloadSpec(targetVersion string, sha256 string) (downloadSpec, error) 
 		latestVersion, err := detectLatestVersion()
 		if err != nil {
 			// 检测失败时回退到已知的最新版本
-			targetVersion = "24.08" // 当前已知的最新版本
+			targetVersion = "25.01" // 当前已知的最新版本
 		} else {
 			targetVersion = latestVersion
 		}
@@ -173,19 +173,19 @@ func getDownloadSpec(targetVersion string, sha256 string) (downloadSpec, error) 
 // detectLatestVersion 从官方页面检测最新版本
 //
 // 返回值:
-//   - string: 最新版本号，格式为 "主版本.次版本"（如 "24.08"）
+//   - string: 最新版本号，格式为 "主版本.次版本"（如 "25.01"）
 //   - error: 如果检测失败则返回错误
 //
 // 说明:
 //   - 尝试从 7-Zip 官方页面解析最新版本号
-//   - 目前使用简单的 URL 尝试方法，后续可扩展为解析 HTML
+//   - 目前使用简单的 URL + 版本列表 尝试方法，后续可扩展为解析 HTML
 func detectLatestVersion() (string, error) {
 	// 尝试访问官方页面检测最新版本
 	// 这里使用一个简化的方法：尝试几个可能的版本号
 	// TODO:迭代为可以解析官方页面获取真实的最新版本
 
 	// 已知的版本列表，按时间倒序
-	knownVersions := []string{"24.08", "23.01", "22.01", "21.07"}
+	knownVersions := []string{"25.01", "23.01", "22.01", "21.07"}
 
 	for _, version := range knownVersions {
 		// 尝试构建一个测试 URL 来验证版本是否存在
@@ -202,14 +202,10 @@ func detectLatestVersion() (string, error) {
 func buildTestURL(version string) string {
 	versionCode := strings.ReplaceAll(version, ".", "")
 	os := runtime.GOOS
-	arch := runtime.GOARCH
 
 	switch os {
 	case "darwin":
-		if arch == "arm64" {
-			return fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac-arm64.tar.xz", versionCode)
-		}
-		return fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac-x64.tar.xz", versionCode)
+		return fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac.tar.xz", versionCode)
 	case "linux":
 		return fmt.Sprintf("https://www.7-zip.org/a/7z%s-linux-x64.tar.xz", versionCode)
 	case "windows":
@@ -237,24 +233,15 @@ func urlExists(url string) bool {
 // buildDownloadSpec 根据版本和 SHA256 构建下载规格
 func buildDownloadSpec(targetVersion string, sha256 string) (downloadSpec, error) {
 	os := runtime.GOOS
-	arch := runtime.GOARCH
 
 	// 将版本号转换为下载 URL 格式（如 "23.01" -> "2301"）
 	versionCode := strings.ReplaceAll(targetVersion, ".", "")
 
 	switch os {
 	case "darwin":
-		// macOS: 根据架构选择对应的 7zz 独立版
-		if arch == "arm64" {
-			return downloadSpec{
-				URL:     fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac-arm64.tar.xz", versionCode),
-				SHA256:  sha256,
-				Archive: "tar.xz",
-				BinName: "7zz",
-			}, nil
-		}
+		// macOS: 使用统一的 7zz 独立版（不区分架构）
 		return downloadSpec{
-			URL:     fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac-x64.tar.xz", versionCode),
+			URL:     fmt.Sprintf("https://www.7-zip.org/a/7z%s-mac.tar.xz", versionCode),
 			SHA256:  sha256,
 			Archive: "tar.xz",
 			BinName: "7zz",
