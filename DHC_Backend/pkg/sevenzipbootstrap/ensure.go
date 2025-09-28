@@ -198,7 +198,7 @@ func detectLatestVersion() (string, error) {
 	return "", errors.New("无法检测到最新版本")
 }
 
-// buildTestURL 构建测试 URL 来验证版本是否存在
+// buildTestURL 构建测试 URL 来验证版本是否存在（测试用）
 func buildTestURL(version string) string {
 	versionCode := strings.ReplaceAll(version, ".", "")
 	os := runtime.GOOS
