@@ -44,7 +44,7 @@ touch "$SCRIPT_DIR/logs/backend_setup.log"
 touch "$SCRIPT_DIR/logs/backend.log"
 
 go mod tidy > "$SCRIPT_DIR/logs/backend_setup.log" 2>&1
-go run exec/main.go > "$SCRIPT_DIR/logs/backend.log" 2>&1 &
+go run cmd/main.go > "$SCRIPT_DIR/logs/backend.log" 2>&1 &
 BACKEND_PID=$!
 
 # 等待后端启动
