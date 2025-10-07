@@ -3,8 +3,9 @@ import React from 'react'
 import { Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
 import { Api } from '../../shared'
 import { useState } from 'react'
-import { IconHome, IconCart } from '@douyinfe/semi-icons';
+import { IconHome, IconCart, IconBookmark } from '@douyinfe/semi-icons';
 import ModInstallPage from './ModInstallPage';
+import ShutokoWiki from './shutokoWiki';
 
 // const { Title, Text } = Typography
 
@@ -23,6 +24,8 @@ function App(): React.JSX.Element {
     switch (key) {
       case 'ModInstallPage':
         return <ModInstallPage />
+      case 'ShutokoWiki':
+        return <ShutokoWiki />
       default:
         return <div>Not Found</div>
     }
@@ -74,6 +77,7 @@ function App(): React.JSX.Element {
               items={[
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
+                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
