@@ -5,10 +5,8 @@ import Markdown from 'react-markdown'
 import wanganLine from './wikiPage/line/wanganLine'
 
 
-const markdown = '# Hi, *Pluto*!'
+// const markdown = '# Hi, *Pluto*!'
 // <Markdown>{markdown}</Markdown>
-
-
 function ShutokoWiki(): React.JSX.Element {
 
   // 页面选择
