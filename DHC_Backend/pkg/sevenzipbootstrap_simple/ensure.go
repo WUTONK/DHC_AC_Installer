@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/ulikunitz/xz"
 )
@@ -225,6 +226,7 @@ func findPrivate7z(dir string) string {
 //   - 使用自定义 User-Agent 标识下载请求
 //   - 检查 HTTP 状态码，确保下载成功
 //   - 自动创建目标文件并写入下载内容
+//   - 显示下载进度和速度
 func downloadFile(url, dst string) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -239,13 +241,91 @@ func downloadFile(url, dst string) error {
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("下载失败: %s", resp.Status)
 	}
+
+	// 获取文件总大小
+	totalSize := resp.ContentLength
+	if totalSize <= 0 {
+		fmt.Printf("开始下载 %s...\n", filepath.Base(dst))
+	} else {
+		fmt.Printf("开始下载 %s (大小: %.2f MB)...\n", filepath.Base(dst), float64(totalSize)/(1024*1024))
+	}
+
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
-	_, err = io.Copy(out, resp.Body)
-	return err
+
+	// 创建带进度显示的写入器
+	progressWriter := &progressWriter{
+		writer:     out,
+		totalSize:  totalSize,
+		downloaded: 0,
+		lastUpdate: time.Now(),
+	}
+
+	_, err = io.Copy(progressWriter, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("\n下载完成！\n")
+	return nil
+}
+
+// progressWriter 实现 io.Writer 接口，用于显示下载进度
+type progressWriter struct {
+	writer     io.Writer
+	totalSize  int64
+	downloaded int64
+	lastUpdate time.Time
+}
+
+// Write 实现 io.Writer 接口
+func (pw *progressWriter) Write(p []byte) (n int, err error) {
+	n, err = pw.writer.Write(p)
+	if err != nil {
+		return n, err
+	}
+
+	pw.downloaded += int64(n)
+
+	// 每 500ms 更新一次进度显示
+	now := time.Now()
+	if now.Sub(pw.lastUpdate) >= 500*time.Millisecond || pw.downloaded == pw.totalSize {
+		pw.updateProgress()
+		pw.lastUpdate = now
+	}
+
+	return n, nil
+}
+
+// updateProgress 更新进度显示
+func (pw *progressWriter) updateProgress() {
+	if pw.totalSize <= 0 {
+		// 如果不知道总大小，只显示已下载的字节数
+		fmt.Printf("\r已下载: %.2f MB", float64(pw.downloaded)/(1024*1024))
+		return
+	}
+
+	// 计算进度百分比
+	percentage := float64(pw.downloaded) / float64(pw.totalSize) * 100
+
+	// 计算下载速度
+	elapsed := time.Since(pw.lastUpdate)
+	if elapsed > 0 {
+		speed := float64(pw.downloaded) / elapsed.Seconds() / (1024 * 1024) // MB/s
+		fmt.Printf("\r进度: %.1f%% (%.2f/%.2f MB) - 速度: %.2f MB/s",
+			percentage,
+			float64(pw.downloaded)/(1024*1024),
+			float64(pw.totalSize)/(1024*1024),
+			speed)
+	} else {
+		fmt.Printf("\r进度: %.1f%% (%.2f/%.2f MB)",
+			percentage,
+			float64(pw.downloaded)/(1024*1024),
+			float64(pw.totalSize)/(1024*1024))
+	}
 }
 
 // verifySHA256 验证文件的 SHA256 校验值
