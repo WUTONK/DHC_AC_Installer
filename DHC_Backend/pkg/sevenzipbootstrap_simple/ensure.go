@@ -8,7 +8,6 @@
 package sevenZipBootStrapSimple
 
 import (
-	"archive/tar"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -21,8 +20,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/ulikunitz/xz"
 )
 
 // 固定版本常量
@@ -32,6 +29,34 @@ const (
 	// VERSION_CODE 版本代码，用于构建下载 URL
 	VERSION_CODE = "2501"
 )
+
+// 全局变量，用于强制指定操作系统（主要用于测试）
+var forcedOS string
+
+// SetForcedOS 强制指定操作系统，用于测试
+// 参数:
+//   - os: 操作系统名称 ("windows", "darwin", "linux")
+//
+// 说明:
+//   - 如果设置为空字符串，则使用实际的 runtime.GOOS
+//   - 主要用于测试不同平台的行为
+func SetForcedOS(os string) {
+	forcedOS = os
+}
+
+// getCurrentOS 获取当前操作系统
+// 返回值:
+//   - string: 当前操作系统名称
+//
+// 说明:
+//   - 如果设置了 forcedOS，则返回 forcedOS
+//   - 否则返回实际的 runtime.GOOS
+func getCurrentOS() string {
+	if forcedOS != "" {
+		return forcedOS
+	}
+	return runtime.GOOS
+}
 
 // EnsureSevenZipSimple 确保在指定目录下存在可用的 7z 可执行文件（25.01版本）
 //
@@ -90,7 +115,7 @@ func EnsureSevenZipSimple(installDir string, sha256 string) (string, error) {
 		}
 	}
 
-	// 根据不同的归档类型进行解压和安装
+	// 根据不同的归档类型进行解压
 	switch spec.Archive {
 	case "tar.xz":
 		// macOS/Linux: 解压 tar.xz 文件
@@ -100,24 +125,14 @@ func EnsureSevenZipSimple(installDir string, sha256 string) (string, error) {
 		bin := filepath.Join(installDir, spec.BinName)
 		_ = os.Chmod(bin, 0o755) // 设置可执行权限
 		return bin, nil
-	case "msi":
-		// Windows: 使用 MSI 静默安装
-		cmd := exec.Command("msiexec.exe", "/i", tmp, "/qn", "TARGETDIR="+installDir, "ALLUSERS=1", "ADDLOCAL=ALL", "REBOOT=ReallySuppress")
-		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
-		if err := cmd.Run(); err != nil {
-			return "", fmt.Errorf("MSI 安装失败: %w", err)
+	case "7z":
+		// Windows: 解压 .7z 文件
+		if err := extract7z(tmp, installDir); err != nil {
+			return "", err
 		}
-		// 查找安装后的 7z.exe 位置
-		cands := []string{
-			filepath.Join(installDir, "7-Zip", "7z.exe"),
-			filepath.Join(installDir, "7z.exe"),
-		}
-		for _, c := range cands {
-			if _, err := os.Stat(c); err == nil {
-				return c, nil
-			}
-		}
-		return "", errors.New("未找到 7z.exe（MSI 安装后路径不符合预期）")
+		bin := filepath.Join(installDir, spec.BinName)
+		_ = os.Chmod(bin, 0o755) // 设置可执行权限
+		return bin, nil
 	default:
 		return "", fmt.Errorf("不支持的归档类型: %s", spec.Archive)
 	}
@@ -142,9 +157,10 @@ type downloadSpec struct {
 //
 // 功能说明:
 //   - 固定使用 25.01 版本
-//   - 支持跨平台：Windows(MSI)、macOS/Linux(tar.xz)
+//   - Windows: 使用 .7z 格式的命令行版本
+//   - macOS/Linux: 使用 .tar.xz 格式的命令行版本
 func buildDownloadSpec(sha256 string) (downloadSpec, error) {
-	os := runtime.GOOS
+	os := getCurrentOS()
 
 	switch os {
 	case "darwin":
@@ -164,11 +180,11 @@ func buildDownloadSpec(sha256 string) (downloadSpec, error) {
 			BinName: "7zz",
 		}, nil
 	case "windows":
-		// Windows: 使用官方 MSI 安装包（x64 架构）
+		// Windows: 使用 .7z 格式的命令行版本
 		return downloadSpec{
-			URL:     fmt.Sprintf("https://www.7-zip.org/a/7z%s-x64.msi", VERSION_CODE),
+			URL:     fmt.Sprintf("https://www.7-zip.org/a/7z%s-extra.7z", VERSION_CODE),
 			SHA256:  sha256,
-			Archive: "msi",
+			Archive: "7z",
 			BinName: "7z.exe",
 		}, nil
 	default:
@@ -183,9 +199,9 @@ func buildDownloadSpec(sha256 string) (downloadSpec, error) {
 //
 // 说明:
 //   - Windows: 返回 "7z.exe"
-//   - 其他平台: 返回 "7zz"（独立版）
+//   - macOS/Linux: 返回 "7zz"
 func candidateName() string {
-	if runtime.GOOS == "windows" {
+	if getCurrentOS() == "windows" {
 		return "7z.exe"
 	}
 	return "7zz"
@@ -372,79 +388,47 @@ func verifySHA256(path, want string) error {
 //   - error: 如果解压失败则返回错误
 //
 // 说明:
-//   - macOS/Linux: 使用系统 tar 命令处理 .tar.xz 文件
-//   - Windows: 使用 Go xz 库处理 .tar.xz 文件
+//   - 使用系统 tar 命令处理 .tar.xz 文件
 //   - 只提取普通文件，跳过目录和链接
 //   - 提取的文件自动设置可执行权限（0o755）
 func extractTarXZ(archive, dst string) error {
 	fmt.Printf("正在解压 %s...\n", filepath.Base(archive))
 
-	if runtime.GOOS == "windows" {
-		// Windows 系统使用 Go xz 库
-		return extractTarXZWithGo(archive, dst)
-	} else {
-		// macOS/Linux 系统使用系统 tar 命令
-		return extractTarXZWithSystem(archive, dst)
-	}
-}
-
-// extractTarXZWithSystem 使用系统 tar 命令解压 tar.xz 文件（macOS/Linux）
-func extractTarXZWithSystem(archive, dst string) error {
+	// 使用系统 tar 命令解压
 	cmd := exec.Command("tar", "-xf", archive, "-C", dst)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("系统 tar 解压失败: %w", err)
+		return fmt.Errorf("tar 解压失败: %w", err)
 	}
 
 	fmt.Printf("解压完成！\n")
 	return nil
 }
 
-// extractTarXZWithGo 使用 Go xz 库解压 tar.xz 文件（Windows）
-func extractTarXZWithGo(archive, dst string) error {
-	f, err := os.Open(archive)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+// extract7z 解压 .7z 归档文件到指定目录（Windows）
+//
+// 参数:
+//   - archive: .7z 归档文件路径
+//   - dst: 解压目标目录
+//
+// 返回值:
+//   - error: 如果解压失败则返回错误
+//
+// 说明:
+//   - 使用系统 7z 命令解压 .7z 文件
+//   - 如果系统没有 7z 命令，则返回错误
+func extract7z(archive, dst string) error {
+	fmt.Printf("正在解压 %s...\n", filepath.Base(archive))
 
-	xzr, err := xz.NewReader(f)
-	if err != nil {
-		return fmt.Errorf("创建 xz 读取器失败: %w", err)
-	}
+	// 使用系统 7z 命令解压
+	cmd := exec.Command("7z", "x", archive, "-o"+dst, "-y")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	tr := tar.NewReader(xzr)
-	for {
-		hdr, err := tr.Next()
-		if errors.Is(err, io.EOF) {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("读取 tar 头部失败: %w", err)
-		}
-
-		name := filepath.Base(hdr.Name)
-		if name == "" || name == "." {
-			continue
-		}
-
-		target := filepath.Join(dst, name)
-		switch hdr.Typeflag {
-		case tar.TypeReg, tar.TypeRegA:
-			out, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
-			if err != nil {
-				return fmt.Errorf("创建文件失败: %w", err)
-			}
-			if _, err := io.Copy(out, tr); err != nil {
-				out.Close()
-				return fmt.Errorf("写入文件失败: %w", err)
-			}
-			out.Close()
-		default:
-			// 跳过目录/链接等
-		}
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("7z 解压失败: %w", err)
 	}
 
 	fmt.Printf("解压完成！\n")

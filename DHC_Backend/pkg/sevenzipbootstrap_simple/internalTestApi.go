@@ -34,3 +34,8 @@ func (t TestApi) GetTargetVersion() string {
 func (t TestApi) GetVersionCode() string {
 	return VERSION_CODE
 }
+
+// SetForcedOS 暴露 SetForcedOS 函数供测试使用
+func (t TestApi) SetForcedOS(os string) {
+	SetForcedOS(os)
+}
