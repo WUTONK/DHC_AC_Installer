@@ -372,20 +372,49 @@ func verifySHA256(path, want string) error {
 //   - error: 如果解压失败则返回错误
 //
 // 说明:
-//   - 使用 xz 解压缩器处理 .xz 压缩
-//   - 使用 tar 读取器处理 tar 归档
-//   - 只提取普通文件（TypeReg, TypeRegA），跳过目录和链接
+//   - macOS/Linux: 使用系统 tar 命令处理 .tar.xz 文件
+//   - Windows: 使用 Go xz 库处理 .tar.xz 文件
+//   - 只提取普通文件，跳过目录和链接
 //   - 提取的文件自动设置可执行权限（0o755）
 func extractTarXZ(archive, dst string) error {
+	fmt.Printf("正在解压 %s...\n", filepath.Base(archive))
+
+	if runtime.GOOS == "windows" {
+		// Windows 系统使用 Go xz 库
+		return extractTarXZWithGo(archive, dst)
+	} else {
+		// macOS/Linux 系统使用系统 tar 命令
+		return extractTarXZWithSystem(archive, dst)
+	}
+}
+
+// extractTarXZWithSystem 使用系统 tar 命令解压 tar.xz 文件（macOS/Linux）
+func extractTarXZWithSystem(archive, dst string) error {
+	cmd := exec.Command("tar", "-xf", archive, "-C", dst)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("系统 tar 解压失败: %w", err)
+	}
+
+	fmt.Printf("解压完成！\n")
+	return nil
+}
+
+// extractTarXZWithGo 使用 Go xz 库解压 tar.xz 文件（Windows）
+func extractTarXZWithGo(archive, dst string) error {
 	f, err := os.Open(archive)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+
 	xzr, err := xz.NewReader(f)
 	if err != nil {
-		return err
+		return fmt.Errorf("创建 xz 读取器失败: %w", err)
 	}
+
 	tr := tar.NewReader(xzr)
 	for {
 		hdr, err := tr.Next()
@@ -393,27 +422,31 @@ func extractTarXZ(archive, dst string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("读取 tar 头部失败: %w", err)
 		}
+
 		name := filepath.Base(hdr.Name)
 		if name == "" || name == "." {
 			continue
 		}
+
 		target := filepath.Join(dst, name)
 		switch hdr.Typeflag {
 		case tar.TypeReg, tar.TypeRegA:
 			out, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
 			if err != nil {
-				return err
+				return fmt.Errorf("创建文件失败: %w", err)
 			}
 			if _, err := io.Copy(out, tr); err != nil {
 				out.Close()
-				return err
+				return fmt.Errorf("写入文件失败: %w", err)
 			}
 			out.Close()
 		default:
 			// 跳过目录/链接等
 		}
 	}
+
+	fmt.Printf("解压完成！\n")
 	return nil
 }
