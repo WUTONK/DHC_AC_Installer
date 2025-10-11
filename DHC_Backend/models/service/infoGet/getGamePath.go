@@ -1,0 +1,8 @@
+package infoGet
+
+// GetGamePath 从注册表中获取steam安装位置，以此获取vdf并解析获得神力科莎安装位置
+// @TODO:待在windows中进行测试
+func GetGamePath() string {
+	// TODO: 实现获取游戏路径的逻辑
+	return ""
+}
