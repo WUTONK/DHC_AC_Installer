@@ -90,12 +90,7 @@ func EnsureSevenZipSimple(installDir string, sha256 string) (string, error) {
 		return p, nil
 	}
 
-	// 2) 检查系统 PATH 中是否有 7z
-	if sys, err := exec.LookPath(candidateName()); err == nil {
-		return sys, nil
-	}
-
-	// 3) 如果私有目录和系统 PATH 都没有 7z，则自动下载安装 25.01 版本
+	// 2) 如果没有 7z，则自动下载安装 25.01 版本
 	spec, err := buildDownloadSpec(sha256)
 	if err != nil {
 		return "", err

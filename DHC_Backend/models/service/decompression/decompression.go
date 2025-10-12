@@ -2,7 +2,9 @@ package decompression
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 )
@@ -38,22 +40,45 @@ func GetBackendRootPath() (string, error) {
 	return backendAbsPath, nil
 }
 
-// DhcDecompression
+func szInstall() {
+	targetFolder := infoGet.GetSysInfo().OsType
+	fmt.Printf("系统类型: %+v\n", targetFolder)
+
+	backendAbsPath, err := GetBackendRootPath()
+	if err != nil {
+		fmt.Printf("获取根目录失败 error:%s", err)
+		return
+	}
+
+	installPath := filepath.Join(backendAbsPath, "models", "tools", "7z", targetFolder)
+
+	sevenZipBootStrapSimple.EnsureSevenZipSimple(installPath, "")
+}
 
 func Get7zPath() string {
 
-	// 检测7z路径是否存在 不存在就安装
+	// 检测7z目录下是否有和系统类型符合的版本 不存在就安装
+
+	targetFolder := infoGet.GetSysInfo().OsType
+	fmt.Printf("系统类型: %+v\n", targetFolder)
+
 	backendAbsPath, err := GetBackendRootPath()
 	if err != nil {
-		fmt.Println("获取根目录失败 error:%s", err)
+		fmt.Printf("获取根目录失败 error:%s", err)
 		return ""
 	}
 
-	szPath := filepath.Join(backendAbsPath, "models", "tools", "7z", "")
+	szPath := filepath.Join(backendAbsPath, "models", "tools", "7z", targetFolder)
+	pathStat, pathStatErr := os.Stat(szPath)
 
-	// 检测7z是否和系统版本符合，是否为需要的版本
-	userSysInfo := infoGet.GetSysInfo()
-	fmt.Printf("系统信息: %+v\n", userSysInfo)
+	if pathStatErr != nil {
+		szInstall()
+	}
+
+	// 完整性检测 如果小于目标大小则视为不存在 (7mb)
+	if pathStat.Size() < 7340032 {
+		szInstall()
+	}
 
 	// 通过检测后调用进行简单解压缩测试并且捕获异常
 	fmt.Printf("7z路径: %s\n", szPath)
