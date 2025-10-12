@@ -3,3 +3,8 @@
 
 # cursor chat context
 .specstory/
+
+# 7z tools folders
+DHC_Backend/models/tools/7z/darwin/
+DHC_Backend/models/tools/7z/linux/
+DHC_Backend/models/tools/7z/windows/
