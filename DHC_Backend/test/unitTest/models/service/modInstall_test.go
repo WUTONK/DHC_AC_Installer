@@ -1,10 +1,10 @@
 package service
 
 import (
-	"DHC_Backend/models/service/modInstall"
+	dhcDecompression "DHC_Backend/models/service/dhcDecompression"
 	"testing"
 )
 
 func TestGetBackendRootPath(t *testing.T) {
-	modInstall.GetBackendRootPath()
+	dhcDecompression.GetBackendRootPath()
 }

@@ -1,6 +1,7 @@
-package modInstall
+package dhcDecompression
 
 import (
+	"DHC_Backend/models/service/infoGet"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -27,21 +28,30 @@ func GetBackendRootPath() (string, error) {
 	rootPath := filepath.Join(dir, "..", "..", "..")
 
 	// 获取绝对路径
-	absPath, err := filepath.Abs(rootPath)
+	backendAbsPath, err := filepath.Abs(rootPath)
 	if err != nil {
 		fmt.Printf("获取绝对路径失败: %v\n", err)
 		return "", err
 	}
 
-	fmt.Println("项目后端根目录:", absPath)
-	return absPath, nil
+	fmt.Println("项目后端根目录:", backendAbsPath)
+	return backendAbsPath, nil
 }
+
+// DhcDecompression
 
 func Get7zPath() string {
 
 	// 检测7z路径是否存在 不存在就安装
+	backendAbsPath, err := GetBackendRootPath()
+	if err != nil {
+		fmt.Println("获取根目录失败 error:%s", err)
+	}
+
+	szPath := filepath.Join(backendAbsPath, "modles", "tools", "7z", "")
 
 	// 检测7z是否和系统版本符合，是否为需要的版本
+	userSysInfo := infoGet.GetSysInfo()
 
 	// 通过检测后调用进行简单解压缩测试并且捕获异常
 
