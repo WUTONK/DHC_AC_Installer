@@ -55,7 +55,10 @@ func SzInstall() {
 	sevenZipBootStrapSimple.EnsureSevenZipSimple(installPath, "")
 }
 
-func Get7zPath() string {
+// ---函数说明---
+// 返回 7z 路径
+// isTestSz 选择是否进行 7z 解压缩测试
+func Get7zPath(isTestSz bool) string {
 
 	// 检测7z目录下是否有和系统类型符合的版本 不存在就安装
 
@@ -87,13 +90,17 @@ func Get7zPath() string {
 	// 通过检测后调用进行简单解压缩测试并且捕获异常
 	fmt.Printf("7z路径: %s\n", szPath)
 
-	// szTestResult := SzTest()
+	if isTestSz {
+		szTestResult := SzTest()
 
-	// if szTestResult != "PASS" {
-	// 	// 有异常 处理
-	// }
+		if szTestResult != "PASS" {
+			// 有异常 处理
+		}
 
-	// 无异常 打印日志 返回绝对路径并写入
+		fmt.Printf("7z解压缩测试通过")
+		// 无异常 打印日志 返回绝对路径并写入
+
+	}
 
 	return szPath
 }
@@ -114,7 +121,7 @@ func SzTest() string {
 	}
 
 	// TODO:写完测试逻辑
-	szPath := Get7zPath()
+	szPath := Get7zPath(false)
 	exec.Command(szPath, "a", "szTest_7z.7z", "1.txt", "2.txt")
 	exec.Command(szPath, "a", "-tzip", "szTest_zip.7z", "1.txt", "2.txt")
 
