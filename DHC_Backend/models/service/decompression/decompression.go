@@ -1,8 +1,9 @@
 package decompression
 
 import (
-	"DHC_Backend/models/service/infoGet"
+	infoGet "DHC_Backend/models/service/infoGet"
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -80,7 +81,7 @@ func Get7zPath(isTestSz bool) string {
 	}
 
 	// 完整性检测 检查目录下所有文件的总大小
-	dirSize, err := getDirSize(szPath)
+	dirSize, err := infoGet.GetDirSize(szPath)
 	if err != nil || dirSize < 5000000 {
 		fmt.Printf("目标目录存在但完整性检查未通过 开始安装")
 		fmt.Printf("now szpath:%s, dirSize:%d", szPath, dirSize)
@@ -105,42 +106,64 @@ func Get7zPath(isTestSz bool) string {
 	return szPath
 }
 
+// TODO:写完测试逻辑
 func SzTest() string {
 	// 写入 1.txt 和 2.txt , 内容分别为 lena 和 wutonk
 	backendAbsPath, getBackendAbsPathErr := GetBackendRootPath()
 	if getBackendAbsPathErr != nil {
 		fmt.Printf("获取后端根目录失败,errInfo:%s", getBackendAbsPathErr)
 	}
-	SzTestPath := filepath.Join(backendAbsPath, "models", "tools", "7z", "szFunctionTestFile")
-
-	if err := os.WriteFile(filepath.Join(SzTestPath, "1.txt"), []byte("lena"), 0666); err != nil {
-		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
-	}
-	if err := os.WriteFile(filepath.Join(SzTestPath, "2.txt"), []byte("wutonk"), 0666); err != nil {
-		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
-	}
-
-	// TODO:写完测试逻辑
 	szPath := Get7zPath(false)
-	exec.Command(szPath, "a", "szTest_7z.7z", "1.txt", "2.txt")
-	exec.Command(szPath, "a", "-tzip", "szTest_zip.7z", "1.txt", "2.txt")
+	szTestPath := filepath.Join(backendAbsPath, "models", "tools", "7z", "szFunctionTestFile")
+
+	// 确保测试目录存在
+	if err := os.MkdirAll(szTestPath, 0755); err != nil {
+		fmt.Printf("创建测试目录失败,errInfo:%s", err)
+		return "FAIL"
+	}
+
+	if err := os.WriteFile(filepath.Join(szTestPath, "1.txt"), []byte("lena"), 0666); err != nil {
+		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
+		return "FAIL"
+	}
+	if err := os.WriteFile(filepath.Join(szTestPath, "2.txt"), []byte("wutonk"), 0666); err != nil {
+		fmt.Printf("创建2.txt压缩测试文件失败,errInfo:%s", err)
+		return "FAIL"
+	}
+
+	// 创建7z可执行文件路径
+	szExecutable := filepath.Join(szPath, "7zz")
+	if runtime.GOOS == "windows" {
+		szExecutable = filepath.Join(szPath, "7z.exe")
+	}
+
+	// 创建压缩命令1：创建7z格式压缩包
+	cmd1 := exec.Command(szExecutable, "a", "szTest_7z.7z", "1.txt", "2.txt")
+	cmd1.Dir = szTestPath // 设置工作目录
+	var stdout1, stderr1 bytes.Buffer
+	cmd1.Stdout = &stdout1
+	cmd1.Stderr = &stderr1
+
+	err1 := cmd1.Run()
+	outStr1, errStr1 := string(stdout1.Bytes()), string(stderr1.Bytes())
+	fmt.Printf("7z压缩命令1输出: %s, 错误: %s\n", outStr1, errStr1)
+
+	// 创建压缩命令2：创建zip格式压缩包
+	cmd2 := exec.Command(szExecutable, "a", "-tzip", "szTest_zip.zip", "1.txt", "2.txt")
+	cmd2.Dir = szTestPath // 设置工作目录
+	var stdout2, stderr2 bytes.Buffer
+	cmd2.Stdout = &stdout2
+	cmd2.Stderr = &stderr2
+
+	err2 := cmd2.Run()
+	outStr2, errStr2 := string(stdout2.Bytes()), string(stderr2.Bytes())
+	fmt.Printf("7z压缩命令2输出: %s, 错误: %s\n", outStr2, errStr2)
+
+	// 检查命令执行结果
+	if err1 != nil || err2 != nil {
+		fmt.Printf("压缩测试失败: cmd1错误=%v, cmd2错误=%v\n", err1, err2)
+		return "FAIL"
+	}
 
 	return "PASS"
-}
-
-// getDirSize 计算目录下所有文件的总大小
-func getDirSize(dirPath string) (int64, error) {
-	var totalSize int64
-
-	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			totalSize += info.Size()
-		}
-		return nil
-	})
-
-	return totalSize, err
 }
