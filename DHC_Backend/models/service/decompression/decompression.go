@@ -5,6 +5,7 @@ import (
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 )
@@ -40,7 +41,7 @@ func GetBackendRootPath() (string, error) {
 	return backendAbsPath, nil
 }
 
-func szInstall() {
+func SzInstall() {
 	targetFolder := infoGet.GetSysInfo().OsType
 	fmt.Printf("系统类型: %+v\n", targetFolder)
 
@@ -51,7 +52,6 @@ func szInstall() {
 	}
 
 	installPath := filepath.Join(backendAbsPath, "models", "tools", "7z", targetFolder)
-
 	sevenZipBootStrapSimple.EnsureSevenZipSimple(installPath, "")
 }
 
@@ -69,21 +69,71 @@ func Get7zPath() string {
 	}
 
 	szPath := filepath.Join(backendAbsPath, "models", "tools", "7z", targetFolder)
-	pathStat, pathStatErr := os.Stat(szPath)
+	_, pathStatErr := os.Stat(szPath)
 
 	if pathStatErr != nil {
-		szInstall()
+		fmt.Printf("目标目录不存在 开始安装")
+		SzInstall()
 	}
 
-	// 完整性检测 如果小于目标大小则视为不存在 (7mb)
-	if pathStat.Size() < 7340032 {
-		szInstall()
+	// 完整性检测 检查目录下所有文件的总大小
+	dirSize, err := getDirSize(szPath)
+	if err != nil || dirSize < 5000000 {
+		fmt.Printf("目标目录存在但完整性检查未通过 开始安装")
+		fmt.Printf("now szpath:%s, dirSize:%d", szPath, dirSize)
+		SzInstall()
 	}
 
 	// 通过检测后调用进行简单解压缩测试并且捕获异常
 	fmt.Printf("7z路径: %s\n", szPath)
 
+	// szTestResult := SzTest()
+
+	// if szTestResult != "PASS" {
+	// 	// 有异常 处理
+	// }
+
 	// 无异常 打印日志 返回绝对路径并写入
 
 	return szPath
+}
+
+func SzTest() string {
+	// 写入 1.txt 和 2.txt , 内容分别为 lena 和 wutonk
+	backendAbsPath, getBackendAbsPathErr := GetBackendRootPath()
+	if getBackendAbsPathErr != nil {
+		fmt.Printf("获取后端根目录失败,errInfo:%s", getBackendAbsPathErr)
+	}
+	SzTestPath := filepath.Join(backendAbsPath, "models", "tools", "7z", "szFunctionTestFile")
+
+	if err := os.WriteFile(filepath.Join(SzTestPath, "1.txt"), []byte("lena"), 0666); err != nil {
+		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
+	}
+	if err := os.WriteFile(filepath.Join(SzTestPath, "2.txt"), []byte("wutonk"), 0666); err != nil {
+		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
+	}
+
+	// TODO:写完测试逻辑
+	szPath := Get7zPath()
+	exec.Command(szPath, "a", "szTest_7z.7z", "1.txt", "2.txt")
+	exec.Command(szPath, "a", "-tzip", "szTest_zip.7z", "1.txt", "2.txt")
+
+	return "PASS"
+}
+
+// getDirSize 计算目录下所有文件的总大小
+func getDirSize(dirPath string) (int64, error) {
+	var totalSize int64
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			totalSize += info.Size()
+		}
+		return nil
+	})
+
+	return totalSize, err
 }
