@@ -6,10 +6,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // 实现解压缩和安装功能
@@ -201,52 +203,85 @@ func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
 
 }
 
-// 解压功能 支持.zip / .7z / .rar等压缩格式，解压后放在 rootpath/resources/(标记类型)/(文件名) 目录下，例如 rootpath/resources/mod/shutokoMap
-// 来源路径 标记类型
-// func Decompression(sourceFilePath string, dstPath string) {
-// 	funcIdt := "-service.decompression.Decompression-"
+// 解压功能 支持.zip / .7z / .rar等压缩格式
+// 解压后暂存在 rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
+// 参数：来源路径 目标路径
+// 返回值：错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
+func Decompression(sourceFilePath string, dstPath string) (errorTiming string, error error) {
+	funcIdt := "-service.decompression.Decompression-"
 
-// 	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
+	// 获取后端根目录
+	backendRootPath, err := GetBackendRootPath()
+	if err != nil {
+		return "before", fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
+	}
 
-// 	isUncompressedFile := false //是否为压缩文件
-// 	isVolume := false           //是否为分卷
-// 	comparableType := ""        //压缩类型
+	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
+	isUncompressedFile := false //是否为压缩文件
+	isVolume := false           //是否为分卷
+	comparableType := ""        //压缩类型
 
-// 	// 先拆分出文件名
-// 	fileInfo, fileInfoErr := os.Stat(sourceFilePath)
-// 	if fileInfoErr != nil {
-// 		fmt.Printf("%s 无法获取fileInfo",funcIdt)
-// 	}
-// 	fileName := fileInfo.Name()
+	// 先拆分出文件名
+	fileInfo, fileInfoErr := os.Stat(sourceFilePath)
+	if fileInfoErr != nil {
+		return "before", fmt.Errorf("%s 无法获取fileInfo", funcIdt)
+	}
+	fileName := fileInfo.Name()
 
-// 	// 通过 `.` 分割文件名字符串并获取最后后缀
-// 	fileNameList := strings.Split(fileName, ".")
-// 	lastSuffix := fileNameList[len(fileNameList)]
+	// 然后获取模组标记类型
+	dhcFileTag, err := DhcFileTagIdentify(sourceFilePath)
+	if err != nil {
+		return "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s\n", funcIdt, err)
+	}
 
-// 	// 首先识别是不是zip/7z/rar的非分卷 如果不是 匹配剩下的4种情况
-// 	if lastSuffix!="7z" && lastSuffix!="zip"{
-// 		if lastSuffix=="rar" {
+	// 通过 `.` 分割文件名字符串并获取最后后缀
+	fileNameList := strings.Split(fileName, ".")
+	lastSuffix := fileNameList[len(fileNameList)]
 
-// 		}else{
-// 			// 鉴定为非压缩文件或不受支持的压缩格式 直接复制一份到 dstPath
-// 			_,err := io.Copy(dstPath,sourceFilePath)
-// 			if err != nil{
-// 				fmt.Printf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误",funcIdt)
-// 			}
-// 		}
-// 	}
+	// 首先识别是不是zip/7z/rar的非分卷 如果不是 匹配剩下的4种情况
+	if lastSuffix != "7z" && lastSuffix != "zip" {
+		if lastSuffix != "rar" {
+			// 鉴定为非压缩文件或不受支持的压缩格式 直接复制一份到 dstPath
+			srcFile, err := os.Open(sourceFilePath)
+			if err != nil {
+				return "before", fmt.Errorf("%s打开源文件失败: %v", funcIdt, err)
+			}
+			defer srcFile.Close()
 
-// 是否为分卷格式识别
-// switch lastSuffix{
-// 	case
-// }
+			// 创建中间文件
+			// 例:rootpath/resources/mod/shutokoMap
+			intermediateFilePath := filepath.Join(backendRootPath, "resources", dhcFileTag.ModType, fileName)
+			intermediateFile, err := os.Create(intermediateFilePath)
+			if err != nil {
+				return "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
+			}
+			defer intermediateFile.Close()
 
-// zip分卷格式：file.z01, file.z02
-// 7z分卷格式： file.7z.001, file.7z.002
-// rar分卷格式 file.part1.rar, file.part2.rar
+			// 创建目标文件
+			dstFile, err := os.Create(dstPath)
+			if err != nil {
+				return "before", fmt.Errorf("%s创建目标文件失败: %v", funcIdt, err)
+			}
+			defer dstFile.Close()
 
-// 非压缩文件格式识别
-// }
+			_, err = io.Copy(dstFile, srcFile)
+			if err != nil {
+				return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
+			}
+		}
+	}
+
+	// 是否为分卷格式识别
+	// switch lastSuffix{
+	// 	case
+	// }
+
+	// zip分卷格式：file.z01, file.z02
+	// 7z分卷格式： file.7z.001, file.7z.002
+	// rar分卷格式 file.part1.rar, file.part2.rar
+
+	// 非压缩文件格式识别
+}
 
 // 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
 // cover
