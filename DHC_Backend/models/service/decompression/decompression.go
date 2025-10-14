@@ -4,6 +4,7 @@ import (
 	infoGet "DHC_Backend/models/service/infoGet"
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -106,7 +107,6 @@ func Get7zPath(isTestSz bool) string {
 	return szPath
 }
 
-// TODO:写完测试逻辑
 func SzTest() string {
 	// 写入 1.txt 和 2.txt , 内容分别为 lena 和 wutonk
 	backendAbsPath, getBackendAbsPathErr := GetBackendRootPath()
@@ -145,7 +145,7 @@ func SzTest() string {
 	cmd1.Stderr = &stderr1
 
 	err1 := cmd1.Run()
-	outStr1, errStr1 := string(stdout1.Bytes()), string(stderr1.Bytes())
+	outStr1, errStr1 := stdout1.String(), stderr1.String()
 	fmt.Printf("7z压缩命令1输出: %s, 错误: %s\n", outStr1, errStr1)
 
 	// 创建压缩命令2：创建zip格式压缩包
@@ -156,7 +156,7 @@ func SzTest() string {
 	cmd2.Stderr = &stderr2
 
 	err2 := cmd2.Run()
-	outStr2, errStr2 := string(stdout2.Bytes()), string(stderr2.Bytes())
+	outStr2, errStr2 := stdout2.String(), stderr2.String()
 	fmt.Printf("7z压缩命令2输出: %s, 错误: %s\n", outStr2, errStr2)
 
 	// 检查命令执行结果
@@ -166,4 +166,91 @@ func SzTest() string {
 	}
 
 	return "PASS"
+}
+
+// TODO: 写出智能识别函数
+
+type DhcFileTag struct {
+	ModType string `json:"ModType"`
+}
+
+// 文件Tag识别
+func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
+	funcIdt := "-service.decompression.DhcFileTagIdentify-"
+
+	dhcFileTagJsonPath := filepath.Join(sourceFilePath, "dhcFileTag.json")
+	if exist := infoGet.IsExists(dhcFileTagJsonPath); !exist {
+		return DhcFileTag{}, fmt.Errorf("%s在%s目录下没有找到dhcFileTag.json", funcIdt, sourceFilePath)
+	}
+
+	dhcFileTagJsonFile, err := os.Open(dhcFileTagJsonPath)
+	if err != nil {
+		return DhcFileTag{}, fmt.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dhcFileTagJsonPath, err)
+	}
+	defer dhcFileTagJsonFile.Close()
+
+	// 解码并识别文件类型
+	var dft DhcFileTag
+	dhcFileTagDecode := json.NewDecoder(dhcFileTagJsonFile)
+	err = dhcFileTagDecode.Decode(&dft)
+	if err != nil {
+		return DhcFileTag{}, fmt.Errorf("%s在解码dhcFileTagFile:%s出现错误:\n%s", funcIdt, dhcFileTagJsonPath, err)
+	}
+
+	return dft, nil
+
+}
+
+// 解压功能 支持.zip / .7z / .rar等压缩格式，解压后放在 rootpath/resources/(标记类型)/(文件名) 目录下，例如 rootpath/resources/mod/shutokoMap
+// 来源路径 标记类型
+// func Decompression(sourceFilePath string, dstPath string) {
+// 	funcIdt := "-service.decompression.Decompression-"
+
+// 	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
+
+// 	isUncompressedFile := false //是否为压缩文件
+// 	isVolume := false           //是否为分卷
+// 	comparableType := ""        //压缩类型
+
+// 	// 先拆分出文件名
+// 	fileInfo, fileInfoErr := os.Stat(sourceFilePath)
+// 	if fileInfoErr != nil {
+// 		fmt.Printf("%s 无法获取fileInfo",funcIdt)
+// 	}
+// 	fileName := fileInfo.Name()
+
+// 	// 通过 `.` 分割文件名字符串并获取最后后缀
+// 	fileNameList := strings.Split(fileName, ".")
+// 	lastSuffix := fileNameList[len(fileNameList)]
+
+// 	// 首先识别是不是zip/7z/rar的非分卷 如果不是 匹配剩下的4种情况
+// 	if lastSuffix!="7z" && lastSuffix!="zip"{
+// 		if lastSuffix=="rar" {
+
+// 		}else{
+// 			// 鉴定为非压缩文件或不受支持的压缩格式 直接复制一份到 dstPath
+// 			_,err := io.Copy(dstPath,sourceFilePath)
+// 			if err != nil{
+// 				fmt.Printf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误",funcIdt)
+// 			}
+// 		}
+// 	}
+
+// 是否为分卷格式识别
+// switch lastSuffix{
+// 	case
+// }
+
+// zip分卷格式：file.z01, file.z02
+// 7z分卷格式： file.7z.001, file.7z.002
+// rar分卷格式 file.part1.rar, file.part2.rar
+
+// 非压缩文件格式识别
+// }
+
+// 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
+// cover
+// 源文件目录 目标复制目录
+func cover(SourceDir string, TargetDir string) {
+
 }
