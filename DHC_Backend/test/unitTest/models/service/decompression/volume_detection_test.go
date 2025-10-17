@@ -47,7 +47,7 @@ func TestVolumeDetection(t *testing.T) {
 
 		// 测试Decompression函数
 		dstPath := filepath.Join(tempDir, "output_"+filename)
-		errorTiming, err := decompression.Decompression(filePath, dstPath)
+		errorTiming, err := decompression.Decompression(filePath, dstPath, "")
 
 		fmt.Printf("测试文件: %s\n", filename)
 		fmt.Printf("错误时机: %s\n", errorTiming)

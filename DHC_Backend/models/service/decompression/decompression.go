@@ -148,6 +148,9 @@ func SzTest() string {
 
 	err1 := cmd1.Run()
 	outStr1, errStr1 := stdout1.String(), stderr1.String()
+	if err1 == nil {
+		errStr1 = "无错误输出"
+	}
 	fmt.Printf("7z压缩命令1输出: %s, 错误: %s\n", outStr1, errStr1)
 
 	// 创建压缩命令2：创建zip格式压缩包
@@ -170,7 +173,7 @@ func SzTest() string {
 	return "PASS"
 }
 
-// TODO: 写出智能识别函数
+// TODO: 写出模组类型智能识别函数
 
 type DhcFileTag struct {
 	ModType string `json:"ModType"`
@@ -205,9 +208,11 @@ func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
 
 // 解压功能 支持.zip / .7z / .rar等压缩格式
 // 解压后暂存在 rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
-// 参数：来源路径 目标路径
+// 参数：- 来源路径 目标路径 文件密码
+//   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
+//
 // 返回值：错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-func Decompression(sourceFilePath string, dstPath string) (errorTiming string, error error) {
+func Decompression(sourceFilePath string, dstPath string, filePassword string) (errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
@@ -219,9 +224,9 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
 	isVolume := false    //是否为分卷
 	comparableType := "" //压缩类型
-	dhcFileTag := DhcFileTag{}
-	completeMidFiles := false
 
+	dhcFileTag := DhcFileTag{}
+	szPath := Get7zPath(false) // 获取7z路径
 	// 先拆分出文件名
 	fileInfo, fileInfoErr := os.Stat(sourceFilePath)
 	if fileInfoErr != nil {
@@ -229,8 +234,11 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	}
 	fileName := fileInfo.Name()
 
-	// 然后获取模组标记类型
-	dhcFileTag, err = DhcFileTagIdentify(sourceFilePath)
+	// 然后自动从上层文件夹获取模组标记类型
+	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
+	sourceFilePathDir := filepath.Join(sourceFilePath, "..")
+	fmt.Printf("sourceFilePathDir:%s\n", sourceFilePathDir)
+	dhcFileTag, err = DhcFileTagIdentify(sourceFilePathDir)
 	if err != nil {
 		if err.Error() == "notFound" {
 			dhcFileTag.ModType = "undefined"
@@ -247,6 +255,7 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	// zip分卷格式：file.z01, file.z02
 	// 7z分卷格式： file.7z.001, file.7z.002
 	// rar分卷格式 file.part1.rar, file.part2.rar
+	fmt.Printf("开始识别文件类型\n")
 	switch lastSuffix {
 	case "zip":
 		comparableType = "zip"
@@ -285,6 +294,13 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	// 创建中间文件
 	// 例:rootpath/resources/mod/shutokoMap
 	midFilePath := filepath.Join(backendRootPath, "resources", dhcFileTag.ModType, fileName)
+
+	// 确保中间文件目录存在
+	midFileDir := filepath.Dir(midFilePath)
+	if err := os.MkdirAll(midFileDir, 0755); err != nil {
+		return "before", fmt.Errorf("%s创建中间文件目录失败: %v", funcIdt, err)
+	}
+
 	midFile, err := os.Create(midFilePath)
 	if err != nil {
 		return "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
@@ -294,13 +310,63 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	// 鉴定是否为非压缩文件或不受支持的压缩格式 如果是 直接复制一份到中间文件
 	if comparableType == "" {
 		// 复制一份到中间文件
-		fmt.Printf("%s 识别为非压缩文件或不受支持的压缩格式: %s\n", funcIdt, fileName)
+		_, err = midFile.ReadFrom(srcFile)
+		if err != nil {
+			return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
+		}
+
+		// TODO:调用OverrideControl()
+		return "", nil
 	}
 
 	// 例:rootpath/resources/mod/shutokoMap
-	if completeMidFiles != true {
-		// 解压缩并写入中间文件
+	if !isVolume {
+		// 创建7z可执行文件路径
+		szExecutable := filepath.Join(szPath, "7zz")
+		if runtime.GOOS == "windows" {
+			szExecutable = filepath.Join(szPath, "7z.exe")
+		}
+
+		// 确保输出目录存在
+		outputDir := filepath.Dir(midFilePath)
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			return "before", fmt.Errorf("%s创建输出目录失败: %v", funcIdt, err)
+		}
+
+		// 普通解压逻辑
+		cmd := exec.Command(szExecutable, "x", sourceFilePath, "-o"+outputDir+"/")
+		cmd.Dir = backendRootPath
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		outStr, errStr := stdout.String(), stderr.String()
+		if err == nil {
+			errStr = "无错误输出"
+		}
+		fmt.Printf("7z解压命令输出: %s\n 7z解压命令错误: %s\n", outStr, errStr)
+
+		if err != nil {
+			fmt.Printf("%s解压失败: 错误=%v\n", funcIdt, err)
+			return "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
+		}
+
+		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midFilePath)
+	} else {
+		// 分卷解压逻辑
 	}
+
+	// TODO: 融入覆盖控制逻辑
+
+	return "", nil
+}
+
+// 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
+// 源文件目录 目标复制目录
+func OverrideControl(SourceDir string, TargetDir string) {
+
+	// 测试例子文件
 
 	// 创建目标文件
 	// dstFile, err := os.Create(dstPath)
@@ -313,13 +379,4 @@ func Decompression(sourceFilePath string, dstPath string) (errorTiming string, e
 	// if err != nil {
 	// 	return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
 	// }
-
-	return "", nil
-}
-
-// 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
-// cover
-// 源文件目录 目标复制目录
-func cover(SourceDir string, TargetDir string) {
-
 }
