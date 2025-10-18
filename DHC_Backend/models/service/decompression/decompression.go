@@ -291,25 +291,28 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 	}
 	defer srcFile.Close()
 
-	// 创建中间文件
+	// 创建中间目录
 	// 例:rootpath/resources/mod/shutokoMap
-	midFilePath := filepath.Join(backendRootPath, "resources", dhcFileTag.ModType, fileName)
+	// 去掉fileName的尾缀，只保留文件名部分
+	removeSuffixFilename := fileNameList[0]
+	midDirPath := filepath.Join(backendRootPath, "resources", dhcFileTag.ModType, removeSuffixFilename)
+	fmt.Printf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
 
-	// 确保中间文件目录存在
-	midFileDir := filepath.Dir(midFilePath)
-	if err := os.MkdirAll(midFileDir, 0755); err != nil {
-		return "before", fmt.Errorf("%s创建中间文件目录失败: %v", funcIdt, err)
+	// 确保中间目录存在
+	if err := os.MkdirAll(midDirPath, 0755); err != nil {
+		return "before", fmt.Errorf("%s创建中间目录失败: %v", funcIdt, err)
 	}
 
-	midFile, err := os.Create(midFilePath)
-	if err != nil {
-		return "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
-	}
-	defer midFile.Close()
-
-	// 鉴定是否为非压缩文件或不受支持的压缩格式 如果是 直接复制一份到中间文件
+	// 鉴定是否为非压缩文件或不受支持的压缩格式 如果是 直接复制一份到中间目录
 	if comparableType == "" {
-		// 复制一份到中间文件
+		// 复制一份到中间目录
+		midFilePath := filepath.Join(midDirPath, fileName)
+		midFile, err := os.Create(midFilePath)
+		if err != nil {
+			return "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
+		}
+		defer midFile.Close()
+
 		_, err = midFile.ReadFrom(srcFile)
 		if err != nil {
 			return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
@@ -327,14 +330,8 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 			szExecutable = filepath.Join(szPath, "7z.exe")
 		}
 
-		// 确保输出目录存在
-		outputDir := filepath.Dir(midFilePath)
-		if err := os.MkdirAll(outputDir, 0755); err != nil {
-			return "before", fmt.Errorf("%s创建输出目录失败: %v", funcIdt, err)
-		}
-
-		// 普通解压逻辑
-		cmd := exec.Command(szExecutable, "x", sourceFilePath, "-o"+outputDir+"/")
+		// 普通解压逻辑 - 解压到中间目录，使用-y参数自动覆盖所有文件
+		cmd := exec.Command(szExecutable, "x", sourceFilePath, "-o"+midDirPath+"/", "-y")
 		cmd.Dir = backendRootPath
 		var stdout, stderr bytes.Buffer
 		cmd.Stdout = &stdout
@@ -352,7 +349,7 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 			return "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
 		}
 
-		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midFilePath)
+		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	} else {
 		// 分卷解压逻辑
 	}
