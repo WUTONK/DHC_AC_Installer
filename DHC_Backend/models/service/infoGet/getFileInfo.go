@@ -6,7 +6,7 @@ import (
 )
 
 // IsExists 判断给定文件/目录是否存在
-func IsExists(path string) bool {
+func IsFileOrDirExists(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
 	return !os.IsNotExist(err)
 }

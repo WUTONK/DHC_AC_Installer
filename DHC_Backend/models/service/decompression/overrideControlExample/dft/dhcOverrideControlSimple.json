@@ -1,0 +1,9 @@
+{
+    "ModType":"Map",
+    "defaultAction":  {"action": "skip","backup": false},
+    "rules": [
+        {"pattern": "*.cfg", "action": "skip"},
+        {"pattern": "*.txt", "action": "backup", "backup": true}
+    ]
+}
+

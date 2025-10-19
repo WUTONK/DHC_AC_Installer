@@ -16,7 +16,7 @@ import (
 
 // 实现解压缩和安装功能
 // >)功能注释：旨在提供类似手动安装操作体验的操作接口（ winrar 式的解压互动逻辑，windows finder 式的覆盖互动逻辑）
-// >)解压相关 - 支持.zip / .7z / .rar等压缩格式，解压后放在 rootpath/resources/(标记类型)/(文件名) 目录下，例如 rootpath/resources/mod/shutokoMap
+// >)解压相关 - 支持.zip / .7z / .rar等压缩格式，解压后放在 rootpath/resources/cache/(标记类型)/(文件名) 目录下，例如 rootpath/resources/mod/shutokoMap
 // >)覆盖相关 - 支持覆盖/跳过同名目录或取消操作、覆盖警告模式（不警告、警告）被覆盖目录备份和还原，记录重点事件 (覆盖信息、安装时间戳)
 
 // 检测 7zip 路径并添加 如果不存在就下载
@@ -180,17 +180,18 @@ type DhcFileTag struct {
 }
 
 // 文件Tag识别
-func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
+func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
 	funcIdt := "-service.decompression.DhcFileTagIdentify-"
 
-	dhcFileTagJsonPath := filepath.Join(sourceFilePath, "dhcFileTag.json")
-	if exist := infoGet.IsExists(dhcFileTagJsonPath); !exist {
+	if exist := infoGet.IsFileOrDirExists(dftJsonPath); !exist {
+		// TODO:将这里修改为如果路径不存在就中止，只有在目录存在但是找不到
 		return DhcFileTag{}, errors.New("notFound")
 	}
 
-	dhcFileTagJsonFile, err := os.Open(dhcFileTagJsonPath)
+	dhcFileTagJsonFile, err := os.Open(dftJsonPath)
 	if err != nil {
-		return DhcFileTag{}, fmt.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dhcFileTagJsonPath, err)
+		fmt.Printf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
+		return DhcFileTag{}, fmt.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
 	}
 	defer dhcFileTagJsonFile.Close()
 
@@ -199,7 +200,7 @@ func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
 	dhcFileTagDecode := json.NewDecoder(dhcFileTagJsonFile)
 	err = dhcFileTagDecode.Decode(&dft)
 	if err != nil {
-		return DhcFileTag{}, fmt.Errorf("%s在解码dhcFileTagFile:%s出现错误:\n%s", funcIdt, dhcFileTagJsonPath, err)
+		return DhcFileTag{}, fmt.Errorf("%s在解码dhcFileTagFile:%s出现错误:\n%s", funcIdt, dftJsonPath, err)
 	}
 
 	return dft, nil
@@ -208,11 +209,13 @@ func DhcFileTagIdentify(sourceFilePath string) (DhcFileTag, error) {
 
 // 解压功能 支持.zip / .7z / .rar等压缩格式
 // 解压后暂存在 rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
-// 参数：- 来源路径 目标路径 文件密码
+// 参数：- 来源路径 目标路径 文件密码 dfc文件地址(为空则默认从srcPath所在目录获取)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
 //
 // 返回值：错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-func Decompression(sourceFilePath string, dstPath string, filePassword string) (errorTiming string, error error) {
+// 指定dhcfiletag.json地址
+// dft文件地址
+func Decompression(srcPath string, dstPath string, filePassword string, dftJsonPath string) (errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
@@ -228,17 +231,21 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 	dhcFileTag := DhcFileTag{}
 	szPath := Get7zPath(false) // 获取7z路径
 	// 先拆分出文件名
-	fileInfo, fileInfoErr := os.Stat(sourceFilePath)
+	fileInfo, fileInfoErr := os.Stat(srcPath)
 	if fileInfoErr != nil {
 		return "before", fmt.Errorf("%s 无法获取fileInfo", funcIdt)
 	}
 	fileName := fileInfo.Name()
 
-	// 然后自动从上层文件夹获取模组标记类型
+	// 然后自动从srcPath所在的上层文件夹获取dhcFileTag.json路径
 	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
-	sourceFilePathDir := filepath.Join(sourceFilePath, "..")
-	fmt.Printf("sourceFilePathDir:%s\n", sourceFilePathDir)
-	dhcFileTag, err = DhcFileTagIdentify(sourceFilePathDir)
+	if dftJsonPath == "" {
+		dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
+		dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
+	} else {
+		fmt.Printf("%s 正在从dftJsonPath获取信息\n", funcIdt)
+		dhcFileTag, err = DhcFileTagIdentify(dftJsonPath)
+	}
 	if err != nil {
 		if err.Error() == "notFound" {
 			dhcFileTag.ModType = "undefined"
@@ -285,7 +292,7 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 	}
 
 	// 打开源文件
-	srcFile, err := os.Open(sourceFilePath)
+	srcFile, err := os.Open(srcPath)
 	if err != nil {
 		return "before", fmt.Errorf("%s打开源文件失败: %v", funcIdt, err)
 	}
@@ -295,7 +302,7 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 	// 例:rootpath/resources/mod/shutokoMap
 	// 去掉fileName的尾缀，只保留文件名部分
 	removeSuffixFilename := fileNameList[0]
-	midDirPath := filepath.Join(backendRootPath, "resources", dhcFileTag.ModType, removeSuffixFilename)
+	midDirPath := filepath.Join(backendRootPath, "resources", "cache", dhcFileTag.ModType, removeSuffixFilename)
 	fmt.Printf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
 
 	// 确保中间目录存在
@@ -331,7 +338,7 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 		}
 
 		// 普通解压逻辑 - 解压到中间目录，使用-y参数自动覆盖所有文件
-		cmd := exec.Command(szExecutable, "x", sourceFilePath, "-o"+midDirPath+"/", "-y")
+		cmd := exec.Command(szExecutable, "x", srcPath, "-o"+midDirPath+"/", "-y")
 		cmd.Dir = backendRootPath
 		var stdout, stderr bytes.Buffer
 		cmd.Stdout = &stdout
@@ -357,23 +364,4 @@ func Decompression(sourceFilePath string, dstPath string, filePassword string) (
 	// TODO: 融入覆盖控制逻辑
 
 	return "", nil
-}
-
-// 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
-// 源文件目录 目标复制目录
-func OverrideControl(SourceDir string, TargetDir string) {
-
-	// 测试例子文件
-
-	// 创建目标文件
-	// dstFile, err := os.Create(dstPath)
-	// if err != nil {
-	// 	return "before", fmt.Errorf("%s创建目标文件失败: %v", funcIdt, err)
-	// }
-	// defer dstFile.Close()
-
-	// _, err = io.Copy(dstFile, srcFile)
-	// if err != nil {
-	// 	return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
-	// }
 }
