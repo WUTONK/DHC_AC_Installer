@@ -299,7 +299,7 @@ func Decompression(srcPath string, dstPath string, filePassword string, dftJsonP
 	defer srcFile.Close()
 
 	// 创建中间目录
-	// 例:rootpath/resources/mod/shutokoMap
+	// 例:rootpath/resources/cache/Map/shutoko
 	// 去掉fileName的尾缀，只保留文件名部分
 	removeSuffixFilename := fileNameList[0]
 	midDirPath := filepath.Join(backendRootPath, "resources", "cache", dhcFileTag.ModType, removeSuffixFilename)
