@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -63,7 +64,7 @@ func OverrideControl(srcDir string, dstDir string, dftPath string) error {
 		}
 		return false
 	}() {
-		if err := createBackupDirectory(dstDir); err != nil {
+		if err := createBackupDirectory(modType, dstDir); err != nil {
 			return fmt.Errorf("创建备份目录失败: %v", err)
 		}
 	}
@@ -111,45 +112,75 @@ func decodeDhcFileTagConfig(dftPath string) (*DhcFileTagConfig, error) {
 // - 备份被删除后 序列号会乱掉 怎么办
 
 // createBackupDirectory 创建备份目录
-func createBackupDirectory(needBackupPath string) error {
+func createBackupDirectory(modType string, needBackupPath string) error {
 
-	// 备份保存目录示例: rootpath/resources/backup/Map/shutoko_backup_01 (中间目录路径中的cache换成backup，文件名末尾加上"_backup"和版本号)
+	// 备份保存目录示例: rootpath/resources/backup/Map/shutoko_backup_01
 	// 使用 filepath 包来处理跨平台路径
 
-	// 将路径标准化（统一分隔符）
-	needBackupPath = filepath.Clean(needBackupPath)
-
-	// 将路径中的 "cache" 替换为 "backup"
-	backupPath := strings.Replace(needBackupPath, string(filepath.Separator)+"cache"+string(filepath.Separator), string(filepath.Separator)+"backup"+string(filepath.Separator), 1)
-
-	// 如果路径以 cache 结尾，也要替换
-	if strings.HasSuffix(backupPath, string(filepath.Separator)+"cache") {
-		backupPath = strings.TrimSuffix(backupPath, "cache") + "backup"
+	// 获取后端根目录
+	rootPath, err := GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取根目录路径失败: %v", err)
 	}
+
+	// 从 needBackupPath 提取最后一个路径名
+	lastPathName := filepath.Base(needBackupPath)
+
+	// 构造完整路径: rootpath/resources/backup/(modType)/(最后一个路径名)
+	backupPath := filepath.Join(rootPath, "resources", "backup", modType, lastPathName)
 
 	// 在最后的目录名末尾加上 "_backup"
 	backupPath = backupPath + "_backup"
 
-	// TODO: 检查存在目录的版本号 格式：example_backup_01, example_backup_02, ...
-	// 暂时使用固定版本号
-	backupDir := backupPath + "_01"
+	// 检查存在目录的版本号 格式：example_backup_01, example_backup_02, ...
+	// 获取父目录路径
+	parentDir := filepath.Dir(backupPath)
+	baseName := filepath.Base(backupPath)
 
-	// 检查目录是否已存在
-	if _, err := os.Stat(backupDir); os.IsNotExist(err) {
-		// 检查存在目录的版本号 格式：example_backup_0 , example_backup_1 , ...
+	// 读取父目录中的所有文件和目录
+	entries, err := os.ReadDir(parentDir)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("无法读取目录 %s: %v", parentDir, err)
+	}
 
-		// 目录不存在，创建它
-		if err := os.MkdirAll(backupDir, 0755); err != nil {
-			return fmt.Errorf("无法创建备份目录 %s: %v", backupDir, err)
+	// 查找所有匹配 baseName_数字 格式的目录
+	maxVersion := 0
+	pattern := baseName + "_"
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
 		}
 
-		// 目录存在，创建最新的版本号
-		fmt.Printf("成功创建备份目录: %s\n", backupDir)
-
-	} else if err != nil {
-		return fmt.Errorf("检查备份目录状态失败: %v", err)
-	} else {
-		fmt.Printf("备份目录已存在: %s\n", backupDir)
+		name := entry.Name()
+		// 检查是否以 pattern 开头
+		if strings.HasPrefix(name, pattern) {
+			// 提取版本号部分
+			versionStr := strings.TrimPrefix(name, pattern)
+			// 尝试解析为整数
+			if version, err := strconv.Atoi(versionStr); err == nil {
+				if version > maxVersion {
+					maxVersion = version
+				}
+			}
+		}
 	}
+
+	// 生成新的版本号
+	var backupDir string
+	if maxVersion == 0 {
+		// 不存在任何备份，使用 _01
+		backupDir = backupPath + "_01"
+	} else {
+		// 存在备份，使用最大版本号+1
+		backupDir = fmt.Sprintf("%s_%02d", backupPath, maxVersion+1)
+	}
+
+	// 创建备份目录
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		return fmt.Errorf("无法创建备份目录 %s: %v", backupDir, err)
+	}
+
+	fmt.Printf("成功创建备份目录: %s\n", backupDir)
 	return nil
 }
