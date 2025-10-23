@@ -108,13 +108,10 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 		baseDir := strings.TrimSuffix(rulePath, "/*")
 		// 检查目标路径是否以这个基础目录开头
 		if strings.HasPrefix(targetPath, baseDir+"/") {
-			// 去除重复字符串
-			removduplicatePath := targetPath[len(baseDir)+1:]
-			// 查找是否还有下一个标识符号
-			// 现在的字符
-			for _, v := range removduplicatePath {
+			// 检测匹配后的路径是否还有下级目录
+			removeDuplicatePath := targetPath[len(baseDir)+1:]
+			for _, v := range removeDuplicatePath {
 				if v == '/' {
-					fmt.Printf("出现下级目录:%s\n", removduplicatePath)
 					return false
 				}
 			}
@@ -160,61 +157,6 @@ func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	}
 
 	return &config, nil
-}
-
-// MatchPractise 路径匹配练习函数，用于测试 DirectoryMatching
-func MatchPractise() {
-	fmt.Println("\n=== 开始路径匹配测试 ===")
-
-	// 测试用例
-	testCases := []struct {
-		rulePath   string
-		targetPath string
-		expected   bool
-	}{
-		// 测试 /* 模式（匹配 * 所在级别目录下所有文件，不包括子目录）
-		{"mod/shutoko/*", "mod/shutoko/a.txt", true},
-		{"mod/shutoko/*", "mod/shutoko/1/a.txt", false},
-		{"mod/shutoko/*", "mod/shutoko/1/2/a.txt", false},
-		{"mod/shutoko/*", "mod/other/a.txt", false},
-		{"mod/shutoko/*", "mod/a.txt", false},
-
-		// 测试 /** 模式（递归匹配）
-		{"mod/shutoko/**", "mod/shutoko/a.txt", true},
-		{"mod/shutoko/**", "mod/shutoko/1/a.txt", true},
-		{"mod/shutoko/**", "mod/shutoko", true},
-		{"mod/shutoko/**", "mod/other/a.txt", false},
-
-		// 测试精确匹配
-		{"mod/shutoko/a.txt", "mod/shutoko/a.txt", true},
-		{"mod/shutoko/a.txt", "mod/shutoko/b.txt", false},
-
-		// 测试通配符 * (单层目录)
-		{"mod/shutoko/*.txt", "mod/shutoko/a.txt", true},
-		{"mod/shutoko/*.txt", "mod/shutoko/b.txt", true},
-		{"mod/shutoko/*.txt", "mod/shutoko/a.json", false},
-		{"mod/shutoko/*.txt", "mod/shutoko/1/a.txt", false}, // 标准 * 不匹配多层
-	}
-
-	passCount := 0
-	failCount := 0
-
-	for i, tc := range testCases {
-		result := DirectoryMatching(tc.rulePath, tc.targetPath)
-		status := "✓"
-		if result != tc.expected {
-			status = "✗"
-			failCount++
-		} else {
-			passCount++
-		}
-
-		fmt.Printf("%s 测试 %d: 规则='%s' 目标='%s' 期望=%v 实际=%v\n",
-			status, i+1, tc.rulePath, tc.targetPath, tc.expected, result)
-	}
-
-	fmt.Printf("\n测试完成: 通过 %d/%d, 失败 %d/%d\n", passCount, len(testCases), failCount, len(testCases))
-	fmt.Println("=== 路径匹配测试结束 ===")
 }
 
 // ---备份处理部分---
