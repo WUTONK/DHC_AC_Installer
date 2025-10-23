@@ -32,8 +32,7 @@ type Rule struct {
 // 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
 // 源文件目录 目标复制目录 dft文件
 func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) error {
-
-	// --- 现在编写部分 ---
+	funcIdt := "-service.decompression.overrideControl-"
 
 	// 解码文件
 	config, err := decodeDhcFileTagConfig(dftJsonPath)
@@ -76,9 +75,28 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	}
 
 	for _, entry := range entries {
-		name := entry.Name()
+		entryPath := entry.Name()
+		isMatch := false
 		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
-		fmt.Print(name)
+		for _, ruleEntry := range rules {
+			isMatchCounter := 0
+			if DirectoryMatching(ruleEntry.Pattern, entryPath) {
+				isMatch = true
+				isMatchCounter++
+				if isMatchCounter > 1 {
+					// TODO:处理一下匹配了多条规则的情况
+					return fmt.Errorf("%s匹配到多条覆盖控制规则,发生冲突", funcIdt)
+				}
+				// TODO:如果是就按照操作执行
+
+			}
+		}
+		// 没匹配上 按照默认操作执行
+		if !isMatch {
+
+		}
+
+		fmt.Print(entryPath)
 	}
 
 	// 完成后输出信息
@@ -102,7 +120,7 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 	rulePath = filepath.ToSlash(rulePath)
 	targetPath = filepath.ToSlash(targetPath)
 
-	// 如果规则路径以 /* 结尾，表示匹配该目录下的所有文件（包括子目录）
+	// 如果规则路径以 /* 结尾，表示匹配该目录下的所有文件（不包括子目录）
 	if strings.HasSuffix(rulePath, "/*") {
 		// 去掉 /* 后缀
 		baseDir := strings.TrimSuffix(rulePath, "/*")
@@ -115,16 +133,27 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 					return false
 				}
 			}
-		} else {
-			return false
+			// 没有下级目录，匹配成功
+			return true
 		}
-
+		return false
 	}
 
 	// 如果规则路径以 /** 结尾，表示递归匹配该目录下的所有文件
 	if strings.HasSuffix(rulePath, "/**") {
 		baseDir := strings.TrimSuffix(rulePath, "/**")
 		return strings.HasPrefix(targetPath, baseDir+"/") || targetPath == baseDir
+	}
+
+	// 如果规则路径不包含路径分隔符，则只匹配文件名（例如 *.cfg 匹配任何路径下的 .cfg 文件）
+	if !strings.Contains(rulePath, "/") {
+		targetFileName := filepath.Base(targetPath)
+		matched, err := filepath.Match(rulePath, targetFileName)
+		if err != nil {
+			fmt.Printf("路径匹配错误: %v\n", err)
+			return false
+		}
+		return matched
 	}
 
 	// 使用 filepath.Match 进行标准的 glob 匹配

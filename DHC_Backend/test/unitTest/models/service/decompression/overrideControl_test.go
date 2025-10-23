@@ -16,7 +16,6 @@ func TestOverrideControl(t *testing.T) {
 func TestCreateBackupDirectory(t *testing.T) {
 	// 添加日志输出，防止测试结果被缓存
 	t.Logf("Running TestCreateBackupDirectory at %v", t.Name())
-
 	needBackupPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/resources/cache/Map/szTest_zip"
 	err := decompression.CreateBackupDirectory("Mod", needBackupPath)
 	if err != nil {
@@ -55,6 +54,12 @@ func TestDecodeDhcFileTagConfig(t *testing.T) {
 		{"mod/shutoko/*.txt", "mod/shutoko/b.txt", true},
 		{"mod/shutoko/*.txt", "mod/shutoko/a.json", false},
 		{"mod/shutoko/*.txt", "mod/shutoko/1/a.txt", false}, // 标准 * 不匹配多层
+
+		// 测试无目录
+		{"*.cfg", "mod/shutoko/a.cfg", true},
+
+		// 多匹配优先级：
+		// 先执行大的优先级
 	}
 
 	passCount := 0
