@@ -8,7 +8,9 @@
     "typescript": "/usr/local/bin/node --no-warnings --loader ts-node/esm",
     "typescriptreact": "/usr/local/bin/node --no-warnings --loader ts-node/esm"
   },
-  "code-runner.ignoreSelection": true
+  "code-runner.ignoreSelection": true,
+  // 禁止go test 缓存
+  "go.testFlags": ["-v", "-count=1"],
 }
 
 

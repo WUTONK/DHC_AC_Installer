@@ -31,12 +31,12 @@ type Rule struct {
 
 // 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
 // 源文件目录 目标复制目录 dft文件
-func OverrideControl(srcDir string, dstDir string, dftPath string) error {
+func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) error {
 
 	// --- 现在编写部分 ---
 
 	// 解码文件
-	config, err := decodeDhcFileTagConfig(dftPath)
+	config, err := decodeDhcFileTagConfig(dftJsonPath)
 	if err != nil {
 		return fmt.Errorf("解码覆盖控制配置文件失败: %v", err)
 	}
@@ -64,30 +64,91 @@ func OverrideControl(srcDir string, dstDir string, dftPath string) error {
 		}
 		return false
 	}() {
-		if err := createBackupDirectory(modType, dstDir); err != nil {
+		if err := CreateBackupDirectory(modType, dstDirPath); err != nil {
 			return fmt.Errorf("创建备份目录失败: %v", err)
 		}
 	}
 
-	// --- 以后完成 ---
 	// 遍历每一个文件并进行操作
+	entries, err := os.ReadDir(srcDirPath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("无法读取目录 %s: %v", srcDirPath, err)
+	}
 
-	// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
+	for _, entry := range entries {
+		name := entry.Name()
+		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
+		fmt.Print(name)
+	}
 
 	// 完成后输出信息
 
 	return nil
+
+	// --- 以后完成 ---
+}
+
+// DirectoryMatching 目录匹配
+// rulePath: 匹配规则路径，支持通配符 * 和 **
+// targetPath: 需要匹配的目标路径
+// 返回: 是否匹配成功
+func DirectoryMatching(rulePath, targetPath string) bool {
+	// 当我输入这个的时候：mod/shutoko/**
+	// 我希望可以匹配：mod/shutoko/a.txt / mod/shutoko/1/a.txt  mod/shutoko/1/2/a.txt (mod/shutoko/目录下的所有文件)
+	// 当我输入这个的时候：mod/shutoko/*
+	// 我希望可以匹配：mod/shutoko/a.txt 但不匹配 mod/shutoko/a.txt/1.cfg (mod/shutoko/目录下的所有文件，但不匹配次级目录)
+
+	// 标准化路径（统一使用 / 作为分隔符）
+	rulePath = filepath.ToSlash(rulePath)
+	targetPath = filepath.ToSlash(targetPath)
+
+	// 如果规则路径以 /* 结尾，表示匹配该目录下的所有文件（包括子目录）
+	if strings.HasSuffix(rulePath, "/*") {
+		// 去掉 /* 后缀
+		baseDir := strings.TrimSuffix(rulePath, "/*")
+		// 检查目标路径是否以这个基础目录开头
+		if strings.HasPrefix(targetPath, baseDir+"/") {
+			// 去除重复字符串
+			removduplicatePath := targetPath[len(baseDir)+1:]
+			// 查找是否还有下一个标识符号
+			// 现在的字符
+			for _, v := range removduplicatePath {
+				if v == '/' {
+					fmt.Printf("出现下级目录:%s\n", removduplicatePath)
+					return false
+				}
+			}
+		} else {
+			return false
+		}
+
+	}
+
+	// 如果规则路径以 /** 结尾，表示递归匹配该目录下的所有文件
+	if strings.HasSuffix(rulePath, "/**") {
+		baseDir := strings.TrimSuffix(rulePath, "/**")
+		return strings.HasPrefix(targetPath, baseDir+"/") || targetPath == baseDir
+	}
+
+	// 使用 filepath.Match 进行标准的 glob 匹配
+	matched, err := filepath.Match(rulePath, targetPath)
+	if err != nil {
+		fmt.Printf("路径匹配错误: %v\n", err)
+		return false
+	}
+
+	return matched
 }
 
 // decodeOverrideControlConfig 解码覆盖控制配置文件
-func decodeDhcFileTagConfig(dftPath string) (*DhcFileTagConfig, error) {
+func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	// 检查文件是否存在
-	if _, err := os.Stat(dftPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("配置文件不存在: %s", dftPath)
+	if _, err := os.Stat(dftJsonPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("配置文件不存在: %s", dftJsonPath)
 	}
 
 	// 读取文件内容
-	fileData, err := os.ReadFile(dftPath)
+	fileData, err := os.ReadFile(dftJsonPath)
 	if err != nil {
 		return nil, fmt.Errorf("读取配置文件失败: %v", err)
 	}
@@ -101,6 +162,61 @@ func decodeDhcFileTagConfig(dftPath string) (*DhcFileTagConfig, error) {
 	return &config, nil
 }
 
+// MatchPractise 路径匹配练习函数，用于测试 DirectoryMatching
+func MatchPractise() {
+	fmt.Println("\n=== 开始路径匹配测试 ===")
+
+	// 测试用例
+	testCases := []struct {
+		rulePath   string
+		targetPath string
+		expected   bool
+	}{
+		// 测试 /* 模式（匹配 * 所在级别目录下所有文件，不包括子目录）
+		{"mod/shutoko/*", "mod/shutoko/a.txt", true},
+		{"mod/shutoko/*", "mod/shutoko/1/a.txt", false},
+		{"mod/shutoko/*", "mod/shutoko/1/2/a.txt", false},
+		{"mod/shutoko/*", "mod/other/a.txt", false},
+		{"mod/shutoko/*", "mod/a.txt", false},
+
+		// 测试 /** 模式（递归匹配）
+		{"mod/shutoko/**", "mod/shutoko/a.txt", true},
+		{"mod/shutoko/**", "mod/shutoko/1/a.txt", true},
+		{"mod/shutoko/**", "mod/shutoko", true},
+		{"mod/shutoko/**", "mod/other/a.txt", false},
+
+		// 测试精确匹配
+		{"mod/shutoko/a.txt", "mod/shutoko/a.txt", true},
+		{"mod/shutoko/a.txt", "mod/shutoko/b.txt", false},
+
+		// 测试通配符 * (单层目录)
+		{"mod/shutoko/*.txt", "mod/shutoko/a.txt", true},
+		{"mod/shutoko/*.txt", "mod/shutoko/b.txt", true},
+		{"mod/shutoko/*.txt", "mod/shutoko/a.json", false},
+		{"mod/shutoko/*.txt", "mod/shutoko/1/a.txt", false}, // 标准 * 不匹配多层
+	}
+
+	passCount := 0
+	failCount := 0
+
+	for i, tc := range testCases {
+		result := DirectoryMatching(tc.rulePath, tc.targetPath)
+		status := "✓"
+		if result != tc.expected {
+			status = "✗"
+			failCount++
+		} else {
+			passCount++
+		}
+
+		fmt.Printf("%s 测试 %d: 规则='%s' 目标='%s' 期望=%v 实际=%v\n",
+			status, i+1, tc.rulePath, tc.targetPath, tc.expected, result)
+	}
+
+	fmt.Printf("\n测试完成: 通过 %d/%d, 失败 %d/%d\n", passCount, len(testCases), failCount, len(testCases))
+	fmt.Println("=== 路径匹配测试结束 ===")
+}
+
 // ---备份处理部分---
 
 // - 备份场景
@@ -112,7 +228,7 @@ func decodeDhcFileTagConfig(dftPath string) (*DhcFileTagConfig, error) {
 // - 备份被删除后 序列号会乱掉 怎么办
 
 // createBackupDirectory 创建备份目录
-func createBackupDirectory(modType string, needBackupPath string) error {
+func CreateBackupDirectory(modType string, needBackupPath string) error {
 
 	// 备份保存目录示例: rootpath/resources/backup/Map/shutoko_backup_01
 	// 使用 filepath 包来处理跨平台路径
@@ -127,21 +243,26 @@ func createBackupDirectory(modType string, needBackupPath string) error {
 	lastPathName := filepath.Base(needBackupPath)
 
 	// 构造完整路径: rootpath/resources/backup/(modType)/(最后一个路径名)
-	backupPath := filepath.Join(rootPath, "resources", "backup", modType, lastPathName)
+	localBackupPath := filepath.Join(rootPath, "resources", "backup", modType, lastPathName)
 
 	// 在最后的目录名末尾加上 "_backup"
-	backupPath = backupPath + "_backup"
+	localBackupPath = localBackupPath + "_backup"
 
 	// 检查存在目录的版本号 格式：example_backup_01, example_backup_02, ...
 	// 获取父目录路径
-	parentDir := filepath.Dir(backupPath)
-	baseName := filepath.Base(backupPath)
+	parentDir := filepath.Dir(localBackupPath)
+	baseName := filepath.Base(localBackupPath)
+	// dhc_backup
 
 	// 读取父目录中的所有文件和目录
 	entries, err := os.ReadDir(parentDir)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("无法读取目录 %s: %v", parentDir, err)
 	}
+
+	// fmt.Print("-------\n")
+	// fmt.Print(entries, "\n")
+	// fmt.Print("-------\n")
 
 	// 查找所有匹配 baseName_数字 格式的目录
 	maxVersion := 0
@@ -154,6 +275,7 @@ func createBackupDirectory(modType string, needBackupPath string) error {
 
 		name := entry.Name()
 		// 检查是否以 pattern 开头
+		// 匹配 dhc_backup_**
 		if strings.HasPrefix(name, pattern) {
 			// 提取版本号部分
 			versionStr := strings.TrimPrefix(name, pattern)
@@ -170,10 +292,10 @@ func createBackupDirectory(modType string, needBackupPath string) error {
 	var backupDir string
 	if maxVersion == 0 {
 		// 不存在任何备份，使用 _01
-		backupDir = backupPath + "_01"
+		backupDir = localBackupPath + "_01"
 	} else {
 		// 存在备份，使用最大版本号+1
-		backupDir = fmt.Sprintf("%s_%02d", backupPath, maxVersion+1)
+		backupDir = fmt.Sprintf("%s_%02d", localBackupPath, maxVersion+1)
 	}
 
 	// 创建备份目录
