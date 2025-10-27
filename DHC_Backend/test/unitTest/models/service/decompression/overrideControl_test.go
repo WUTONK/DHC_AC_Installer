@@ -82,3 +82,13 @@ func TestDecodeDhcFileTagConfig(t *testing.T) {
 	fmt.Printf("\n测试完成: 通过 %d/%d, 失败 %d/%d\n", passCount, len(testCases), failCount, len(testCases))
 	fmt.Println("=== 路径匹配测试结束 ===")
 }
+
+func TestRename2(t *testing.T) {
+	srcFilePath := "/123.txt"
+	dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/file1/lingangu.txt"
+	o := decompression.OverrideStruct{}
+	err := o.Rename(srcFilePath, dstFilePath)
+	if err != nil {
+		t.Errorf("Rename failed: %v", err)
+	}
+}

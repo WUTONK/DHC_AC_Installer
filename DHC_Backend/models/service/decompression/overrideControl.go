@@ -1,8 +1,10 @@
 package decompression
 
 import (
+	infoGet "DHC_Backend/models/service/infoGet"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -29,9 +31,91 @@ type Rule struct {
 	Backup  bool   `json:"backup"`
 }
 
+type OverrideAction string
+
+const (
+	OverrideActionOverwrite OverrideAction = "overwrite" // 覆盖
+	OverrideActionSkip      OverrideAction = "skip"      // 跳过
+	OverrideActionBackup    OverrideAction = "backup"    // 备份后覆盖
+	OverrideActionRename    OverrideAction = "rename"    // 重命名
+	OverrideActionAsk       OverrideAction = "ask"       // 询问用户
+)
+
+type override interface {
+	overwrite() error
+	skip() error
+	backup() error
+	rename() error
+	ask() error
+}
+
+type OverrideStruct struct {
+}
+
+func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
+	funcIdt := "-service.decompression.Overwrite-"
+
+	srcFile, err := os.Open(srcFilePath)
+	if err != nil {
+		return fmt.Errorf("%s无法打开srcfile: %v", funcIdt, err)
+	}
+	defer srcFile.Close()
+
+	var dstFile *os.File
+	if exist := infoGet.IsFileOrDirExists(dstFilePath); !exist {
+		dstFile, err = os.Create(dstFilePath)
+	} else {
+		dstFile, err = os.Open(dstFilePath)
+	}
+	if err != nil {
+		return fmt.Errorf("%s无法打开dstfile: %v", funcIdt, err)
+	}
+	defer dstFile.Close()
+
+	_, err = io.Copy(srcFile, dstFile)
+
+	if err != nil {
+		return fmt.Errorf("%s无法复制并覆盖srcFile:%s 到 dstFile:%s ,err:%v", funcIdt, srcFilePath, dstFilePath, err)
+	}
+
+	return nil
+}
+func (o OverrideStruct) Skip() error {
+	// funcIdt := "-service.decompression.Skip-"
+	return nil
+}
+func (o OverrideStruct) Backup() error {
+	// funcIdt := "-service.decompression.Backup-"
+	return nil
+}
+
+// 接收一个文件路径并提取出文件名 然后将传入的路径的文件改为此文件名
+func (o OverrideStruct) Rename(srcFilePath, dstFilePath string) error {
+	funcIdt := "-service.decompression.Rename-"
+	// 获取dst去文件名路径
+	dstDir := filepath.Dir(dstFilePath)
+	// 读取src文件名
+	srcFilename := filepath.Base(srcFilePath)
+	// 合成new dstname
+	newDstnamePath := dstDir + "/" + srcFilename
+	// 标准化路径（统一使用 / 作为分隔符）
+	err := os.Rename(dstFilePath, newDstnamePath)
+	if err != nil {
+		return fmt.Errorf("%s重命名操作失败 错误信息: %v", funcIdt, err)
+	}
+
+	return nil
+}
+
+func (o OverrideStruct) Ask(srcFilePath, dstFilePath string) error {
+	// funcIdt := "-service.decompression.Ask-"
+	return nil
+}
+
 // 将解压后文件复制到目标目录 覆盖/跳过同名项目 支持警告或不警告 被覆盖项目备份和还原 记录重点事件（覆盖信息、覆盖时间戳）
 // 源文件目录 目标复制目录 dft文件
 func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) error {
+
 	funcIdt := "-service.decompression.overrideControl-"
 
 	// 解码文件
