@@ -1,7 +1,6 @@
 package decompression
 
 import (
-	infoGet "DHC_Backend/models/service/infoGet"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,6 +51,7 @@ type override interface {
 type OverrideStruct struct {
 }
 
+// 接受*一个*文件并覆盖目标文件 如果目标文件不存在 它会被创建
 func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
 	funcIdt := "-service.decompression.Overwrite-"
 
@@ -61,23 +61,19 @@ func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
 	}
 	defer srcFile.Close()
 
-	var dstFile *os.File
-	if exist := infoGet.IsFileOrDirExists(dstFilePath); !exist {
-		dstFile, err = os.Create(dstFilePath)
-	} else {
-		dstFile, err = os.Open(dstFilePath)
-	}
+	// os.Create 会创建或截断文件，并以可写模式打开
+	dstFile, err := os.Create(dstFilePath)
 	if err != nil {
-		return fmt.Errorf("%s无法打开dstfile: %v", funcIdt, err)
+		return fmt.Errorf("%s无法创建dstfile: %v", funcIdt, err)
 	}
 	defer dstFile.Close()
 
-	_, err = io.Copy(srcFile, dstFile)
-
+	bytesWritten, err := io.Copy(dstFile, srcFile)
 	if err != nil {
 		return fmt.Errorf("%s无法复制并覆盖srcFile:%s 到 dstFile:%s ,err:%v", funcIdt, srcFilePath, dstFilePath, err)
 	}
 
+	fmt.Printf("%s成功复制 %d 字节从 %s 到 %s\n", funcIdt, bytesWritten, srcFilePath, dstFilePath)
 	return nil
 }
 func (o OverrideStruct) Skip() error {

@@ -83,12 +83,29 @@ func TestDecodeDhcFileTagConfig(t *testing.T) {
 	fmt.Println("=== 路径匹配测试结束 ===")
 }
 
-func TestRename2(t *testing.T) {
-	srcFilePath := "/123.txt"
-	dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/file1/lingangu.txt"
+func TestRename(t *testing.T) {
+	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/ohhh.txt"
+	dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/file1/1.txt"
 	o := decompression.OverrideStruct{}
 	err := o.Rename(srcFilePath, dstFilePath)
 	if err != nil {
 		t.Errorf("Rename failed: %v", err)
+	}
+}
+
+func TestOverwrite(t *testing.T) {
+	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/1.txt"
+	dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/unitTest/models/service/decompression/testFiles/rename/file1/ohhh.txt"
+
+	t.Logf("开始测试覆盖功能")
+	t.Logf("源文件: %s", srcFilePath)
+	t.Logf("目标文件: %s", dstFilePath)
+
+	o := decompression.OverrideStruct{}
+	err := o.Overwrite(srcFilePath, dstFilePath)
+	if err != nil {
+		t.Errorf("Overwrite failed: %v", err)
+	} else {
+		t.Logf("覆盖操作成功完成")
 	}
 }
