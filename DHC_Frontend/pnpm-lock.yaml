@@ -27,6 +27,9 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^4.0.0
         version: 4.0.0(electron@38.1.2)
+      '@semi-bot/semi-theme-dhc-theme':
+        specifier: ^1.0.1
+        version: 1.0.1
       electron-updater:
         specifier: ^6.3.9
         version: 6.6.2
@@ -724,6 +727,9 @@ packages:
     resolution: {integrity: sha512-ARz+Bs8kY6FtitYM96PqPEVvPXqEZmPZsSkXvyX19YzDqkCaIlhCieLLMI5hxO9SRZ2XtCtm8wxhy0iJ2jxNfw==}
     cpu: [x64]
     os: [win32]
+
+  '@semi-bot/semi-theme-dhc-theme@1.0.1':
+    resolution: {integrity: sha512-tQGni6wwbRcPNLqGWsu5wDeFr6/laZf6azYt7j9zQ5T4lWtoipt3cUcFNodq5SC5FyZc9cQOHfzOqosjZjD2Ew==}
 
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
@@ -4056,6 +4062,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.52.2':
     optional: true
+
+  '@semi-bot/semi-theme-dhc-theme@1.0.1': {}
 
   '@sindresorhus/is@4.6.0': {}
 

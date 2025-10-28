@@ -26,6 +26,7 @@
     "@douyinfe/semi-ui": "^2.86.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@semi-bot/semi-theme-dhc-theme": "^1.0.1",
     "electron-updater": "^6.3.9",
     "react-markdown": "^10.1.0"
   },
