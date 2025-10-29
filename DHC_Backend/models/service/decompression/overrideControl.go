@@ -61,7 +61,6 @@ func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
 	}
 	defer srcFile.Close()
 
-	// os.Create 会创建或截断文件，并以可写模式打开
 	dstFile, err := os.Create(dstFilePath)
 	if err != nil {
 		return fmt.Errorf("%s无法创建dstfile: %v", funcIdt, err)
@@ -80,9 +79,88 @@ func (o OverrideStruct) Skip() error {
 	// funcIdt := "-service.decompression.Skip-"
 	return nil
 }
-func (o OverrideStruct) Backup() error {
-	// funcIdt := "-service.decompression.Backup-"
+
+// - TODO:处理完备份场景
+// - 用户安装失败后 再次安装成功 那么需要删除备份
+// - 备份操作应该被显示出来 并且应该被用户手动删除 所以不进行自动垃圾回收（从备份恢复场景以外）
+
+// - 首次安装：无需备份｜重新安装以修复：无需备份｜更新且原版本可用：需要备份
+// - 需要提供多备份 用版本号区分
+
+// - 备份被删除后 序列号会乱掉 怎么办
+
+// Backup()接收模组类型和需备份目录路径 并存放在 rootpath/resources/backup/modType/needBackupDirName下
+func (o OverrideStruct) Backup(modType string, needBackupPath string) error {
+	funcIdt := "-service.decompression.Backup-"
+
+	// 获取后端根目录
+	rootPath, err := GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取根目录路径失败: %v", err)
+	}
+
+	// 从 needBackupPath 提取最后一个路径名
+	lastPathName := filepath.Base(needBackupPath)
+
+	// 构造完整路径: rootpath/resources/backup/(modType)/(最后一个路径名)
+	localBackupPath := filepath.Join(rootPath, "resources", "backup", modType, lastPathName)
+
+	// 在最后的目录名末尾加上 "_backup"
+	localBackupPath = localBackupPath + "_backup"
+
+	// 检查存在目录的版本号 格式：example_backup_01, example_backup_02, ...
+	// 获取父目录路径
+	parentDir := filepath.Dir(localBackupPath)
+	baseName := filepath.Base(localBackupPath)
+	// dhc_backup
+
+	// 读取父目录中的所有文件和目录
+	entries, err := os.ReadDir(parentDir)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("%s无法读取目录 %s: %v", funcIdt, parentDir, err)
+	}
+
+	// 查找所有匹配 baseName_数字 格式的目录
+	maxVersion := 0
+	pattern := baseName + "_"
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		// 检查是否以 pattern 开头
+		// 匹配 dhc_backup_**
+		if strings.HasPrefix(name, pattern) {
+			// 提取版本号部分
+			versionStr := strings.TrimPrefix(name, pattern)
+			// 尝试解析为整数
+			if version, err := strconv.Atoi(versionStr); err == nil {
+				if version > maxVersion {
+					maxVersion = version
+				}
+			}
+		}
+	}
+
+	// 生成新的版本号
+	var backupDir string
+	if maxVersion == 0 {
+		// 不存在任何备份，使用 _01
+		backupDir = localBackupPath + "_01"
+	} else {
+		// 存在备份，使用最大版本号+1
+		backupDir = fmt.Sprintf("%s_%02d", localBackupPath, maxVersion+1)
+	}
+
+	// 创建备份目录
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		return fmt.Errorf("%s无法创建备份目录 %s: %v", funcIdt, backupDir, err)
+	}
+
 	return nil
+
 }
 
 // 接收一个文件路径并提取出文件名 然后将传入的路径的文件改为此文件名
@@ -113,6 +191,7 @@ func (o OverrideStruct) Ask(srcFilePath, dstFilePath string) error {
 func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) error {
 
 	funcIdt := "-service.decompression.overrideControl-"
+	o := OverrideStruct{}
 
 	// 解码文件
 	config, err := decodeDhcFileTagConfig(dftJsonPath)
@@ -143,7 +222,7 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		}
 		return false
 	}() {
-		if err := CreateBackupDirectory(modType, dstDirPath); err != nil {
+		if err := o.Backup(modType, dstDirPath); err != nil {
 			return fmt.Errorf("创建备份目录失败: %v", err)
 		}
 	}
@@ -266,94 +345,4 @@ func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	}
 
 	return &config, nil
-}
-
-// ---备份处理部分---
-
-// - 备份场景
-// - 用户安装失败后 再次安装成功 那么需要删除备份
-// - 备份操作应该被显示出来 并且应该被用户手动删除 所以不进行自动垃圾回收（从备份恢复场景以外）
-// - 首次安装：无需备份｜重新安装以修复：无需备份｜更新且原版本可用：需要备份
-// - 需要提供多备份 用版本号区分
-
-// - 备份被删除后 序列号会乱掉 怎么办
-
-// createBackupDirectory 创建备份目录
-func CreateBackupDirectory(modType string, needBackupPath string) error {
-
-	// 备份保存目录示例: rootpath/resources/backup/Map/shutoko_backup_01
-	// 使用 filepath 包来处理跨平台路径
-
-	// 获取后端根目录
-	rootPath, err := GetBackendRootPath()
-	if err != nil {
-		return fmt.Errorf("获取根目录路径失败: %v", err)
-	}
-
-	// 从 needBackupPath 提取最后一个路径名
-	lastPathName := filepath.Base(needBackupPath)
-
-	// 构造完整路径: rootpath/resources/backup/(modType)/(最后一个路径名)
-	localBackupPath := filepath.Join(rootPath, "resources", "backup", modType, lastPathName)
-
-	// 在最后的目录名末尾加上 "_backup"
-	localBackupPath = localBackupPath + "_backup"
-
-	// 检查存在目录的版本号 格式：example_backup_01, example_backup_02, ...
-	// 获取父目录路径
-	parentDir := filepath.Dir(localBackupPath)
-	baseName := filepath.Base(localBackupPath)
-	// dhc_backup
-
-	// 读取父目录中的所有文件和目录
-	entries, err := os.ReadDir(parentDir)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("无法读取目录 %s: %v", parentDir, err)
-	}
-
-	// fmt.Print("-------\n")
-	// fmt.Print(entries, "\n")
-	// fmt.Print("-------\n")
-
-	// 查找所有匹配 baseName_数字 格式的目录
-	maxVersion := 0
-	pattern := baseName + "_"
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-
-		name := entry.Name()
-		// 检查是否以 pattern 开头
-		// 匹配 dhc_backup_**
-		if strings.HasPrefix(name, pattern) {
-			// 提取版本号部分
-			versionStr := strings.TrimPrefix(name, pattern)
-			// 尝试解析为整数
-			if version, err := strconv.Atoi(versionStr); err == nil {
-				if version > maxVersion {
-					maxVersion = version
-				}
-			}
-		}
-	}
-
-	// 生成新的版本号
-	var backupDir string
-	if maxVersion == 0 {
-		// 不存在任何备份，使用 _01
-		backupDir = localBackupPath + "_01"
-	} else {
-		// 存在备份，使用最大版本号+1
-		backupDir = fmt.Sprintf("%s_%02d", localBackupPath, maxVersion+1)
-	}
-
-	// 创建备份目录
-	if err := os.MkdirAll(backupDir, 0755); err != nil {
-		return fmt.Errorf("无法创建备份目录 %s: %v", backupDir, err)
-	}
-
-	fmt.Printf("成功创建备份目录: %s\n", backupDir)
-	return nil
 }
