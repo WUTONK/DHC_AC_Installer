@@ -15,12 +15,22 @@
 
 import * as runtime from '../runtime';
 import type {
-  GamePathGet,
+  ApiServerInfoGet200Response,
+  ApiServerInfoGetRequest,
+  GetGamePathResp,
 } from '../models/index';
 import {
-    GamePathGetFromJSON,
-    GamePathGetToJSON,
+    ApiServerInfoGet200ResponseFromJSON,
+    ApiServerInfoGet200ResponseToJSON,
+    ApiServerInfoGetRequestFromJSON,
+    ApiServerInfoGetRequestToJSON,
+    GetGamePathRespFromJSON,
+    GetGamePathRespToJSON,
 } from '../models/index';
+
+export interface ApiServerInfoGetOperationRequest {
+    apiServerInfoGetRequest?: ApiServerInfoGetRequest;
+}
 
 /**
  * 
@@ -31,7 +41,7 @@ export class DefaultApi extends runtime.BaseAPI {
      * 获取游戏存储路径
      * 获取游戏路径
      */
-    async apiGetGamePathGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GamePathGet>> {
+    async apiGetGamePathGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetGamePathResp>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -46,15 +56,49 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GamePathGetFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => GetGamePathRespFromJSON(jsonValue));
     }
 
     /**
      * 获取游戏存储路径
      * 获取游戏路径
      */
-    async apiGetGamePathGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GamePathGet> {
+    async apiGetGamePathGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetGamePathResp> {
         const response = await this.apiGetGamePathGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * 
+     * 获取服务器信息
+     */
+    async apiServerInfoGetRaw(requestParameters: ApiServerInfoGetOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiServerInfoGet200Response>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/ServerInfo`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ApiServerInfoGetRequestToJSON(requestParameters['apiServerInfoGetRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiServerInfoGet200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 
+     * 获取服务器信息
+     */
+    async apiServerInfoGet(requestParameters: ApiServerInfoGetOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiServerInfoGet200Response> {
+        const response = await this.apiServerInfoGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

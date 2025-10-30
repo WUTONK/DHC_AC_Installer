@@ -6,7 +6,11 @@ package.json
 src/apis/DefaultApi.ts
 src/apis/index.ts
 src/index.ts
-src/models/GamePathGet.ts
+src/models/ApiServerInfoGet200Response.ts
+src/models/ApiServerInfoGetRequest.ts
+src/models/GetGamePathResp.ts
+src/models/GetServerInfoReq.ts
+src/models/GetServerInfoResp.ts
 src/models/index.ts
 src/runtime.ts
 tsconfig.esm.json
