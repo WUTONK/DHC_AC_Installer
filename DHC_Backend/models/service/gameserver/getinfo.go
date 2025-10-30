@@ -1,14 +1,10 @@
 package gameserver
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
-	"net/http"
 	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
 	"golang.org/x/net/icmp"
@@ -172,38 +168,10 @@ func GetServerPingDelay(server serverList, timeout time.Duration) (int64, error)
 	return result.Delay.Milliseconds(), nil
 }
 
-// ---获取 AC server 部分---
-type SessionInfo struct {
-	Clients    int64 `json:"clients"`
-	MaxClients int64 `json:"maxclients"`
-}
-
-// GetServerInfo 接收一个 AC server 地址, 示例: 1.1.1.1:8081
-// 然后返回一个 SessionInfo struct
-func GetServerInfo(serverHost string) (SessionInfo, error) {
-
-	serverHostSlice := strings.Split(serverHost, ":")
-
-	host := serverHostSlice[0]
-	httpPort, _ := strconv.Atoi(serverHostSlice[1])
-
-	url := fmt.Sprintf("http://%s:%d/INFO", host, httpPort)
-
-	start := time.Now()
-	resp, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	rtt := time.Since(start)
-
-	var info SessionInfo
-	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Players: %d/%d\n", info.Clients, info.MaxClients)
-	fmt.Printf("Approx RTT (HTTP): %v\n", rtt)
-
-	return info, nil
-}
+// Example usage:
+// delay, err := GetServerPingDelay(Baidu, 3*time.Second)
+// if err != nil {
+//     fmt.Printf("Ping失败: %v\n", err)
+//     return
+// }
+// fmt.Printf("延迟: %d ms\n", delay)
