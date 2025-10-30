@@ -17,7 +17,9 @@ func TestCreateBackupDirectory(t *testing.T) {
 	// 添加日志输出，防止测试结果被缓存
 	t.Logf("Running TestCreateBackupDirectory at %v", t.Name())
 	needBackupPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/resources/cache/Map/szTest_zip"
-	err := decompression.CreateBackupDirectory("Mod", needBackupPath)
+	o := decompression.OverrideStruct{}
+	// err := decompression.CreateBackupDirectory("Mod", needBackupPath)
+	err := o.Backup("Mod", needBackupPath)
 	if err != nil {
 		t.Errorf("CreateBackupDirectory failed: %v", err)
 	}
