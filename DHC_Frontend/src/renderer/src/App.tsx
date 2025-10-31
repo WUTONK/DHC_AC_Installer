@@ -1,7 +1,6 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button, Typography, Space, Card,Avatar} from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
+import { Layout,Nav, Button,Avatar} from '@douyinfe/semi-ui'
 import { useState } from 'react'
 import { IconHome, IconCart, IconBookmark, IconEdit } from '@douyinfe/semi-icons';
 import ModInstallPage from './ModInstallPage';

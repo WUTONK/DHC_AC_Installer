@@ -6,8 +6,8 @@ package.json
 src/apis/DefaultApi.ts
 src/apis/index.ts
 src/index.ts
-src/models/ApiServerInfoGet200Response.ts
-src/models/ApiServerInfoGetRequest.ts
+src/models/ApiGetServerInfoGet200Response.ts
+src/models/ApiGetServerInfoGetRequest.ts
 src/models/GetGamePathResp.ts
 src/models/GetServerInfoReq.ts
 src/models/GetServerInfoResp.ts

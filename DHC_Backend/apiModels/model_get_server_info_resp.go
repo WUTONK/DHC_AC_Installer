@@ -11,7 +11,9 @@ package apiModels
 
 type GetServerInfoResp struct {
 
-	Clients string `json:"Clients"`
+	Rtt string `json:"Rtt"`
 
-	MaxClients string `json:"MaxClients"`
+	Clients float32 `json:"Clients"`
+
+	MaxClients float32 `json:"MaxClients"`
 }

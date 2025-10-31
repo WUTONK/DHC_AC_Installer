@@ -30,7 +30,7 @@
         "security": []
       }
     },
-    "/api/ServerInfo": {
+    "/api/GetServerInfo": {
       "get": {
         "summary": "获取服务器信息",
         "deprecated": false,
@@ -63,14 +63,18 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "Clients": {
+                    "Rtt": {
                       "type": "string"
                     },
+                    "Clients": {
+                      "type": "number"
+                    },
                     "MaxClients": {
-                      "type": "string"
+                      "type": "number"
                     }
                   },
                   "required": [
+                    "Rtt",
                     "Clients",
                     "MaxClients"
                   ]
@@ -111,16 +115,20 @@
       "GetServerInfoResp": {
         "type": "object",
         "properties": {
-          "Clients": {
+          "Rtt": {
             "type": "string"
           },
+          "Clients": {
+            "type": "number"
+          },
           "MaxClients": {
-            "type": "string"
+            "type": "number"
           }
         },
         "required": [
           "Clients",
-          "MaxClients"
+          "MaxClients",
+          "Rtt"
         ]
       }
     },

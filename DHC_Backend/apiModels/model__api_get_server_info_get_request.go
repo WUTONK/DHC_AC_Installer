@@ -9,7 +9,7 @@
 
 package apiModels
 
-type ApiServerInfoGetRequest struct {
+type ApiGetServerInfoGetRequest struct {
 
 	ServerHost string `json:"ServerHost"`
 }

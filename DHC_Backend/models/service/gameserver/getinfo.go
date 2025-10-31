@@ -178,9 +178,15 @@ type SessionInfo struct {
 	MaxClients int64 `json:"maxclients"`
 }
 
+type HasRttSessionInfo struct {
+	Rtt        string
+	Clients    int64
+	MaxClients int64
+}
+
 // GetServerInfo 接收一个 AC server 地址, 示例: 1.1.1.1:8081
 // 然后返回一个 SessionInfo struct
-func GetServerInfo(serverHost string) (SessionInfo, error) {
+func GetServerInfo(serverHost string) (HasRttSessionInfo, error) {
 
 	serverHostSlice := strings.Split(serverHost, ":")
 
@@ -202,8 +208,15 @@ func GetServerInfo(serverHost string) (SessionInfo, error) {
 		panic(err)
 	}
 
+	var hasTtsInfo HasRttSessionInfo
+
+	// hasTtsInfo.Tts = rtt.String()
+	hasTtsInfo.Rtt = rtt.String()
+	hasTtsInfo.Clients = info.Clients
+	hasTtsInfo.MaxClients = info.MaxClients
+
 	fmt.Printf("Players: %d/%d\n", info.Clients, info.MaxClients)
 	fmt.Printf("Approx RTT (HTTP): %v\n", rtt)
 
-	return info, nil
+	return hasTtsInfo, nil
 }

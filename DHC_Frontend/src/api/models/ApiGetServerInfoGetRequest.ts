@@ -16,30 +16,30 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ApiServerInfoGetRequest
+ * @interface ApiGetServerInfoGetRequest
  */
-export interface ApiServerInfoGetRequest {
+export interface ApiGetServerInfoGetRequest {
     /**
      * 
      * @type {string}
-     * @memberof ApiServerInfoGetRequest
+     * @memberof ApiGetServerInfoGetRequest
      */
     serverHost: string;
 }
 
 /**
- * Check if a given object implements the ApiServerInfoGetRequest interface.
+ * Check if a given object implements the ApiGetServerInfoGetRequest interface.
  */
-export function instanceOfApiServerInfoGetRequest(value: object): value is ApiServerInfoGetRequest {
+export function instanceOfApiGetServerInfoGetRequest(value: object): value is ApiGetServerInfoGetRequest {
     if (!('serverHost' in value) || value['serverHost'] === undefined) return false;
     return true;
 }
 
-export function ApiServerInfoGetRequestFromJSON(json: any): ApiServerInfoGetRequest {
-    return ApiServerInfoGetRequestFromJSONTyped(json, false);
+export function ApiGetServerInfoGetRequestFromJSON(json: any): ApiGetServerInfoGetRequest {
+    return ApiGetServerInfoGetRequestFromJSONTyped(json, false);
 }
 
-export function ApiServerInfoGetRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ApiServerInfoGetRequest {
+export function ApiGetServerInfoGetRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): ApiGetServerInfoGetRequest {
     if (json == null) {
         return json;
     }
@@ -49,11 +49,11 @@ export function ApiServerInfoGetRequestFromJSONTyped(json: any, ignoreDiscrimina
     };
 }
 
-export function ApiServerInfoGetRequestToJSON(json: any): ApiServerInfoGetRequest {
-    return ApiServerInfoGetRequestToJSONTyped(json, false);
+export function ApiGetServerInfoGetRequestToJSON(json: any): ApiGetServerInfoGetRequest {
+    return ApiGetServerInfoGetRequestToJSONTyped(json, false);
 }
 
-export function ApiServerInfoGetRequestToJSONTyped(value?: ApiServerInfoGetRequest | null, ignoreDiscriminator: boolean = false): any {
+export function ApiGetServerInfoGetRequestToJSONTyped(value?: ApiGetServerInfoGetRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }

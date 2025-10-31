@@ -16,44 +16,44 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface GetServerInfoResp
+ * @interface ApiGetServerInfoGet200Response
  */
-export interface GetServerInfoResp {
+export interface ApiGetServerInfoGet200Response {
     /**
      * 
      * @type {string}
-     * @memberof GetServerInfoResp
+     * @memberof ApiGetServerInfoGet200Response
      */
     rtt: string;
     /**
      * 
      * @type {number}
-     * @memberof GetServerInfoResp
+     * @memberof ApiGetServerInfoGet200Response
      */
     clients: number;
     /**
      * 
      * @type {number}
-     * @memberof GetServerInfoResp
+     * @memberof ApiGetServerInfoGet200Response
      */
     maxClients: number;
 }
 
 /**
- * Check if a given object implements the GetServerInfoResp interface.
+ * Check if a given object implements the ApiGetServerInfoGet200Response interface.
  */
-export function instanceOfGetServerInfoResp(value: object): value is GetServerInfoResp {
+export function instanceOfApiGetServerInfoGet200Response(value: object): value is ApiGetServerInfoGet200Response {
     if (!('rtt' in value) || value['rtt'] === undefined) return false;
     if (!('clients' in value) || value['clients'] === undefined) return false;
     if (!('maxClients' in value) || value['maxClients'] === undefined) return false;
     return true;
 }
 
-export function GetServerInfoRespFromJSON(json: any): GetServerInfoResp {
-    return GetServerInfoRespFromJSONTyped(json, false);
+export function ApiGetServerInfoGet200ResponseFromJSON(json: any): ApiGetServerInfoGet200Response {
+    return ApiGetServerInfoGet200ResponseFromJSONTyped(json, false);
 }
 
-export function GetServerInfoRespFromJSONTyped(json: any, ignoreDiscriminator: boolean): GetServerInfoResp {
+export function ApiGetServerInfoGet200ResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): ApiGetServerInfoGet200Response {
     if (json == null) {
         return json;
     }
@@ -65,11 +65,11 @@ export function GetServerInfoRespFromJSONTyped(json: any, ignoreDiscriminator: b
     };
 }
 
-export function GetServerInfoRespToJSON(json: any): GetServerInfoResp {
-    return GetServerInfoRespToJSONTyped(json, false);
+export function ApiGetServerInfoGet200ResponseToJSON(json: any): ApiGetServerInfoGet200Response {
+    return ApiGetServerInfoGet200ResponseToJSONTyped(json, false);
 }
 
-export function GetServerInfoRespToJSONTyped(value?: GetServerInfoResp | null, ignoreDiscriminator: boolean = false): any {
+export function ApiGetServerInfoGet200ResponseToJSONTyped(value?: ApiGetServerInfoGet200Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }

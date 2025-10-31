@@ -9,9 +9,11 @@
 
 package apiModels
 
-type ApiServerInfoGet200Response struct {
+type ApiGetServerInfoGet200Response struct {
 
-	Clients string `json:"Clients"`
+	Rtt string `json:"Rtt"`
 
-	MaxClients string `json:"MaxClients"`
+	Clients float32 `json:"Clients"`
+
+	MaxClients float32 `json:"MaxClients"`
 }
