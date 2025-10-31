@@ -18,7 +18,8 @@ import (
 type serverList string
 
 const (
-	Baidu serverList = "www.baidu.com"
+	SPR_EU2 serverList = "5.161.43.117:8081"
+	SHMC    serverList = "42.51.34.184:8081" // 上海湾岸俱乐部服务器
 )
 
 // PingResult 表示ping的结果
@@ -201,6 +202,7 @@ func GetServerInfo(serverHost string) (HasRttSessionInfo, error) {
 		panic(err)
 	}
 	defer resp.Body.Close()
+	// 统一换成ms
 	rtt := time.Since(start)
 
 	var info SessionInfo
@@ -210,13 +212,13 @@ func GetServerInfo(serverHost string) (HasRttSessionInfo, error) {
 
 	var hasTtsInfo HasRttSessionInfo
 
-	// hasTtsInfo.Tts = rtt.String()
-	hasTtsInfo.Rtt = rtt.String()
+	// 使用毫秒字符串（例如 "12ms"）
+	hasTtsInfo.Rtt = fmt.Sprintf("%dms", rtt.Milliseconds())
 	hasTtsInfo.Clients = info.Clients
 	hasTtsInfo.MaxClients = info.MaxClients
 
 	fmt.Printf("Players: %d/%d\n", info.Clients, info.MaxClients)
-	fmt.Printf("Approx RTT (HTTP): %v\n", rtt)
+	fmt.Printf("Approx RTT (HTTP): %dms\n", rtt.Milliseconds())
 
 	return hasTtsInfo, nil
 }
