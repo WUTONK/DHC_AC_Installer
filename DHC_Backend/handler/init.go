@@ -4,10 +4,12 @@ import (
 	apiModels "DHC_Backend/apiModels"
 	"DHC_Backend/models/service/gameserver"
 	"encoding/json"
+	"io"
 
 	// "crypto/rand"
 	// "encoding/base64"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,19 +17,35 @@ import (
 
 func InitGin(g gin.IRouter) {
 	g.GET("/api/GetGamePath", getGamePath)
-	g.GET("/api/GetServerInfo")
+	g.GET("/api/GetServerInfo", GetServerInfo)
 }
 
 func GetServerInfo(c *gin.Context) {
 	var req apiModels.GetServerInfoReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
-		return
+		if err == io.EOF {
+			// GET 通常没有 body，尝试从 query 读取
+			q := c.Query("ServerHost")
+			if q == "" {
+				q = c.Query("serverHost")
+			}
+			if q == "" {
+				log.Printf("GetServerInfo missing ServerHost in body and query")
+				c.JSON(http.StatusBadRequest, gin.H{"error": "missing ServerHost"})
+				return
+			}
+			req.ServerHost = q
+		} else {
+			log.Printf("GetServerInfo bind error: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
 	}
 
 	info, err := gameserver.GetServerInfo(req.ServerHost)
 	if err != nil {
+		log.Printf("GetServerInfo service error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}

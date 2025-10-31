@@ -36,25 +36,18 @@
         "deprecated": false,
         "description": "",
         "tags": [],
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "ServerHost": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "ServerHost"
-                ]
-              },
-              "examples": {}
+        "parameters": [
+          {
+            "name": "ServerHost",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "1.1.1.1:8080",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "",

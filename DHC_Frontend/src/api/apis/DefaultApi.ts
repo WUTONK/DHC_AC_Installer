@@ -16,20 +16,17 @@
 import * as runtime from '../runtime';
 import type {
   ApiGetServerInfoGet200Response,
-  ApiGetServerInfoGetRequest,
   GetGamePathResp,
 } from '../models/index';
 import {
     ApiGetServerInfoGet200ResponseFromJSON,
     ApiGetServerInfoGet200ResponseToJSON,
-    ApiGetServerInfoGetRequestFromJSON,
-    ApiGetServerInfoGetRequestToJSON,
     GetGamePathRespFromJSON,
     GetGamePathRespToJSON,
 } from '../models/index';
 
-export interface ApiGetServerInfoGetOperationRequest {
-    apiGetServerInfoGetRequest?: ApiGetServerInfoGetRequest;
+export interface ApiGetServerInfoGetRequest {
+    serverHost?: string;
 }
 
 /**
@@ -72,12 +69,14 @@ export class DefaultApi extends runtime.BaseAPI {
      * 
      * 获取服务器信息
      */
-    async apiGetServerInfoGetRaw(requestParameters: ApiGetServerInfoGetOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiGetServerInfoGet200Response>> {
+    async apiGetServerInfoGetRaw(requestParameters: ApiGetServerInfoGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiGetServerInfoGet200Response>> {
         const queryParameters: any = {};
 
-        const headerParameters: runtime.HTTPHeaders = {};
+        if (requestParameters['serverHost'] != null) {
+            queryParameters['ServerHost'] = requestParameters['serverHost'];
+        }
 
-        headerParameters['Content-Type'] = 'application/json';
+        const headerParameters: runtime.HTTPHeaders = {};
 
 
         let urlPath = `/api/GetServerInfo`;
@@ -87,7 +86,6 @@ export class DefaultApi extends runtime.BaseAPI {
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
-            body: ApiGetServerInfoGetRequestToJSON(requestParameters['apiGetServerInfoGetRequest']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ApiGetServerInfoGet200ResponseFromJSON(jsonValue));
@@ -97,7 +95,7 @@ export class DefaultApi extends runtime.BaseAPI {
      * 
      * 获取服务器信息
      */
-    async apiGetServerInfoGet(requestParameters: ApiGetServerInfoGetOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiGetServerInfoGet200Response> {
+    async apiGetServerInfoGet(requestParameters: ApiGetServerInfoGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiGetServerInfoGet200Response> {
         const response = await this.apiGetServerInfoGetRaw(requestParameters, initOverrides);
         return await response.value();
     }

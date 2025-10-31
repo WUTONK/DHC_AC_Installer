@@ -42,7 +42,7 @@ async function GetServerInfo(server:string): Promise<[string, number, number]> {
        }
       }
   ).then((res): [string, number, number] => {
-    return ["", res.clients, res.maxClients]
+    return [res.rtt, res.clients, res.maxClients]
   }).catch((err): [string, number, number] => {
     console.log(err)
     return ["获取信息失败", 0, 0]

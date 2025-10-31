@@ -7,7 +7,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  2.51 kB
-✓ built in 45ms
+✓ built in 47ms
 
 build the electron main process successfully
 
@@ -31,103 +31,14 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
-13:47:14 [vite] Internal server error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-      at TransformPluginContext._formatLog (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31185:43)
-      at TransformPluginContext.error (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31182:14)
-      at normalizeUrl (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29665:18)
-      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-      at async file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29723:32
-      at async Promise.all (index 5)
-      at async TransformPluginContext.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29691:4)
-      at async EnvironmentPluginContainer.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30984:14)
-      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26116:26)
-13:47:14 [vite] (client) Pre-transform error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-13:47:37 [vite] Internal server error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-      at TransformPluginContext._formatLog (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31185:43)
-      at TransformPluginContext.error (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31182:14)
-      at normalizeUrl (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29665:18)
-      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-      at async file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29723:32
-      at async Promise.all (index 5)
-      at async TransformPluginContext.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29691:4)
-      at async EnvironmentPluginContainer.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30984:14)
-      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26116:26)
-      at async viteTransformMiddleware (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:27187:20)
-13:48:00 [vite] Internal server error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-      at TransformPluginContext._formatLog (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31185:43)
-      at TransformPluginContext.error (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31182:14)
-      at normalizeUrl (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29665:18)
-      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-      at async file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29723:32
-      at async Promise.all (index 5)
-      at async TransformPluginContext.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29691:4)
-      at async EnvironmentPluginContainer.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30984:14)
-      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26116:26)
-      at async viteTransformMiddleware (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:27187:20)
-13:48:05 [vite] (client) hmr update /src/App.tsx
-13:48:05 [vite] (client) Pre-transform error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-13:48:05 [vite] Internal server error: Failed to resolve import "src/shared" from "src/renderer/src/NetDemo.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/NetDemo.tsx:4:20
-  18 |  import { useState } from "react";
-  19 |  import { Card, Layout, Button } from "@douyinfe/semi-ui";
-  20 |  import { Api } from "src/shared";
-     |                       ^
-  21 |  function NetDemo() {
-  22 |    _s();
-      at TransformPluginContext._formatLog (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31185:43)
-      at TransformPluginContext.error (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31182:14)
-      at normalizeUrl (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29665:18)
-      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-      at async file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29723:32
-      at async Promise.all (index 5)
-      at async TransformPluginContext.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29691:4)
-      at async EnvironmentPluginContainer.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30984:14)
-      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26116:26)
-      at async viteTransformMiddleware (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:27187:20)
-13:48:48 [vite] (client) hmr update /src/App.tsx
-13:49:01 [vite] (client) hmr update /src/NetDemo.tsx
-13:49:05 [vite] (client) hmr update /src/NetDemo.tsx
-13:49:10 [vite] (client) hmr update /src/NetDemo.tsx
-13:49:10 [vite] (client) hmr update /src/NetDemo.tsx
+Open dev tool...
+[76397:1031/143856.587837:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[76397:1031/143856.587907:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+14:40:09 [vite] (client) hmr update /src/NetDemo.tsx
+Open dev tool...
+[76397:1031/144013.394734:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[76397:1031/144013.394801:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+14:41:32 [vite] (client) hmr update /src/NetDemo.tsx
+14:41:42 [vite] (client) hmr update /src/NetDemo.tsx
+14:44:24 [vite] (client) hmr update /src/NetDemo.tsx
  ELIFECYCLE  Command failed.
