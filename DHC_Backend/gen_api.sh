@@ -4,8 +4,8 @@ rm -fr tmp
 
 mkdir -p tmp
 
-# API 模型文件存储在 models
-rm -fr models
+# API 模型文件存储在 apiModels
+rm -fr apiModels
 
 openapi-generator-cli generate \
     -i DHC_AC_Installer.openapi.json \
@@ -15,4 +15,4 @@ openapi-generator-cli generate \
     --global-property models,modelDocs=false \
     --skip-validate-spec
 
-mv tmp/go models
+mv tmp/go apiModels

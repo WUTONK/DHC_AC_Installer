@@ -20,7 +20,60 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GamePathGet"
+                  "$ref": "#/components/schemas/GetGamePathResp"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/ServerInfo": {
+      "get": {
+        "summary": "获取服务器信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ServerHost": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ServerHost"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Clients": {
+                      "type": "string"
+                    },
+                    "MaxClients": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "Clients",
+                    "MaxClients"
+                  ]
                 }
               }
             },
@@ -33,7 +86,7 @@
   },
   "components": {
     "schemas": {
-      "GamePathGet": {
+      "GetGamePathResp": {
         "type": "object",
         "properties": {
           "GamePath": {
@@ -42,6 +95,32 @@
         },
         "required": [
           "GamePath"
+        ]
+      },
+      "GetServerInfoReq": {
+        "type": "object",
+        "properties": {
+          "ServerHost": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ServerHost"
+        ]
+      },
+      "GetServerInfoResp": {
+        "type": "object",
+        "properties": {
+          "Clients": {
+            "type": "string"
+          },
+          "MaxClients": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Clients",
+          "MaxClients"
         ]
       }
     },
