@@ -7,112 +7,56 @@
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
 [GIN-debug] GET    /api/GetServerInfo        --> DHC_Backend/handler.GetServerInfo (4 handlers)
-2025/10/31 14:38:44 Backend Server is running on port http://127.0.0.1:19810
-2025/10/31 14:38:44 Frontend login page is running on path http://localhost:11451
+2025/10/31 14:59:45 Backend Server is running on port http://127.0.0.1:19810
+2025/10/31 14:59:45 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-Players: 10/57
-Approx RTT (HTTP): 3.497905958s
+Players: 12/57
+Approx RTT (HTTP): 592.26075ms
 {
-  "Rtt": "3.497905958s",
-  "Clients": 10,
+  "Rtt": "592.26075ms",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:38:55 | 200 |  3.498739166s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 305.44075ms
+[GIN] 2025/10/31 - 14:59:53 | 200 |  592.790958ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
+Players: 12/57
+Approx RTT (HTTP): 1.597756959s
 {
-  "Rtt": "305.44075ms",
-  "Clients": 10,
+  "Rtt": "1.597756959s",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:38:55 | 200 |  305.563375ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 3.782815583s
+[GIN] 2025/10/31 - 14:59:55 | 200 |  1.598023416s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
+Players: 12/57
+Approx RTT (HTTP): 1.707346708s
 {
-  "Rtt": "3.782815583s",
-  "Clients": 10,
+  "Rtt": "1.707346708s",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:38:59 | 200 |  3.783183083s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 299.890208ms
+[GIN] 2025/10/31 - 14:59:56 | 200 |  1.708178125s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
+Players: 12/57
+Approx RTT (HTTP): 3.579693916s
 {
-  "Rtt": "299.890208ms",
-  "Clients": 10,
+  "Rtt": "3.579693916s",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:38:59 | 200 |  299.993334ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 307.513958ms
+[GIN] 2025/10/31 - 14:59:57 | 200 |  3.579811791s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
+Players: 12/57
+Approx RTT (HTTP): 299.861ms
 {
-  "Rtt": "307.513958ms",
-  "Clients": 10,
+  "Rtt": "299.861ms",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:38:59 | 200 |  307.637291ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 410.233417ms
+[GIN] 2025/10/31 - 15:00:00 | 200 |  300.131041ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
+Players: 12/57
+Approx RTT (HTTP): 1.077135375s
 {
-  "Rtt": "410.233417ms",
-  "Clients": 10,
+  "Rtt": "1.077135375s",
+  "Clients": 12,
   "MaxClients": 57
 }
-[GIN] 2025/10/31 - 14:39:00 | 200 |  411.096584ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 403.793208ms
-{
-  "Rtt": "403.793208ms",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:00 | 200 |   403.90775ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 1.973030542s
-{
-  "Rtt": "1.973030542s",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:05 | 200 |  1.973143333s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 1.962941s
-{
-  "Rtt": "1.962941s",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:09 | 200 |  1.963064083s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 6.120947916s
-{
-  "Rtt": "6.120947916s",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:16 | 200 |  6.121300208s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 291.950458ms
-{
-  "Rtt": "291.950458ms",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:16 | 200 |  292.380375ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-Players: 10/57
-Approx RTT (HTTP): 1.077986958s
-{
-  "Rtt": "1.077986958s",
-  "Clients": 10,
-  "MaxClients": 57
-}
-[GIN] 2025/10/31 - 14:39:17 | 200 |  1.078100625s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"
-2025/10/31 14:40:11 GetServerInfo missing ServerHost in body and query
-[GIN] 2025/10/31 - 14:40:11 | 400 |      99.709µs |       127.0.0.1 | GET      "/api/GetServerInfo"
-2025/10/31 14:40:17 GetServerInfo missing ServerHost in body and query
-[GIN] 2025/10/31 - 14:40:17 | 400 |     106.166µs |       127.0.0.1 | GET      "/api/GetServerInfo"
-2025/10/31 14:40:32 GetServerInfo missing ServerHost in body and query
-[GIN] 2025/10/31 - 14:40:32 | 400 |      81.125µs |       127.0.0.1 | GET      "/api/GetServerInfo"
-2025/10/31 14:40:33 GetServerInfo missing ServerHost in body and query
-[GIN] 2025/10/31 - 14:40:33 | 400 |      58.875µs |       127.0.0.1 | GET      "/api/GetServerInfo"
+[GIN] 2025/10/31 - 15:00:03 | 200 |    1.0772675s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=5.161.43.117%3A8081"

@@ -37,9 +37,7 @@ function NetDemo(): React.JSX.Element {
 async function GetServerInfo(server:string): Promise<[string, number, number]> {
   return Api.apiGetServerInfoGet(
       {
-       apiGetServerInfoGetRequest:{
         serverHost: server
-       }
       }
   ).then((res): [string, number, number] => {
     return [res.rtt, res.clients, res.maxClients]
