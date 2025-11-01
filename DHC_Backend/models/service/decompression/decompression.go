@@ -21,35 +21,11 @@ import (
 
 // 检测 7zip 路径并添加 如果不存在就下载
 
-func GetBackendRootPath() (string, error) {
-	// 获取当前文件的路径 从而获得项目根目录
-	_, filename, _, _ := runtime.Caller(0)
-
-	fmt.Println("当前文件路径:", filename)
-
-	// 获取文件所在目录
-	dir := filepath.Dir(filename)
-
-	// 往上跳伞级目录获取项目后端根目录
-	// modInstall/ -> service/ -> models/ -> DHC_Backend/
-	rootPath := filepath.Join(dir, "..", "..", "..")
-
-	// 获取绝对路径
-	backendAbsPath, err := filepath.Abs(rootPath)
-	if err != nil {
-		fmt.Printf("获取绝对路径失败: %v\n", err)
-		return "", err
-	}
-
-	fmt.Println("项目后端根目录:", backendAbsPath)
-	return backendAbsPath, nil
-}
-
 func SzInstall() {
 	targetFolder := infoGet.GetSysInfo().OsType
 	fmt.Printf("系统类型: %+v\n", targetFolder)
 
-	backendAbsPath, err := GetBackendRootPath()
+	backendAbsPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
 		fmt.Printf("获取根目录失败 error:%s", err)
 		return
@@ -69,7 +45,7 @@ func Get7zPath(isTestSz bool) string {
 	targetFolder := infoGet.GetSysInfo().OsType
 	fmt.Printf("系统类型: %+v\n", targetFolder)
 
-	backendAbsPath, err := GetBackendRootPath()
+	backendAbsPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
 		fmt.Printf("获取根目录失败 error:%s", err)
 		return ""
@@ -111,7 +87,7 @@ func Get7zPath(isTestSz bool) string {
 
 func SzTest() string {
 	// 写入 1.txt 和 2.txt , 内容分别为 lena 和 wutonk
-	backendAbsPath, getBackendAbsPathErr := GetBackendRootPath()
+	backendAbsPath, getBackendAbsPathErr := infoGet.GetBackendRootPath()
 	if getBackendAbsPathErr != nil {
 		fmt.Printf("获取后端根目录失败,errInfo:%s", getBackendAbsPathErr)
 	}
@@ -219,7 +195,7 @@ func Decompression(srcPath string, dstPath string, filePassword string, dftJsonP
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
-	backendRootPath, err := GetBackendRootPath()
+	backendRootPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
 		return "before", fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
 	}

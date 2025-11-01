@@ -1,6 +1,7 @@
 package decompression
 
 import (
+	"DHC_Backend/models/service/infoGet"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -94,7 +95,7 @@ func (o OverrideStruct) Backup(modType string, needBackupPath string) error {
 	funcIdt := "-service.decompression.Backup-"
 
 	// 获取后端根目录
-	rootPath, err := GetBackendRootPath()
+	rootPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
 		return fmt.Errorf("获取根目录路径失败: %v", err)
 	}
