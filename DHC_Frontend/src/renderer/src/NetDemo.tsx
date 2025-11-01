@@ -30,6 +30,19 @@ function NetDemo(): React.JSX.Element {
           <p>当前人数:{clients}</p>
           <p>最大人数:{maxClients}</p>
         </Card>
+
+        <Card
+            title='模组安装测试'
+            style={{ maxWidth: 500, maxHeight:500 }}
+            headerExtraContent={
+              <div>
+                <Button onClick={async ()=>{
+                 }}>安装map</Button>
+              </div>
+            }
+        >
+        </Card>
+        {/* 模拟环境 */}
     </Layout>
   )
 }
@@ -43,8 +56,8 @@ export const ServerList = {
 export type ServerName = keyof typeof ServerList;
 
 export function resolveServerHost(input: ServerName | string): string {
-  // 既支持传入名字（如 "SPR_EU2"），也支持直接传 "ip:port"
-  if (Object.prototype.hasOwnProperty.call(ServerList, input)) {
+  // 既支持传入名字（如 "SHMC"），也支持直接传 "ip:port"
+  if (Object.hasOwn(ServerList, input)) {
     return ServerList[input as ServerName];
   }
   return input;
