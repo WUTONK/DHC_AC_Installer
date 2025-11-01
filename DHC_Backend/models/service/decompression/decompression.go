@@ -191,7 +191,16 @@ func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
 // 返回值：错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
 // 指定dhcfiletag.json地址
 // dft文件地址
-func Decompression(srcPath string, dstPath string, filePassword string, dftJsonPath string) (errorTiming string, error error) {
+type DftPathGetModOrPath string
+
+const (
+	Dir                   DftPathGetModOrPath = "Dir"
+	InCompressPkgRootFile DftPathGetModOrPath = "InCompressPkgRootFile"
+)
+
+// 上级目录
+
+func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftPathGetModOrPath) (errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
@@ -213,14 +222,17 @@ func Decompression(srcPath string, dstPath string, filePassword string, dftJsonP
 	}
 	fileName := fileInfo.Name()
 
-	// 然后自动从srcPath所在的上层文件夹获取dhcFileTag.json路径
+	// 然后自动从srcPath所在的文件夹获取dhcFileTag.json路径
 	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
-	if dftJsonPath == "" {
+	switch dftPathGetModOrPath {
+	case Dir:
 		dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
 		dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
-	} else {
-		fmt.Printf("%s 正在从dftJsonPath获取信息\n", funcIdt)
-		dhcFileTag, err = DhcFileTagIdentify(dftJsonPath)
+	case InCompressPkgRootFile:
+		// TODO: 从压缩包根目录文件中读取 dhcFileTag.json
+	default:
+		fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
+		dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
 	}
 	if err != nil {
 		if err.Error() == "notFound" {

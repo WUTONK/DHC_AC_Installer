@@ -8,8 +8,9 @@ import (
 
 func TestDecompression(t *testing.T) {
 	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/szTest_zip.zip"
-	dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/example/decompressionPath/dstFile"
-	result, err := decompression.Decompression(srcFilePath, dstFilePath, "", "")
+	// dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/example/decompressionPath/dstFile"
+	// result, err := decompression.Decompression(srcFilePath, "", decompression.Dir)
+	result, err := decompression.Decompression(srcFilePath, "", "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/dhcFileTag.json")
 	fmt.Printf("%v\n", result)
 	fmt.Printf("%v\n", err)
 }
