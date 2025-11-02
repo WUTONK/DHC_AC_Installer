@@ -259,11 +259,9 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		fmt.Print(entryPath)
 	}
 
-	// 完成后输出信息
+	// TODO：完成后输出信息
 
 	return nil
-
-	// --- 以后完成 ---
 }
 
 // DirectoryMatching 目录匹配

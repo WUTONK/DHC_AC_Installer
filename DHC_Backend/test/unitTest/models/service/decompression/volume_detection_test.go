@@ -46,9 +46,10 @@ func TestVolumeDetection(t *testing.T) {
 		}
 
 		// 测试Decompression函数
-		errorTiming, err := decompression.Decompression(filePath, "", "")
+		unDecompressionPath, errorTiming, err := decompression.Decompression(filePath, "", "")
 
 		fmt.Printf("测试文件: %s\n", filename)
+		fmt.Printf("解压目录: %s\n", unDecompressionPath)
 		fmt.Printf("错误时机: %s\n", errorTiming)
 		if err != nil {
 			fmt.Printf("错误信息: %v\n", err)

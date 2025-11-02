@@ -183,30 +183,28 @@ func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
 
 }
 
-// 解压功能 支持.zip / .7z / .rar等压缩格式
-// 解压后暂存在 rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
-// 参数：- 来源路径 目标路径 文件密码 dfc文件地址(为空则默认从srcPath所在目录获取)
-//   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
-//
-// 返回值：错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-// 指定dhcfiletag.json地址
-// dft文件地址
 type DftPathGetModOrPath string
 
 const (
-	Dir                   DftPathGetModOrPath = "Dir"
-	InCompressPkgRootFile DftPathGetModOrPath = "InCompressPkgRootFile"
+	Dir                   DftPathGetModOrPath = "Dir"                   //自动从文件所在目录获取
+	InCompressPkgRootFile DftPathGetModOrPath = "InCompressPkgRootFile" //解压后在压缩包根目录获取
 )
 
-// 上级目录
+// 解压功能 支持.zip / .7z / .rar等压缩格式
+// 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
+// 参数：- 来源路径 目标路径 文件密码 dfc文件获取方式(详见源码)
+//   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
+//
+// 返回值：-解压目录
+// 		  -错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
 
-func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftPathGetModOrPath) (errorTiming string, error error) {
+func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
 	backendRootPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
-		return "before", fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
+		return "", "before", fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
 	}
 
 	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
@@ -218,7 +216,7 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 	// 先拆分出文件名
 	fileInfo, fileInfoErr := os.Stat(srcPath)
 	if fileInfoErr != nil {
-		return "before", fmt.Errorf("%s 无法获取fileInfo", funcIdt)
+		return "", "before", fmt.Errorf("%s 无法获取fileInfo", funcIdt)
 	}
 	fileName := fileInfo.Name()
 
@@ -238,7 +236,7 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 		if err.Error() == "notFound" {
 			dhcFileTag.ModType = "undefined"
 		} else {
-			return "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s", funcIdt, err)
+			return "", "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s", funcIdt, err)
 		}
 	}
 
@@ -282,7 +280,7 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 	// 打开源文件
 	srcFile, err := os.Open(srcPath)
 	if err != nil {
-		return "before", fmt.Errorf("%s打开源文件失败: %v", funcIdt, err)
+		return "", "before", fmt.Errorf("%s打开源文件失败: %v", funcIdt, err)
 	}
 	defer srcFile.Close()
 
@@ -295,7 +293,7 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 
 	// 确保中间目录存在
 	if err := os.MkdirAll(midDirPath, 0755); err != nil {
-		return "before", fmt.Errorf("%s创建中间目录失败: %v", funcIdt, err)
+		return "", "before", fmt.Errorf("%s创建中间目录失败: %v", funcIdt, err)
 	}
 
 	// 鉴定是否为非压缩文件或不受支持的压缩格式 如果是 直接复制一份到中间目录
@@ -304,17 +302,17 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 		midFilePath := filepath.Join(midDirPath, fileName)
 		midFile, err := os.Create(midFilePath)
 		if err != nil {
-			return "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
+			return "", "before", fmt.Errorf("%s创建中间文件失败: %v", funcIdt, err)
 		}
 		defer midFile.Close()
 
 		_, err = midFile.ReadFrom(srcFile)
 		if err != nil {
-			return "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
+			return "", "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
 		}
 
 		// TODO:调用OverrideControl()
-		return "", nil
+		return midDirPath, "", nil
 	}
 
 	// 例:rootpath/resources/mod/shutokoMap
@@ -341,15 +339,17 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 
 		if err != nil {
 			fmt.Printf("%s解压失败: 错误=%v\n", funcIdt, err)
-			return "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
+			return "", "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
 		}
 
 		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	} else {
 		// 分卷解压逻辑
+		// TODO: 实现分卷解压逻辑
+		return "", "before", fmt.Errorf("%s分卷解压功能尚未实现", funcIdt)
 	}
 
 	// TODO: 融入覆盖控制逻辑
 
-	return "", nil
+	return midDirPath, "", nil
 }

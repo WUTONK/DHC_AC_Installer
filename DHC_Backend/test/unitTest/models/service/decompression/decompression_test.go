@@ -9,10 +9,11 @@ import (
 func TestDecompression(t *testing.T) {
 	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/szTest_zip.zip"
 	// dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/example/decompressionPath/dstFile"
-	// result, err := decompression.Decompression(srcFilePath, "", decompression.Dir)
-	result, err := decompression.Decompression(srcFilePath, "", "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/dhcFileTag.json")
-	fmt.Printf("%v\n", result)
-	fmt.Printf("%v\n", err)
+	// unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", decompression.Dir)
+	unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/dhcFileTag.json")
+	fmt.Printf("解压目录: %v\n", unDecompressionPath)
+	fmt.Printf("错误时机: %v\n", errorTiming)
+	fmt.Printf("错误信息: %v\n", err)
 }
 
 func TestGet7zPath(t *testing.T) {
