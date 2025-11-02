@@ -4,6 +4,7 @@
     "rules": [
         {"pattern": "*.cfg", "action": "skip"},
         {"pattern": "*.txt", "action": "backup", "backup": true}
-    ]
+    ],
+    "OverwriteStartingDir":"content"
 }
 

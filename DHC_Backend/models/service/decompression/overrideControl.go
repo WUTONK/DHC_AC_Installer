@@ -164,6 +164,8 @@ func (o OverrideStruct) Backup(modType string, needBackupPath string) error {
 
 }
 
+// 覆盖起始目录
+
 // 接收一个文件路径并提取出文件名 然后将传入的路径的文件改为此文件名
 func (o OverrideStruct) Rename(srcFilePath, dstFilePath string) error {
 	funcIdt := "-service.decompression.Rename-"
@@ -204,6 +206,11 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	defaultAction := config.DefaultAction
 	modType := config.ModType
 	rules := config.Rules
+	// 根据开发/生产模式自动获取游戏路径
+	_, err = infoGet.GetGamePathAuto()
+	if err != nil {
+		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
+	}
 
 	// 打印调试信息
 	fmt.Printf("模组类型: %s\n", modType)
@@ -271,7 +278,6 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		} else {
 			// 没匹配上 按照默认操作执行
 		}
-
 		fmt.Print(entryPath)
 	}
 

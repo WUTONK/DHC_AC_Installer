@@ -24,6 +24,32 @@ fi
 echo "📦 下载 Go 依赖..."
 go mod tidy
 
+# 环境变量配置说明
+# DHC_DEV: 控制是否为开发模式（接受 true/false，脚本默认 true）
+#   - true: 开发模式，使用测试环境（脚本默认）
+#   - false: 生产模式，使用真实游戏环境
+# 
+# DHC_TEST_ENV: 开发模式下使用的测试环境类型（仅在 DHC_DEV=true 时生效）
+#   - simEnvhasDlc: 测试环境（有DLC），默认
+#   - simEnvnoDlc: 测试环境（无DLC）
+# 
+# 示例:
+#   - 开发模式（默认）: ./start_backend.sh
+#   - 生产模式: DHC_DEV=false ./start_backend.sh
+#   - 开发模式（无DLC）: DHC_TEST_ENV=simEnvnoDlc ./start_backend.sh
+
+# 如果未设置 DHC_DEV，默认设置为 true（开发模式）
+if [ -z "$DHC_DEV" ]; then
+    export DHC_DEV=true
+fi
+
+if [ "$DHC_DEV" = "true" ]; then
+    TEST_ENV_TYPE="${DHC_TEST_ENV:-simEnvhasDlc}"
+    echo "ℹ️  运行模式: 开发模式 (测试环境类型: $TEST_ENV_TYPE)"
+else
+    echo "ℹ️  运行模式: 生产模式 (使用真实游戏环境)"
+fi
+
 # 启动服务
 echo "🌟 启动后端服务 (端口: 19810)..."
-go run exec/main.go
+go run cmd/main.go

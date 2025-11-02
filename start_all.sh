@@ -43,6 +43,11 @@ cd "$SCRIPT_DIR/DHC_Backend"
 touch "$SCRIPT_DIR/logs/backend_setup.log"
 touch "$SCRIPT_DIR/logs/backend.log"
 
+# 如果未设置 DHC_DEV，默认设置为 true（开发模式）
+if [ -z "$DHC_DEV" ]; then
+    export DHC_DEV=true
+fi
+
 go mod tidy > "$SCRIPT_DIR/logs/backend_setup.log" 2>&1
 go run cmd/main.go > "$SCRIPT_DIR/logs/backend.log" 2>&1 &
 BACKEND_PID=$!
