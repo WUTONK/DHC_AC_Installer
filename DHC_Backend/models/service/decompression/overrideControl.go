@@ -260,9 +260,13 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 			switch passMatchingRules {
 			case OverrideActionOverwrite:
 			case OverrideActionSkip:
+				continue
 			case OverrideActionBackup:
 			case OverrideActionRename:
+
 			case OverrideActionAsk:
+				// TODO:完成Ask逻辑或者删除Ask
+				continue
 			}
 		} else {
 			// 没匹配上 按照默认操作执行

@@ -3,8 +3,9 @@
 一个使用 Electron + React + TypeScript 构建的桌面应用程序。
 
 ## 技术栈
-
+  
 - **前端**: Electron + React + TypeScript
+- **后端**: GO + Gin
 - **构建工具**: Vite + electron-vite
 - **包管理**: pnpm
 
@@ -42,6 +43,9 @@ pnpm install
 
 ### 运行应用
 
+### 快速启动脚本
+进入根目录 然后运行start_all.sh
+
 #### 开发模式
 
 ```bash
@@ -73,7 +77,6 @@ pnpm build:linux  # Linux
 
 ## 开发说明
 
-这是一个基础的 Electron + React 项目模板，你可以在此基础上添加更多功能。
 
 ## 许可证
 
