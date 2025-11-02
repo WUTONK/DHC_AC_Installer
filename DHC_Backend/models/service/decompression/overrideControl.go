@@ -237,6 +237,7 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	for _, entry := range entries {
 		entryPath := entry.Name()
 		isMatch := false
+		var passMatchingRules OverrideAction
 		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
 		for _, ruleEntry := range rules {
 			isMatchCounter := 0
@@ -247,13 +248,24 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 					// TODO:处理一下匹配了多条规则的情况
 					return fmt.Errorf("%s匹配到多条覆盖控制规则,发生冲突", funcIdt)
 				}
-				// TODO:如果是就按照操作执行
-
+				var err error
+				passMatchingRules, err = stringToOverrideAction(ruleEntry.Action)
+				if err != nil {
+					return fmt.Errorf("%s转换操作类型失败: %v", funcIdt, err)
+				}
 			}
 		}
-		// 没匹配上 按照默认操作执行
-		if !isMatch {
-
+		if isMatch {
+			// 按照操作执行
+			switch passMatchingRules {
+			case OverrideActionOverwrite:
+			case OverrideActionSkip:
+			case OverrideActionBackup:
+			case OverrideActionRename:
+			case OverrideActionAsk:
+			}
+		} else {
+			// 没匹配上 按照默认操作执行
 		}
 
 		fmt.Print(entryPath)
@@ -264,16 +276,28 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	return nil
 }
 
+func stringToOverrideAction(str string) (OverrideAction, error) {
+	switch str {
+	case "overwrite":
+		return OverrideActionOverwrite, nil
+	case "skip":
+		return OverrideActionSkip, nil
+	case "backup":
+		return OverrideActionBackup, nil
+	case "rename":
+		return OverrideActionRename, nil
+	case "ask":
+		return OverrideActionAsk, nil
+	default:
+		return "", fmt.Errorf("未知的操作类型: %s", str)
+	}
+}
+
 // DirectoryMatching 目录匹配
 // rulePath: 匹配规则路径，支持通配符 * 和 **
 // targetPath: 需要匹配的目标路径
 // 返回: 是否匹配成功
 func DirectoryMatching(rulePath, targetPath string) bool {
-	// 当我输入这个的时候：mod/shutoko/**
-	// 我希望可以匹配：mod/shutoko/a.txt / mod/shutoko/1/a.txt  mod/shutoko/1/2/a.txt (mod/shutoko/目录下的所有文件)
-	// 当我输入这个的时候：mod/shutoko/*
-	// 我希望可以匹配：mod/shutoko/a.txt 但不匹配 mod/shutoko/a.txt/1.cfg (mod/shutoko/目录下的所有文件，但不匹配次级目录)
-
 	// 标准化路径（统一使用 / 作为分隔符）
 	rulePath = filepath.ToSlash(rulePath)
 	targetPath = filepath.ToSlash(targetPath)

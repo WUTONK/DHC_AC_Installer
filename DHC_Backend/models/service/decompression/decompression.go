@@ -195,9 +195,7 @@ const (
 // 参数：- 来源路径 目标路径 文件密码 dfc文件获取方式(详见源码)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
 //
-// 返回值：-解压目录
-// 		  -错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-
+// 返回值：-解压目录 错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
 func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
