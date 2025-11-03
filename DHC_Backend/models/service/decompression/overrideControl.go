@@ -695,13 +695,17 @@ func generateExecutionPlan(node *Node, dstRoot string) []Task {
 	var tasks []Task
 	// 目录整体动作：作为一个目录级任务，下方已剪枝或无决策
 	if node.isDir && node.hasDecision && isWholeDirAction(node.decidedAction) {
-		tasks = append(tasks, Task{
-			Path:   node.relPath,
-			Action: node.decidedAction,
-			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
-			IsDir:  true,
-		})
-		return tasks
+		// 仅当子树不存在任何决策（已被剪枝或本就无决策）时，才能安全上提为目录任务
+		if !subtreeHasDecisions(node) {
+			tasks = append(tasks, Task{
+				Path:   node.relPath,
+				Action: node.decidedAction,
+				Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
+				IsDir:  true,
+			})
+			return tasks
+		}
+		// 子树仍有决策，继续下钻以尊重更具体的子规则
 	}
 	if !node.isDir && node.hasDecision {
 		tasks = append(tasks, Task{
@@ -737,4 +741,27 @@ func isWholeDirAction(a OverrideAction) bool {
 	default:
 		return false
 	}
+}
+
+// subtreeHasDecisions: 判断当前目录节点的子树（不含自身）中，是否仍存在任何决策。
+// 用途：避免在目录本身有默认/继承决策时，过早生成目录级任务而吞掉子规则。
+func subtreeHasDecisions(node *Node) bool {
+	var found bool
+	var dfs func(n *Node)
+	dfs = func(n *Node) {
+		if found {
+			return
+		}
+		for _, ch := range n.children {
+			if ch.hasDecision {
+				found = true
+				return
+			}
+			if ch.isDir {
+				dfs(ch)
+			}
+		}
+	}
+	dfs(node)
+	return found
 }

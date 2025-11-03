@@ -10,3 +10,8 @@ func TestmodInstall(t *testing.T) {
 	filePassword := ""
 	modinstall.SingleModInstall(srcPath, filePassword)
 }
+
+// enum
+// ActionDecision
+// decided
+// enum{rule, inherit, default}

@@ -3,18 +3,18 @@ package decompression_test
 import (
 	"DHC_Backend/models/service/decompression"
 	"DHC_Backend/models/service/infoGet"
+	getfilesnumber "DHC_Backend/test/testToolsFunction/GetfilesNumber"
 	"fmt"
 	"testing"
 )
 
 func TestOverrideControl(t *testing.T) {
-	// 测试 OverrideControl 函数
 	// 设置开发模式，确保使用模拟环境
 	infoGet.SetDev(true)
 	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
 
-	// 这里可以添加具体的测试逻辑
 	srcDirPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/resources/cache/Map/ddm_toyota_corolla_levin_ae86_1"
+	fmt.Printf("cars文件夹个数%v\n", getfilesnumber.GetFilesNumber(srcDirPath+"/cars"))
 	dstDirPath, err := infoGet.GetGamePath(infoGet.SimEnvHasDlc)
 	if err != nil {
 		t.Fatalf("获取游戏路径时发生错误: %v", err)

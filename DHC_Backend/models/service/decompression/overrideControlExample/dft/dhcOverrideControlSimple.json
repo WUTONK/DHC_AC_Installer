@@ -1,9 +1,8 @@
 {
-    "ModType":"Map",
+    "ModType":"car",
     "defaultAction":  {"action": "skip","backup": false},
     "rules": [
-        {"pattern": "*.cfg", "action": "skip"},
-        {"pattern": "*.txt", "action": "backup", "backup": true}
+        {"pattern": "cars/**", "action": "overwrite"}
     ],
     "OverwriteStartingDir":"content"
 }
