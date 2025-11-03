@@ -54,10 +54,17 @@ type OverrideStruct struct {
 
 // Node 用于构建源目录树并承载决策信息
 type Node struct {
+	// relPath: 相对 src 根目录的路径（以 "." 为根）。
+	// 例如：".", "cars", "cars/ddm_toyota/.../sfx/GUIDs.txt"
 	relPath  string
 	isDir    bool
 	children []*Node
-	// 决策标注
+
+	// 决策标注：规划/决策阶段输出的最终动作与来源
+	// hasDecision: 是否已有最终决策（true 表示本节点将产生任务或由父节点统领）
+	// decidedAction: 最终动作（overwrite/skip/backup/rename/ask）
+	// decidedTarget: 目标相对路径（为空则等于 relPath；未来支持映射时会使用）
+	// decidedSource: 决策来源（"rule" | "inherit" | "default"）
 	hasDecision   bool
 	decidedAction OverrideAction
 	decidedTarget string
@@ -66,6 +73,10 @@ type Node struct {
 
 // Task 计划项（此阶段仅输出计划，不实际执行 I/O）
 type Task struct {
+	// Path: 源相对路径（与 Node.relPath 一致）
+	// Action: 计划执行的动作
+	// Target: 目标相对路径（若为空则等于 Path；最终落地路径为 dstRoot + Target）
+	// IsDir: 是否为目录级任务（目录级任务生成后会剪枝，避免对子项重复执行）
 	Path   string
 	Action OverrideAction
 	Target string
@@ -104,10 +115,8 @@ func (o OverrideStruct) Skip() error {
 // - TODO:处理完备份场景
 // - 用户安装失败后 再次安装成功 那么需要删除备份
 // - 备份操作应该被显示出来 并且应该被用户手动删除 所以不进行自动垃圾回收（从备份恢复场景以外）
-
 // - 首次安装：无需备份｜重新安装以修复：无需备份｜更新且原版本可用：需要备份
 // - 需要提供多备份 用版本号区分
-
 // - 备份被删除后 序列号会乱掉 怎么办
 
 // Backup()接收模组类型和需备份目录路径 并存放在 rootpath/resources/backup/modType/needBackupDirName下
@@ -264,12 +273,18 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	}
 
 	// 阶段1：构建目录树
+	// 将 srcDirPath 下的所有目录/文件以树的形式组织起来；
+	// 仅建立结构关系，不做任何动作决策与执行。
 	root, buildErr := buildTree(srcDirPath)
 	if buildErr != nil {
 		return fmt.Errorf("%s构建目录树失败: %v", funcIdt, buildErr)
 	}
 
 	// 阶段2：应用决策（规则 > 继承 > 默认），并在冲突时错误
+	// 对每个节点：
+	// 1) 若命中规则：使用规则动作；若同一节点命中多条规则则报错
+	// 2) 否则若父有决策：继承父动作（目录整体动作向下生效）
+	// 3) 否则：应用 defaultAction
 	var defaultAct OverrideAction
 	defaultAct, err = stringToOverrideAction(defaultAction.Action)
 	if err != nil {
@@ -280,9 +295,13 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	}
 
 	// 阶段3：剪枝（将完全一致的子树上提为父目录整体动作）
+	// 若一个目录的所有后代节点的“(action,target)”完全一致，
+	// 则将该动作上提到目录节点，并清空子树的决策（由父目录整体处理），
+	// 这样在执行时不会出现“父目录覆盖后子节点再跳过”的无意义操作。
 	pruneTree(root)
 
 	// 阶段4：生成执行计划（仅输出计划，暂不执行 I/O）
+	// 目录整体任务优先于文件任务；被剪枝的子树不会产生重复任务。
 	tasks := generateExecutionPlan(root, dstDirPath)
 
 	// 打印计划摘要
@@ -392,16 +411,24 @@ func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 // 规划阶段：构建树
 // =====================
 
+// buildTree: 扫描 srcRoot，构建以 "." 为根的目录树
+// 仅建立关系列表与 isDir 标志，不执行匹配/决策。
+// 为什么要构建树：
+// - 便于做“目录级剪枝”（整棵子树统一动作时上提为父目录整体动作）
+// - 便于做“父 -> 子”的继承传递（默认操作或目录规则）
+// 复杂度：O(N) 其中 N 为文件+目录数；WalkDir 一次扫描。
 func buildTree(srcRoot string) (*Node, error) {
+	funcIdt := "-service.decompression.buildTree-"
 	root := &Node{relPath: ".", isDir: true}
 	pathToNode := map[string]*Node{".": root}
 
 	err := filepath.WalkDir(srcRoot, func(p string, d os.DirEntry, err error) error {
 		if err != nil {
 			// 记录并继续
-			fmt.Printf("-service.decompression.overrideControl-遍历文件时出错: %s, 错误: %v\n", p, err)
+			fmt.Printf("%s遍历文件时出错: %s, 错误: %v\n", funcIdt, p, err)
 			return nil
 		}
+		// 获取对于srcRoot的相对路径
 		rel, rErr := filepath.Rel(srcRoot, p)
 		if rErr != nil {
 			return rErr
@@ -410,7 +437,7 @@ func buildTree(srcRoot string) (*Node, error) {
 		if rel == "." {
 			return nil
 		}
-		// 确保父链存在
+		// 确保父链存在（逐级创建中间目录的 Node）
 		ensureChain(pathToNode, rel)
 		n := pathToNode[rel]
 		n.isDir = d.IsDir()
@@ -419,7 +446,7 @@ func buildTree(srcRoot string) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	// 组装 children（根据路径层级）
+	// 组装 children（根据路径层级，将每个节点挂到其父节点下）
 	for rel, n := range pathToNode {
 		if rel == "." {
 			continue
@@ -432,6 +459,7 @@ func buildTree(srcRoot string) (*Node, error) {
 	return root, nil
 }
 
+// 确保父链存在
 func ensureChain(pathToNode map[string]*Node, rel string) {
 	if _, ok := pathToNode[rel]; ok {
 		return
@@ -455,8 +483,17 @@ func parentPath(rel string) string {
 // 规划阶段：应用决策（规则 > 继承 > 默认）
 // =====================
 
+// applyDecisions: 按“规则 > 继承 > 默认”的优先级，为每个节点确定最终动作
+// - 同一节点命中多条规则：报错
+// - 若未命中规则且有父决策：继承父决策（目录整体动作向下生效）
+// - 否则：应用 defaultAction
+// 示例：
+//   - default=overwrite；rules=[a/b/1.txt:skip]
+//     a 目录若无显式规则 -> a 采用 overwrite；
+//     a/b/1.txt 命中规则 -> 采用 skip，不受父 a 影响；
+//     a/b/2.txt 未命中规则 -> 继承 a 的 overwrite（若 a 也无，则用 default）。
 func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct OverrideAction) error {
-	// 规则匹配
+	// 规则匹配：返回命中的规则集合（设计为集合，为多命中报错提供依据）
 	hits := matchRules(node.relPath, rules)
 	if len(hits) > 1 {
 		return fmt.Errorf("规则冲突: 节点 '%s' 命中多条规则", node.relPath)
@@ -471,16 +508,19 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 		ruleDec = &ActionDecision{action: act, target: "", source: "rule"}
 	}
 
+	// 继承：仅当未命中规则且父节点存在决策时生效
 	var inheritDec *ActionDecision
 	if ruleDec == nil && parent != nil {
 		inheritDec = &ActionDecision{action: parent.action, target: parent.target, source: "inherit"}
 	}
 
+	// 默认：既无规则也无继承时，兜底采用 defaultAction
 	var defaultDec *ActionDecision
 	if ruleDec == nil && inheritDec == nil {
 		defaultDec = &ActionDecision{action: defaultAct, target: "", source: "default"}
 	}
 
+	// 获取规则
 	final := pickDecision(ruleDec, inheritDec, defaultDec)
 	if final != nil {
 		node.hasDecision = true
@@ -489,6 +529,7 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 		node.decidedSource = final.source
 	}
 
+	// 如果不是叶节点 遍历
 	if node.isDir {
 		for _, ch := range node.children {
 			if err := applyDecisions(ch, final, rules, defaultAct); err != nil {
@@ -505,6 +546,12 @@ type ActionDecision struct {
 	source string // rule | inherit | default
 }
 
+// matchRules: 使用路径匹配器对单个节点进行规则匹配
+// 返回所有命中的规则；由上层决定“多命中即报错”
+// 注意：DirectoryMatching 支持：
+// - "/*" 同级所有文件（不含子目录）
+// - "/**" 递归匹配
+// - 无斜杠的通配符按“仅文件名”匹配（例如 *.cfg 匹配所有目录下的 .cfg 文件）
 func matchRules(relPath string, rules []Rule) []Rule {
 	rel := filepath.ToSlash(relPath)
 	var hits []Rule
@@ -516,6 +563,7 @@ func matchRules(relPath string, rules []Rule) []Rule {
 	return hits
 }
 
+// 按照 规格 > 继承 > 默认的规则 返回Action
 func pickDecision(ruleDec, inheritDec, defaultDec *ActionDecision) *ActionDecision {
 	if ruleDec != nil {
 		return ruleDec
@@ -530,6 +578,11 @@ func pickDecision(ruleDec, inheritDec, defaultDec *ActionDecision) *ActionDecisi
 // 规划阶段：剪枝（上提统一动作）
 // =====================
 
+// pruneTree: 若某目录的整棵子树“动作+目标”完全一致，则将动作上提到目录本身，
+// 并清空子树的决策（标记为由父处理）。这样执行阶段即可只产生目录级任务，避免重复。
+// 一致性的定义：子树所有后代节点均已“有决策”，且 (action, target) 完全一致。
+// 为什么包含 target：未来支持“映射到特定目录”时，动作相同但目标不同不可上提。
+// 边界：如果子树包含尚未决策的节点，则视为不一致，避免错误上提。
 func pruneTree(node *Node) {
 	if !node.isDir {
 		return
@@ -550,6 +603,9 @@ func pruneTree(node *Node) {
 	}
 }
 
+// allDescendantsSame: 判断“整棵子树”的决策是否完全一致（比较 action 与 target）
+// 注意：若子树中存在尚未决策的节点，则视为“不一致”。
+// 复杂度：O(size_of_subtree)
 func allDescendantsSame(node *Node) bool {
 	var base *ActionDecision
 	same := true
@@ -585,6 +641,8 @@ func allDescendantsSame(node *Node) bool {
 	return same && base != nil
 }
 
+// getAnyDescendantDecision: 从子树中取任意一个后代节点的决策（用于上提时的“代表决策”）。
+// 合法性：在 allDescendantsSame 已判定一致的前提下，任取其一等价。
 func getAnyDescendantDecision(node *Node) *ActionDecision {
 	var res *ActionDecision
 	var dfs func(n *Node)
@@ -604,6 +662,8 @@ func getAnyDescendantDecision(node *Node) *ActionDecision {
 	return res
 }
 
+// clearDescendantDecisions: 清空整棵子树的决策，表示“由父目录整体动作处理”。
+// 目的：防止在执行计划中对子项重复下达任务；保持目录级任务的原子性与可读性。
 func clearDescendantDecisions(node *Node) {
 	var dfs func(n *Node)
 	dfs = func(n *Node) {
@@ -622,6 +682,15 @@ func clearDescendantDecisions(node *Node) {
 // 规划阶段：生成执行计划
 // =====================
 
+// generateExecutionPlan: 根据剪枝后的树，生成“目录级任务优先”的执行计划。
+// - 若当前节点是目录，且存在目录级整体动作：产生一个目录任务并停止下钻（子树已被父处理）。
+// - 若当前节点是文件，且存在决策：产生文件任务。
+// - 否则继续遍历子节点。
+// 扩展建议：此处目前只做 dry-run 计划输出；接入真实 I/O 时，
+// - overwrite: 构造 src=srcRoot+relPath, dst=dstRoot+Target 并复制（必要时创建目录、原子替换）
+// - backup: 可先调用 o.Backup 再执行覆盖；或将备份也纳入 Task 类型
+// - rename: 针对文件时对 dst 路径做重命名；目录级 rename 需谨慎设计
+// 并发：可基于目录切片并发执行，但要控制并发度与错误聚合。
 func generateExecutionPlan(node *Node, dstRoot string) []Task {
 	var tasks []Task
 	// 目录整体动作：作为一个目录级任务，下方已剪枝或无决策
@@ -649,6 +718,8 @@ func generateExecutionPlan(node *Node, dstRoot string) []Task {
 	return tasks
 }
 
+// buildTarget: 将“目标相对路径”拼接到 dstRoot，若未指定则沿用源相对路径
+// 未来支持映射时：decidedTarget 由规则提供；未提供则按 relPath 对齐。
 func buildTarget(dstRoot, relPath, decidedTarget string) string {
 	if decidedTarget != "" {
 		return filepath.Join(dstRoot, decidedTarget)
@@ -656,6 +727,9 @@ func buildTarget(dstRoot, relPath, decidedTarget string) string {
 	return filepath.Join(dstRoot, relPath)
 }
 
+// isWholeDirAction: 判断动作是否可作为“目录级整体动作”
+// 语义：若一个目录被判定为整体 overwrite/skip/backup/rename，则可对整个子树生效。
+// 若你的业务希望“目录规则不一票否决更具体的子规则”，请仅在剪枝通过时使用目录级任务。
 func isWholeDirAction(a OverrideAction) bool {
 	switch a {
 	case OverrideActionOverwrite, OverrideActionSkip, OverrideActionBackup, OverrideActionRename:
