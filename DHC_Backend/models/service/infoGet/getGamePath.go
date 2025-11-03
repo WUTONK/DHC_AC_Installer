@@ -49,11 +49,6 @@ func init() {
 	}
 }
 
-// IsDev 获取当前是否为开发模式
-func IsDev() bool {
-	return isDev
-}
-
 // SetDev 设置开发模式（主要用于测试）
 func SetDev(dev bool) {
 	isDev = dev

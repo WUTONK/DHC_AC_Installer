@@ -46,12 +46,9 @@ pnpm install
 ### 快速启动脚本
 进入根目录 然后运行start_all.sh
 
-#### 开发模式
+#### 开发/生产模式切换
 
-```bash
-cd DHC_Frontend
-pnpm dev
-```
+将DHC_DEV设置为"ture"将进入开发模式 "false"将进入开发模式（注意区分大小写）
 
 #### 生产模式
 

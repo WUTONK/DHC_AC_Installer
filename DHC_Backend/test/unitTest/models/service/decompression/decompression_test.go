@@ -7,7 +7,7 @@ import (
 )
 
 func TestDecompression(t *testing.T) {
-	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/szTest_zip.zip"
+	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/testModFile/car/ddm_toyota_corolla_levin_ae86_1.1/ddm_toyota_corolla_levin_ae86_1.1.rar"
 	// dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/example/decompressionPath/dstFile"
 	// unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", decompression.Dir)
 	unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/dhcFileTag.json")
@@ -31,6 +31,5 @@ func TestDhcFileTagIdentify(t *testing.T) {
 		t.Errorf("DhcFileTagIdentify failed: %v", err)
 		return
 	}
-	// 重新渲染完成 ---10.1145s
 	fmt.Printf("%+v\n", result)
 }

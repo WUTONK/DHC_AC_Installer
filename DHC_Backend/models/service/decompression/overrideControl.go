@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// OverrideControlConfig 覆盖控制配置结构体
+// dtf配置结构体
 type DhcFileTagConfig struct {
 	ModType       string        `json:"ModType"`
 	DefaultAction DefaultAction `json:"defaultAction"`
@@ -203,21 +203,29 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	}
 
 	// 分离出指定默认属性
+	rulesUndefined := false
 	defaultAction := config.DefaultAction
 	modType := config.ModType
 	rules := config.Rules
+	if rules == nil {
+		rulesUndefined = true
+	}
 	// 根据开发/生产模式自动获取游戏路径
+	fmt.Printf("%s正在获取游戏路径...\n", funcIdt)
 	_, err = infoGet.GetGamePathAuto()
 	if err != nil {
 		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
 	}
+	fmt.Printf("%s游戏路径获取成功\n", funcIdt)
 
 	// 打印调试信息
 	fmt.Printf("模组类型: %s\n", modType)
 	fmt.Printf("默认操作: %s, 备份: %t\n", defaultAction.Action, defaultAction.Backup)
-	fmt.Printf("规则数量: %d\n", len(rules))
-	for i, rule := range rules {
-		fmt.Printf("规则 %d: 模式=%s, 操作=%s, 备份=%t\n", i+1, rule.Pattern, rule.Action, rule.Backup)
+	if !rulesUndefined {
+		fmt.Printf("规则数量: %d\n", len(rules))
+		for i, rule := range rules {
+			fmt.Printf("规则 %d: 模式=%s, 操作=%s, 备份=%t\n", i+1, rule.Pattern, rule.Action, rule.Backup)
+		}
 	}
 
 	// 辨别是否存在任何需备份文件（包含默认和指定路径操作）如果是那么创建备份文件夹
@@ -237,48 +245,62 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 
 	// 遍历每一个文件并进行操作
 	entries, err := os.ReadDir(srcDirPath)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("无法读取目录 %s: %v", srcDirPath, err)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("无法读取目录 %s: %v", srcDirPath, err)
+		}
+		// 如果目录不存在，entries 为空，循环不会执行
+		entries = []os.DirEntry{} // 确保 entries 不是 nil
 	}
 
+	fmt.Printf("%s准备遍历目录，找到 %d 个条目\n", funcIdt, len(entries))
 	for _, entry := range entries {
 		entryPath := entry.Name()
+		fmt.Println(entryPath)
 		isMatch := false
 		var passMatchingRules OverrideAction
 		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
-		for _, ruleEntry := range rules {
-			isMatchCounter := 0
-			if DirectoryMatching(ruleEntry.Pattern, entryPath) {
-				isMatch = true
-				isMatchCounter++
-				if isMatchCounter > 1 {
-					// TODO:处理一下匹配了多条规则的情况
-					return fmt.Errorf("%s匹配到多条覆盖控制规则,发生冲突", funcIdt)
-				}
-				var err error
-				passMatchingRules, err = stringToOverrideAction(ruleEntry.Action)
-				if err != nil {
-					return fmt.Errorf("%s转换操作类型失败: %v", funcIdt, err)
+		// 如规格未定义 直接按照默认属性执行
+		if !rulesUndefined {
+			for _, ruleEntry := range rules {
+				isMatchCounter := 0
+				if DirectoryMatching(ruleEntry.Pattern, entryPath) {
+					isMatch = true
+					isMatchCounter++
+					if isMatchCounter > 1 {
+						// TODO:处理一下匹配了多条规则的情况
+						return fmt.Errorf("%s匹配到多条覆盖控制规则,发生冲突", funcIdt)
+					}
+					var err error
+					passMatchingRules, err = stringToOverrideAction(ruleEntry.Action)
+					if err != nil {
+						return fmt.Errorf("%s转换操作类型失败: %v", funcIdt, err)
+					}
 				}
 			}
-		}
-		if isMatch {
-			// 按照操作执行
-			switch passMatchingRules {
-			case OverrideActionOverwrite:
-			case OverrideActionSkip:
-				continue
-			case OverrideActionBackup:
-			case OverrideActionRename:
+			if isMatch {
+				// 按照操作执行
+				switch passMatchingRules {
+				case OverrideActionOverwrite:
+					// TODO:完成映射 a/1.txt -> b/1.txt
+					// o.Overwrite()
+				case OverrideActionSkip:
+					continue
+				case OverrideActionBackup:
+				case OverrideActionRename:
 
-			case OverrideActionAsk:
-				// TODO:完成Ask逻辑或者删除Ask
-				continue
+				case OverrideActionAsk:
+					// TODO:完成Ask逻辑或者删除Ask
+					continue
+				}
+			} else {
+				// TODO:没匹配上 按照默认操作执行
 			}
+			fmt.Print(entryPath)
 		} else {
-			// 没匹配上 按照默认操作执行
+			// TODO:按照默认操作执行
 		}
-		fmt.Print(entryPath)
+
 	}
 
 	// TODO：完成后输出信息

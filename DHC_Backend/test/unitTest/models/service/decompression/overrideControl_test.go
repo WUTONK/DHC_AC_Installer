@@ -2,15 +2,34 @@ package decompression_test
 
 import (
 	"DHC_Backend/models/service/decompression"
+	"DHC_Backend/models/service/infoGet"
 	"fmt"
 	"testing"
 )
 
 func TestOverrideControl(t *testing.T) {
 	// 测试 OverrideControl 函数
+	// 设置开发模式，确保使用模拟环境
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
 	// 这里可以添加具体的测试逻辑
+	srcDirPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/resources/cache/Map/ddm_toyota_corolla_levin_ae86_1"
+	dstDirPath, err := infoGet.GetGamePath(infoGet.SimEnvHasDlc)
+	if err != nil {
+		t.Fatalf("获取游戏路径时发生错误: %v", err)
+	}
 	dftPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/overrideControlExample/dft/dhcOverrideControlSimple.json"
-	decompression.OverrideControl("", "", dftPath)
+
+	fmt.Printf("测试配置:\n")
+	fmt.Printf("  源目录: %s\n", srcDirPath)
+	fmt.Printf("  目标目录: %s\n", dstDirPath)
+	fmt.Printf("  配置文件: %s\n", dftPath)
+
+	err = decompression.OverrideControl(srcDirPath, dstDirPath, dftPath)
+	if err != nil {
+		t.Errorf("OverrideControl 执行失败: %v", err)
+	}
 }
 
 func TestCreateBackupDirectory(t *testing.T) {

@@ -218,7 +218,7 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 	}
 	fileName := fileInfo.Name()
 
-	// 然后自动从srcPath所在的文件夹获取dhcFileTag.json路径
+	// 获取dhcFileTag.json路径
 	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
 	switch dftPathGetModOrPath {
 	case Dir:
@@ -346,8 +346,6 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 		// TODO: 实现分卷解压逻辑
 		return "", "before", fmt.Errorf("%s分卷解压功能尚未实现", funcIdt)
 	}
-
-	// TODO: 融入覆盖控制逻辑
 
 	return midDirPath, "", nil
 }

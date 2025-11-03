@@ -8,3 +8,7 @@
 DHC_Backend/models/tools/7z/darwin/
 DHC_Backend/models/tools/7z/linux/
 DHC_Backend/models/tools/7z/windows/
+
+# testModFIle
+DHC_Backend/resources/cache
+DHC_Backend/test/testModFile

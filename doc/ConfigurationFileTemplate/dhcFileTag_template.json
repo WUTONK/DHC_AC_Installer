@@ -1,6 +1,6 @@
 {
-    "//":"模组类型 目前支持:'car'/'map' ",
-    "ModType":"Map",
+    "//":"模组类型 目前支持:'car'/'map' (需小写) ",
+    "ModType":"map",
     "//":"默认操作 当文件所在的路径没有被包含在rules时 会执行这里的操作",
     "defaultAction":  {"action": "skip","backup": false},
     "//":"pattern fidle:匹配规则 | action filed:要对满足该匹配规则的文件执行的操作",
