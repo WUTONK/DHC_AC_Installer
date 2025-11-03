@@ -52,6 +52,26 @@ type override interface {
 type OverrideStruct struct {
 }
 
+// Node 用于构建源目录树并承载决策信息
+type Node struct {
+	relPath  string
+	isDir    bool
+	children []*Node
+	// 决策标注
+	hasDecision   bool
+	decidedAction OverrideAction
+	decidedTarget string
+	decidedSource string // rule | inherit | default
+}
+
+// Task 计划项（此阶段仅输出计划，不实际执行 I/O）
+type Task struct {
+	Path   string
+	Action OverrideAction
+	Target string
+	IsDir  bool
+}
+
 // 接受*一个*文件并覆盖目标文件 如果目标文件不存在 它会被创建
 func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
 	funcIdt := "-service.decompression.Overwrite-"
@@ -243,98 +263,33 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		}
 	}
 
-	// 递归遍历源目录下的所有文件和子目录
-	entryCount := 0
-	err = filepath.WalkDir(srcDirPath, func(srcFilePath string, entry os.DirEntry, err error) error {
-		if err != nil {
-			// 如果遍历过程中出现错误（如权限问题），记录并继续
-			fmt.Printf("%s遍历文件时出错: %s, 错误: %v\n", funcIdt, srcFilePath, err)
-			return nil // 继续遍历其他文件
-		}
-
-		entryCount++
-
-		// 计算相对于源目录的路径（用于规则匹配）
-		relPath, err := filepath.Rel(srcDirPath, srcFilePath)
-		if err != nil {
-			return fmt.Errorf("%s无法计算相对路径: %v", funcIdt, err)
-		}
-
-		// 标准化路径（统一使用 / 作为分隔符，用于规则匹配）
-		entryPath := filepath.ToSlash(relPath)
-
-		// 如果是源目录本身，跳过
-		if entryPath == "." {
-			return nil
-		}
-
-		fmt.Printf("%s处理条目: %s (完整路径: %s)\n", funcIdt, entryPath, srcFilePath)
-
-		isMatch := false
-		var passMatchingRules OverrideAction
-		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
-		// 如规格未定义 直接按照默认属性执行
-		if !rulesUndefined {
-			for _, ruleEntry := range rules {
-				isMatchCounter := 0
-				if DirectoryMatching(ruleEntry.Pattern, entryPath) {
-					isMatch = true
-					isMatchCounter++
-					if isMatchCounter > 1 {
-						// TODO:处理一下匹配了多条规则的情况
-						return fmt.Errorf("%s匹配到多条覆盖控制规则,发生冲突", funcIdt)
-					}
-					var err error
-					passMatchingRules, err = stringToOverrideAction(ruleEntry.Action)
-					if err != nil {
-						return fmt.Errorf("%s转换操作类型失败: %v", funcIdt, err)
-					}
-				}
-			}
-			if isMatch {
-				// 按照操作执行
-				switch passMatchingRules {
-				case OverrideActionOverwrite:
-					// TODO:完成映射 a/1.txt -> b/1.txt
-					// 需要构建目标路径：dstDirPath + entryPath
-					dstFilePath := filepath.Join(dstDirPath, relPath)
-					fmt.Printf("%s匹配规则，将执行 overwrite: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
-					// o.Overwrite(srcFilePath, dstFilePath)
-				case OverrideActionSkip:
-					fmt.Printf("%s匹配规则，跳过: %s\n", funcIdt, entryPath)
-					return nil // 继续遍历下一个文件
-				case OverrideActionBackup:
-					dstFilePath := filepath.Join(dstDirPath, relPath)
-					fmt.Printf("%s匹配规则，将执行 backup: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
-					// TODO: 实现备份逻辑
-				case OverrideActionRename:
-					dstFilePath := filepath.Join(dstDirPath, relPath)
-					fmt.Printf("%s匹配规则，将执行 rename: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
-					// TODO: 实现重命名逻辑
-				case OverrideActionAsk:
-					// TODO:完成Ask逻辑或者删除Ask
-					fmt.Printf("%s匹配规则，将执行 ask: %s\n", funcIdt, entryPath)
-					return nil // 继续遍历下一个文件
-				}
-			} else {
-				// TODO:没匹配上 按照默认操作执行
-				fmt.Printf("%s未匹配任何规则，使用默认操作: %s\n", funcIdt, entryPath)
-			}
-		} else {
-			// TODO:按照默认操作执行
-			fmt.Printf("%s规则未定义，使用默认操作: %s\n", funcIdt, entryPath)
-		}
-
-		return nil // 继续遍历
-	})
-
-	if err != nil {
-		return fmt.Errorf("%s遍历目录时出错: %v", funcIdt, err)
+	// 阶段1：构建目录树
+	root, buildErr := buildTree(srcDirPath)
+	if buildErr != nil {
+		return fmt.Errorf("%s构建目录树失败: %v", funcIdt, buildErr)
 	}
 
-	fmt.Printf("%s遍历完成，共处理 %d 个条目\n", funcIdt, entryCount)
+	// 阶段2：应用决策（规则 > 继承 > 默认），并在冲突时错误
+	var defaultAct OverrideAction
+	defaultAct, err = stringToOverrideAction(defaultAction.Action)
+	if err != nil {
+		return fmt.Errorf("%s默认操作无效: %v", funcIdt, err)
+	}
+	if applyErr := applyDecisions(root, nil, rules, defaultAct); applyErr != nil {
+		return fmt.Errorf("%s应用决策失败: %v", funcIdt, applyErr)
+	}
 
-	// TODO：完成后输出信息
+	// 阶段3：剪枝（将完全一致的子树上提为父目录整体动作）
+	pruneTree(root)
+
+	// 阶段4：生成执行计划（仅输出计划，暂不执行 I/O）
+	tasks := generateExecutionPlan(root, dstDirPath)
+
+	// 打印计划摘要
+	fmt.Printf("%s规划完成：共生成 %d 个任务\n", funcIdt, len(tasks))
+	for _, t := range tasks {
+		fmt.Printf("%s计划: [%s] %s -> %s (dir=%t)\n", funcIdt, t.Action, t.Path, t.Target, t.IsDir)
+	}
 
 	return nil
 }
@@ -431,4 +386,281 @@ func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	}
 
 	return &config, nil
+}
+
+// =====================
+// 规划阶段：构建树
+// =====================
+
+func buildTree(srcRoot string) (*Node, error) {
+	root := &Node{relPath: ".", isDir: true}
+	pathToNode := map[string]*Node{".": root}
+
+	err := filepath.WalkDir(srcRoot, func(p string, d os.DirEntry, err error) error {
+		if err != nil {
+			// 记录并继续
+			fmt.Printf("-service.decompression.overrideControl-遍历文件时出错: %s, 错误: %v\n", p, err)
+			return nil
+		}
+		rel, rErr := filepath.Rel(srcRoot, p)
+		if rErr != nil {
+			return rErr
+		}
+		rel = filepath.ToSlash(rel)
+		if rel == "." {
+			return nil
+		}
+		// 确保父链存在
+		ensureChain(pathToNode, rel)
+		n := pathToNode[rel]
+		n.isDir = d.IsDir()
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	// 组装 children（根据路径层级）
+	for rel, n := range pathToNode {
+		if rel == "." {
+			continue
+		}
+		parent := parentPath(rel)
+		if parentNode, ok := pathToNode[parent]; ok {
+			parentNode.children = append(parentNode.children, n)
+		}
+	}
+	return root, nil
+}
+
+func ensureChain(pathToNode map[string]*Node, rel string) {
+	if _, ok := pathToNode[rel]; ok {
+		return
+	}
+	parent := parentPath(rel)
+	if parent != "." {
+		ensureChain(pathToNode, parent)
+	}
+	pathToNode[rel] = &Node{relPath: rel}
+}
+
+func parentPath(rel string) string {
+	dir := filepath.ToSlash(filepath.Dir(rel))
+	if dir == "." || dir == "" {
+		return "."
+	}
+	return dir
+}
+
+// =====================
+// 规划阶段：应用决策（规则 > 继承 > 默认）
+// =====================
+
+func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct OverrideAction) error {
+	// 规则匹配
+	hits := matchRules(node.relPath, rules)
+	if len(hits) > 1 {
+		return fmt.Errorf("规则冲突: 节点 '%s' 命中多条规则", node.relPath)
+	}
+
+	var ruleDec *ActionDecision
+	if len(hits) == 1 {
+		act, err := stringToOverrideAction(hits[0].Action)
+		if err != nil {
+			return err
+		}
+		ruleDec = &ActionDecision{action: act, target: "", source: "rule"}
+	}
+
+	var inheritDec *ActionDecision
+	if ruleDec == nil && parent != nil {
+		inheritDec = &ActionDecision{action: parent.action, target: parent.target, source: "inherit"}
+	}
+
+	var defaultDec *ActionDecision
+	if ruleDec == nil && inheritDec == nil {
+		defaultDec = &ActionDecision{action: defaultAct, target: "", source: "default"}
+	}
+
+	final := pickDecision(ruleDec, inheritDec, defaultDec)
+	if final != nil {
+		node.hasDecision = true
+		node.decidedAction = final.action
+		node.decidedTarget = final.target
+		node.decidedSource = final.source
+	}
+
+	if node.isDir {
+		for _, ch := range node.children {
+			if err := applyDecisions(ch, final, rules, defaultAct); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+type ActionDecision struct {
+	action OverrideAction
+	target string
+	source string // rule | inherit | default
+}
+
+func matchRules(relPath string, rules []Rule) []Rule {
+	rel := filepath.ToSlash(relPath)
+	var hits []Rule
+	for _, r := range rules {
+		if DirectoryMatching(r.Pattern, rel) {
+			hits = append(hits, r)
+		}
+	}
+	return hits
+}
+
+func pickDecision(ruleDec, inheritDec, defaultDec *ActionDecision) *ActionDecision {
+	if ruleDec != nil {
+		return ruleDec
+	}
+	if inheritDec != nil {
+		return inheritDec
+	}
+	return defaultDec
+}
+
+// =====================
+// 规划阶段：剪枝（上提统一动作）
+// =====================
+
+func pruneTree(node *Node) {
+	if !node.isDir {
+		return
+	}
+	for _, ch := range node.children {
+		pruneTree(ch)
+	}
+	if allDescendantsSame(node) {
+		// 将子树动作上提到父目录（本节点需要有决策）
+		any := getAnyDescendantDecision(node)
+		if any != nil {
+			node.hasDecision = true
+			node.decidedAction = any.action
+			node.decidedTarget = any.target
+			node.decidedSource = any.source
+			clearDescendantDecisions(node)
+		}
+	}
+}
+
+func allDescendantsSame(node *Node) bool {
+	var base *ActionDecision
+	same := true
+	var walk func(n *Node)
+	walk = func(n *Node) {
+		if !same {
+			return
+		}
+		if n == node {
+			for _, ch := range n.children {
+				walk(ch)
+			}
+			return
+		}
+		if !n.hasDecision {
+			same = false
+			return
+		}
+		d := &ActionDecision{action: n.decidedAction, target: n.decidedTarget, source: n.decidedSource}
+		if base == nil {
+			base = d
+		} else if base.action != d.action || base.target != d.target {
+			same = false
+			return
+		}
+		if n.isDir {
+			for _, ch := range n.children {
+				walk(ch)
+			}
+		}
+	}
+	walk(node)
+	return same && base != nil
+}
+
+func getAnyDescendantDecision(node *Node) *ActionDecision {
+	var res *ActionDecision
+	var dfs func(n *Node)
+	dfs = func(n *Node) {
+		if res != nil {
+			return
+		}
+		if n != node && n.hasDecision {
+			res = &ActionDecision{action: n.decidedAction, target: n.decidedTarget, source: n.decidedSource}
+			return
+		}
+		for _, ch := range n.children {
+			dfs(ch)
+		}
+	}
+	dfs(node)
+	return res
+}
+
+func clearDescendantDecisions(node *Node) {
+	var dfs func(n *Node)
+	dfs = func(n *Node) {
+		for _, ch := range n.children {
+			ch.hasDecision = false
+			ch.decidedAction = ""
+			ch.decidedTarget = ""
+			ch.decidedSource = ""
+			dfs(ch)
+		}
+	}
+	dfs(node)
+}
+
+// =====================
+// 规划阶段：生成执行计划
+// =====================
+
+func generateExecutionPlan(node *Node, dstRoot string) []Task {
+	var tasks []Task
+	// 目录整体动作：作为一个目录级任务，下方已剪枝或无决策
+	if node.isDir && node.hasDecision && isWholeDirAction(node.decidedAction) {
+		tasks = append(tasks, Task{
+			Path:   node.relPath,
+			Action: node.decidedAction,
+			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
+			IsDir:  true,
+		})
+		return tasks
+	}
+	if !node.isDir && node.hasDecision {
+		tasks = append(tasks, Task{
+			Path:   node.relPath,
+			Action: node.decidedAction,
+			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
+			IsDir:  false,
+		})
+		return tasks
+	}
+	for _, ch := range node.children {
+		tasks = append(tasks, generateExecutionPlan(ch, dstRoot)...)
+	}
+	return tasks
+}
+
+func buildTarget(dstRoot, relPath, decidedTarget string) string {
+	if decidedTarget != "" {
+		return filepath.Join(dstRoot, decidedTarget)
+	}
+	return filepath.Join(dstRoot, relPath)
+}
+
+func isWholeDirAction(a OverrideAction) bool {
+	switch a {
+	case OverrideActionOverwrite, OverrideActionSkip, OverrideActionBackup, OverrideActionRename:
+		return true
+	default:
+		return false
+	}
 }
