@@ -243,20 +243,33 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		}
 	}
 
-	// 遍历每一个文件并进行操作
-	entries, err := os.ReadDir(srcDirPath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("无法读取目录 %s: %v", srcDirPath, err)
+	// 递归遍历源目录下的所有文件和子目录
+	entryCount := 0
+	err = filepath.WalkDir(srcDirPath, func(srcFilePath string, entry os.DirEntry, err error) error {
+		if err != nil {
+			// 如果遍历过程中出现错误（如权限问题），记录并继续
+			fmt.Printf("%s遍历文件时出错: %s, 错误: %v\n", funcIdt, srcFilePath, err)
+			return nil // 继续遍历其他文件
 		}
-		// 如果目录不存在，entries 为空，循环不会执行
-		entries = []os.DirEntry{} // 确保 entries 不是 nil
-	}
 
-	fmt.Printf("%s准备遍历目录，找到 %d 个条目\n", funcIdt, len(entries))
-	for _, entry := range entries {
-		entryPath := entry.Name()
-		fmt.Println(entryPath)
+		entryCount++
+
+		// 计算相对于源目录的路径（用于规则匹配）
+		relPath, err := filepath.Rel(srcDirPath, srcFilePath)
+		if err != nil {
+			return fmt.Errorf("%s无法计算相对路径: %v", funcIdt, err)
+		}
+
+		// 标准化路径（统一使用 / 作为分隔符，用于规则匹配）
+		entryPath := filepath.ToSlash(relPath)
+
+		// 如果是源目录本身，跳过
+		if entryPath == "." {
+			return nil
+		}
+
+		fmt.Printf("%s处理条目: %s (完整路径: %s)\n", funcIdt, entryPath, srcFilePath)
+
 		isMatch := false
 		var passMatchingRules OverrideAction
 		// 检测是否符合路径规则 如果是就按照操作执行 否则按照指定默认属性执行
@@ -283,25 +296,43 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 				switch passMatchingRules {
 				case OverrideActionOverwrite:
 					// TODO:完成映射 a/1.txt -> b/1.txt
-					// o.Overwrite()
+					// 需要构建目标路径：dstDirPath + entryPath
+					dstFilePath := filepath.Join(dstDirPath, relPath)
+					fmt.Printf("%s匹配规则，将执行 overwrite: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
+					// o.Overwrite(srcFilePath, dstFilePath)
 				case OverrideActionSkip:
-					continue
+					fmt.Printf("%s匹配规则，跳过: %s\n", funcIdt, entryPath)
+					return nil // 继续遍历下一个文件
 				case OverrideActionBackup:
+					dstFilePath := filepath.Join(dstDirPath, relPath)
+					fmt.Printf("%s匹配规则，将执行 backup: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
+					// TODO: 实现备份逻辑
 				case OverrideActionRename:
-
+					dstFilePath := filepath.Join(dstDirPath, relPath)
+					fmt.Printf("%s匹配规则，将执行 rename: %s -> %s\n", funcIdt, srcFilePath, dstFilePath)
+					// TODO: 实现重命名逻辑
 				case OverrideActionAsk:
 					// TODO:完成Ask逻辑或者删除Ask
-					continue
+					fmt.Printf("%s匹配规则，将执行 ask: %s\n", funcIdt, entryPath)
+					return nil // 继续遍历下一个文件
 				}
 			} else {
 				// TODO:没匹配上 按照默认操作执行
+				fmt.Printf("%s未匹配任何规则，使用默认操作: %s\n", funcIdt, entryPath)
 			}
-			fmt.Print(entryPath)
 		} else {
 			// TODO:按照默认操作执行
+			fmt.Printf("%s规则未定义，使用默认操作: %s\n", funcIdt, entryPath)
 		}
 
+		return nil // 继续遍历
+	})
+
+	if err != nil {
+		return fmt.Errorf("%s遍历目录时出错: %v", funcIdt, err)
 	}
+
+	fmt.Printf("%s遍历完成，共处理 %d 个条目\n", funcIdt, entryCount)
 
 	// TODO：完成后输出信息
 
