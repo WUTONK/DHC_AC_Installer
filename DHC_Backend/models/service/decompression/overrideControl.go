@@ -683,13 +683,13 @@ func clearDescendantDecisions(node *Node) {
 // =====================
 
 // generateExecutionPlan: 根据剪枝后的树，生成“目录级任务优先”的执行计划。
-// - 若当前节点是目录，且存在目录级整体动作：产生一个目录任务并停止下钻（子树已被父处理）。
-// - 若当前节点是文件，且存在决策：产生文件任务。
-// - 否则继续遍历子节点。
+// -若当前节点是目录，且存在目录级整体动作：产生一个目录任务并停止下钻（子树已被父处理）。
+// -若当前节点是文件，且存在决策：产生文件任务。
+// -否则继续遍历子节点。
 // 扩展建议：此处目前只做 dry-run 计划输出；接入真实 I/O 时，
-// - overwrite: 构造 src=srcRoot+relPath, dst=dstRoot+Target 并复制（必要时创建目录、原子替换）
-// - backup: 可先调用 o.Backup 再执行覆盖；或将备份也纳入 Task 类型
-// - rename: 针对文件时对 dst 路径做重命名；目录级 rename 需谨慎设计
+// -overwrite: 构造 src=srcRoot+relPath, dst=dstRoot+Target 并复制（必要时创建目录、原子替换）
+// -backup: 可先调用 o.Backup 再执行覆盖；或将备份也纳入 Task 类型
+// -rename: 针对文件时对 dst 路径做重命名；目录级 rename 需谨慎设计
 // 并发：可基于目录切片并发执行，但要控制并发度与错误聚合。
 func generateExecutionPlan(node *Node, dstRoot string) []Task {
 	var tasks []Task
