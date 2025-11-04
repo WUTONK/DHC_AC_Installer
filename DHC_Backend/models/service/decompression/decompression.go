@@ -5,8 +5,6 @@ import (
 	"DHC_Backend/models/service/types"
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -148,40 +146,6 @@ func SzTest() string {
 	}
 
 	return "PASS"
-}
-
-// TODO: 写出模组类型智能识别函数
-
-type DhcFileTag struct {
-	ModType string `json:"ModType"`
-}
-
-// 文件Tag识别
-func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
-	funcIdt := "-service.decompression.DhcFileTagIdentify-"
-
-	if exist := infoGet.IsFileOrDirExists(dftJsonPath); !exist {
-		// TODO:将这里修改为如果路径不存在就中止，只有在目录存在但是找不到
-		return DhcFileTag{}, errors.New("notFound")
-	}
-
-	dhcFileTagJsonFile, err := os.Open(dftJsonPath)
-	if err != nil {
-		fmt.Printf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
-		return DhcFileTag{}, fmt.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
-	}
-	defer dhcFileTagJsonFile.Close()
-
-	// 解码并识别文件类型
-	var dft DhcFileTag
-	dhcFileTagDecode := json.NewDecoder(dhcFileTagJsonFile)
-	err = dhcFileTagDecode.Decode(&dft)
-	if err != nil {
-		return DhcFileTag{}, fmt.Errorf("%s在解码dhcFileTagFile:%s出现错误:\n%s", funcIdt, dftJsonPath, err)
-	}
-
-	return dft, nil
-
 }
 
 // 解压功能 支持.zip / .7z / .rar等压缩格式

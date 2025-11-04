@@ -2,7 +2,6 @@ package decompression
 
 import (
 	"DHC_Backend/models/service/infoGet"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -10,26 +9,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-// dtf配置结构体
-type DhcFileTagConfig struct {
-	ModType       string        `json:"ModType"`
-	DefaultAction DefaultAction `json:"defaultAction"`
-	Rules         []Rule        `json:"rules"`
-}
-
-// DefaultAction 默认操作结构体
-type DefaultAction struct {
-	Action string `json:"action"`
-	Backup bool   `json:"backup"`
-}
-
-// Rule 规则结构体
-type Rule struct {
-	Pattern string `json:"pattern"`
-	Action  string `json:"action"`
-	Backup  bool   `json:"backup"`
-}
 
 type OverrideAction string
 
@@ -225,7 +204,7 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	o := OverrideStruct{}
 
 	// 解码文件
-	config, err := decodeDhcFileTagConfig(dftJsonPath)
+	config, err := DecodeDhcFileTagConfig(dftJsonPath)
 	if err != nil {
 		return fmt.Errorf("解码覆盖控制配置文件失败: %v", err)
 	}
@@ -382,28 +361,6 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 	}
 
 	return matched
-}
-
-// decodeOverrideControlConfig 解码覆盖控制配置文件
-func decodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
-	// 检查文件是否存在
-	if _, err := os.Stat(dftJsonPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("配置文件不存在: %s", dftJsonPath)
-	}
-
-	// 读取文件内容
-	fileData, err := os.ReadFile(dftJsonPath)
-	if err != nil {
-		return nil, fmt.Errorf("读取配置文件失败: %v", err)
-	}
-
-	// 解码 JSON
-	var config DhcFileTagConfig
-	if err := json.Unmarshal(fileData, &config); err != nil {
-		return nil, fmt.Errorf("解析 JSON 配置失败: %v", err)
-	}
-
-	return &config, nil
 }
 
 // =====================

@@ -19,6 +19,13 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 	fmt.Printf("%s解压完成，解压目录: %s\n", funcIdt, unDecompressionPath)
 	// 检测覆盖规则
 
+	dftPath := decompression.GetDftPath(srcPath, unDecompressionPath, d)
+	_ = dftPath // 暂时未使用，后续会用于覆盖控制
+	// 偏移量的
+	// config, err := decompression.DecodeDhcFileTagConfig(dftPath)
+
+	// decompression.OverrideControl()
+
 	// 进行安装
 }
 

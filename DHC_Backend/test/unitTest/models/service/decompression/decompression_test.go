@@ -2,7 +2,6 @@ package decompression
 
 import (
 	decompression "DHC_Backend/models/service/decompression"
-	"DHC_Backend/models/service/types"
 	"fmt"
 	"testing"
 )
