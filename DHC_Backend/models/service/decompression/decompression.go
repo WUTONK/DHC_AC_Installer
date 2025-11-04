@@ -2,6 +2,7 @@ package decompression
 
 import (
 	infoGet "DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/types"
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"bytes"
 	"encoding/json"
@@ -183,20 +184,13 @@ func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
 
 }
 
-type DftPathGetModOrPath string
-
-const (
-	Dir                   DftPathGetModOrPath = "Dir"                   //自动从文件所在目录获取
-	InCompressPkgRootFile DftPathGetModOrPath = "InCompressPkgRootFile" //解压后在压缩包根目录获取
-)
-
 // 解压功能 支持.zip / .7z / .rar等压缩格式
 // 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
 // 参数：- 来源路径 目标路径 文件密码 dfc文件获取方式(详见源码)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
 //
 // 返回值：-解压目录 错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
+func Decompression(srcPath string, filePassword string, dftPathGetModOrPath types.DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
@@ -221,10 +215,10 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath DftP
 	// 获取dhcFileTag.json路径
 	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
 	switch dftPathGetModOrPath {
-	case Dir:
+	case types.DftPathFromDir:
 		dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
 		dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
-	case InCompressPkgRootFile:
+	case types.DftPathFromCompressRoot:
 		// TODO: 从压缩包根目录文件中读取 dhcFileTag.json
 	default:
 		fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)

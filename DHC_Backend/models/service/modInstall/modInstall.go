@@ -2,15 +2,16 @@ package modinstall
 
 import (
 	"DHC_Backend/models/service/decompression"
+	"DHC_Backend/models/service/types"
 	"fmt"
 )
 
 // 单模组安装
-func SingleModInstall(srcPath string, filePassword string) {
+func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetModOrPath) {
 	funcIdt := "-modinstall.SingleModInstall"
 	// 逻辑：
 	// 传入文件并解压（非压缩包直接复制）到中间目录
-	unDecompressionPath, errorTiming, err := decompression.Decompression(srcPath, filePassword, decompression.Dir)
+	unDecompressionPath, errorTiming, err := decompression.Decompression(srcPath, filePassword, types.DftPathFromDir)
 	if err != nil {
 		fmt.Printf("%s在调用decompression.Decompression()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
 		return

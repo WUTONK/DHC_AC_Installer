@@ -2,6 +2,7 @@ package decompression
 
 import (
 	decompression "DHC_Backend/models/service/decompression"
+	"DHC_Backend/models/service/types"
 	"fmt"
 	"testing"
 )
@@ -9,7 +10,7 @@ import (
 func TestDecompression(t *testing.T) {
 	srcFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/testModFile/car/ddm_toyota_corolla_levin_ae86_1.1/ddm_toyota_corolla_levin_ae86_1.1.rar"
 	// dstFilePath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/decompression/example/decompressionPath/dstFile"
-	// unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", decompression.Dir)
+	// unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", types.DftPathFromDir)
 	unDecompressionPath, errorTiming, err := decompression.Decompression(srcFilePath, "", "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/tools/7z/szFunctionTestFile/dhcFileTag.json")
 	fmt.Printf("解压目录: %v\n", unDecompressionPath)
 	fmt.Printf("错误时机: %v\n", errorTiming)
