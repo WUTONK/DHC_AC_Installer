@@ -202,9 +202,8 @@ func (o OverrideStruct) Rename(srcFilePath, dstFilePath string) error {
 	dstDir := filepath.Dir(dstFilePath)
 	// 读取src文件名
 	srcFilename := filepath.Base(srcFilePath)
-	// 合成new dstname
-	newDstnamePath := dstDir + "/" + srcFilename
-	// 标准化路径（统一使用 / 作为分隔符）
+	// 合成new dstname（使用 filepath.Join 以保证跨平台兼容性）
+	newDstnamePath := filepath.Join(dstDir, srcFilename)
 	err := os.Rename(dstFilePath, newDstnamePath)
 	if err != nil {
 		return fmt.Errorf("%s重命名操作失败 错误信息: %v", funcIdt, err)
@@ -520,7 +519,7 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 		defaultDec = &ActionDecision{action: defaultAct, target: "", source: "default"}
 	}
 
-	// 获取规则
+	// 按优先级选择最终决策（规则 > 继承 > 默认）
 	final := pickDecision(ruleDec, inheritDec, defaultDec)
 	if final != nil {
 		node.hasDecision = true
@@ -578,88 +577,141 @@ func pickDecision(ruleDec, inheritDec, defaultDec *ActionDecision) *ActionDecisi
 // 规划阶段：剪枝（上提统一动作）
 // =====================
 
-// pruneTree: 若某目录的整棵子树“动作+目标”完全一致，则将动作上提到目录本身，
-// 并清空子树的决策（标记为由父处理）。这样执行阶段即可只产生目录级任务，避免重复。
-// 一致性的定义：子树所有后代节点均已“有决策”，且 (action, target) 完全一致。
-// 为什么包含 target：未来支持“映射到特定目录”时，动作相同但目标不同不可上提。
-// 边界：如果子树包含尚未决策的节点，则视为不一致，避免错误上提。
+// pruneTree: 两阶段剪枝算法
+// 阶段1：自底向上计算每个节点的 subtreeUniform（子树是否一致）和 uniformAction/target（统一的动作和目标）
+// 阶段2：自顶向下，只在最高的一致节点处清空并生成目录任务，避免低层清空后高层无法判断一致性的问题
 func pruneTree(node *Node) {
+	// 使用 map 存储每个节点的计算信息（不修改 Node 结构体）
+	uniformInfo := make(map[*Node]*UniformInfo)
+
+	// 阶段1：自底向上计算每个节点的 subtreeUniform 和 uniformAction/target
+	computeUniformInfo(node, uniformInfo)
+
+	// 阶段2：自顶向下，在最高的一致节点处清空并生成目录任务
+	applyPruning(node, uniformInfo, false)
+}
+
+// UniformInfo 存储节点的子树一致性信息（两阶段剪枝用）
+type UniformInfo struct {
+	subtreeUniform bool           // 子树是否完全一致
+	uniformAction  OverrideAction // 统一的动作（仅在 subtreeUniform=true 时有效）
+	uniformTarget  string         // 统一的目标（仅在 subtreeUniform=true 时有效）
+	uniformSource  string         // 统一的来源（仅在 subtreeUniform=true 时有效）
+}
+
+// computeUniformInfo: 阶段1 - 自底向上计算每个节点的 subtreeUniform 和 uniformAction/target
+func computeUniformInfo(node *Node, uniformInfo map[*Node]*UniformInfo) {
+	if !node.isDir {
+		// 叶节点（文件）：如果自身有决策，则子树一致；否则不一致
+		info := &UniformInfo{}
+		if node.hasDecision {
+			info.subtreeUniform = true
+			info.uniformAction = node.decidedAction
+			info.uniformTarget = node.decidedTarget
+			info.uniformSource = node.decidedSource
+		} else {
+			info.subtreeUniform = false
+		}
+		uniformInfo[node] = info
+		return
+	}
+
+	// 目录节点：先递归计算所有子节点
+	for _, ch := range node.children {
+		computeUniformInfo(ch, uniformInfo)
+	}
+
+	// 处理空目录的情况：没有子节点，如果自身有决策则一致，否则不一致
+	if len(node.children) == 0 {
+		info := &UniformInfo{}
+		if node.hasDecision {
+			info.subtreeUniform = true
+			info.uniformAction = node.decidedAction
+			info.uniformTarget = node.decidedTarget
+			info.uniformSource = node.decidedSource
+		} else {
+			info.subtreeUniform = false
+		}
+		uniformInfo[node] = info
+		return
+	}
+
+	// 有子节点：检查所有子节点的一致性
+	info := &UniformInfo{}
+	var base *ActionDecision
+
+	// 检查所有子节点的 uniformInfo
+	for _, ch := range node.children {
+		chInfo := uniformInfo[ch]
+		if !chInfo.subtreeUniform {
+			// 子节点不一致，父节点也不一致
+			info.subtreeUniform = false
+			uniformInfo[node] = info
+			return
+		}
+		// 子节点一致，检查动作和目标是否相同
+		chDec := &ActionDecision{
+			action: chInfo.uniformAction,
+			target: chInfo.uniformTarget,
+			source: chInfo.uniformSource,
+		}
+		if base == nil {
+			base = chDec
+		} else if base.action != chDec.action || base.target != chDec.target {
+			// 子节点动作或目标不一致，父节点不一致
+			info.subtreeUniform = false
+			uniformInfo[node] = info
+			return
+		}
+	}
+
+	// 所有子节点一致，父节点也一致（base 一定不为 nil，因为至少有子节点）
+	info.subtreeUniform = true
+	info.uniformAction = base.action
+	info.uniformTarget = base.target
+	info.uniformSource = base.source
+	uniformInfo[node] = info
+}
+
+// applyPruning: 阶段2 - 自顶向下，在最高的一致节点处清空并生成目录任务
+// parentApplied: 父节点是否已经应用了剪枝（如果父节点已剪枝，子节点不应再剪枝）
+func applyPruning(node *Node, uniformInfo map[*Node]*UniformInfo, parentApplied bool) {
 	if !node.isDir {
 		return
 	}
-	for _, ch := range node.children {
-		pruneTree(ch)
-	}
-	if allDescendantsSame(node) {
-		// 将子树动作上提到父目录（本节点需要有决策）
-		any := getAnyDescendantDecision(node)
-		if any != nil {
-			node.hasDecision = true
-			node.decidedAction = any.action
-			node.decidedTarget = any.target
-			node.decidedSource = any.source
-			clearDescendantDecisions(node)
-		}
-	}
-}
 
-// allDescendantsSame: 判断“整棵子树”的决策是否完全一致（比较 action 与 target）
-// 注意：若子树中存在尚未决策的节点，则视为“不一致”。
-// 复杂度：O(size_of_subtree)
-func allDescendantsSame(node *Node) bool {
-	var base *ActionDecision
-	same := true
-	var walk func(n *Node)
-	walk = func(n *Node) {
-		if !same {
-			return
+	info := uniformInfo[node]
+	if info == nil || !info.subtreeUniform {
+		// 节点不一致，继续处理子节点
+		for _, ch := range node.children {
+			applyPruning(ch, uniformInfo, false)
 		}
-		if n == node {
-			for _, ch := range n.children {
-				walk(ch)
-			}
-			return
-		}
-		if !n.hasDecision {
-			same = false
-			return
-		}
-		d := &ActionDecision{action: n.decidedAction, target: n.decidedTarget, source: n.decidedSource}
-		if base == nil {
-			base = d
-		} else if base.action != d.action || base.target != d.target {
-			same = false
-			return
-		}
-		if n.isDir {
-			for _, ch := range n.children {
-				walk(ch)
-			}
-		}
+		return
 	}
-	walk(node)
-	return same && base != nil
-}
 
-// getAnyDescendantDecision: 从子树中取任意一个后代节点的决策（用于上提时的“代表决策”）。
-// 合法性：在 allDescendantsSame 已判定一致的前提下，任取其一等价。
-func getAnyDescendantDecision(node *Node) *ActionDecision {
-	var res *ActionDecision
-	var dfs func(n *Node)
-	dfs = func(n *Node) {
-		if res != nil {
-			return
+	// 节点一致，但父节点已剪枝，则子节点不应再剪枝
+	if parentApplied {
+		for _, ch := range node.children {
+			applyPruning(ch, uniformInfo, true)
 		}
-		if n != node && n.hasDecision {
-			res = &ActionDecision{action: n.decidedAction, target: n.decidedTarget, source: n.decidedSource}
-			return
-		}
-		for _, ch := range n.children {
-			dfs(ch)
+		return
+	}
+
+	// 节点一致且父节点未剪枝：上提动作并清空子树
+	if isWholeDirAction(info.uniformAction) {
+		node.hasDecision = true
+		node.decidedAction = info.uniformAction
+		node.decidedTarget = info.uniformTarget
+		node.decidedSource = info.uniformSource
+		clearDescendantDecisions(node)
+		// 子节点已被清空，无需再递归处理（它们已被父节点统一处理）
+		return
+	} else {
+		// 虽然一致，但不是目录级动作，继续处理子节点
+		for _, ch := range node.children {
+			applyPruning(ch, uniformInfo, false)
 		}
 	}
-	dfs(node)
-	return res
 }
 
 // clearDescendantDecisions: 清空整棵子树的决策，表示“由父目录整体动作处理”。
