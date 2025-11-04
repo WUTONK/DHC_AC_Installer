@@ -17,9 +17,10 @@ type DhcFileTag struct {
 
 // DhcFileTagConfig dft配置结构体
 type DhcFileTagConfig struct {
-	ModType       string        `json:"ModType"`
-	DefaultAction DefaultAction `json:"defaultAction"`
-	Rules         []Rule        `json:"rules"`
+	ModType              string        `json:"modType"`
+	DefaultAction        DefaultAction `json:"defaultAction"`
+	Rules                []Rule        `json:"rules"`
+	OverwriteStartingDir string        `json:"overwriteStartingDir"`
 }
 
 // DefaultAction 默认操作结构体
@@ -79,6 +80,11 @@ func DecodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	var config DhcFileTagConfig
 	if err := json.Unmarshal(fileData, &config); err != nil {
 		return nil, fmt.Errorf("解析 JSON 配置失败: %v", err)
+	}
+
+	// 覆盖路径默认值设定
+	if config.OverwriteStartingDir == "" {
+		config.OverwriteStartingDir = "content"
 	}
 
 	return &config, nil

@@ -2,8 +2,10 @@ package modinstall
 
 import (
 	"DHC_Backend/models/service/decompression"
+	"DHC_Backend/models/service/infoGet"
 	"DHC_Backend/models/service/types"
 	"fmt"
+	"path/filepath"
 )
 
 // 单模组安装
@@ -20,9 +22,22 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 	// 检测覆盖规则
 
 	dftPath := decompression.GetDftPath(srcPath, unDecompressionPath, d)
-	_ = dftPath // 暂时未使用，后续会用于覆盖控制
-	// 偏移量的
-	// config, err := decompression.DecodeDhcFileTagConfig(dftPath)
+	gamePath, err := infoGet.GetGamePathAuto()
+	if err != nil {
+		fmt.Printf("%s获取游戏路径失败:%s\n", funcIdt, err)
+		return
+	}
+
+	config, err := decompression.DecodeDhcFileTagConfig(dftPath)
+	if err != nil {
+		fmt.Printf("%s解码配置文件失败:%s\n", funcIdt, err)
+		return
+	}
+
+	// 处理 OverwriteStartingDir 为空的情况（使用默认值）
+	overwriteDir := config.OverwriteStartingDir
+	overrideDstFile := filepath.Join(gamePath, overwriteDir)
+	fmt.Printf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
 
 	// decompression.OverrideControl()
 
