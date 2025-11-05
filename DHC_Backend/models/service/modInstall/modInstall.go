@@ -39,8 +39,11 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 	overrideDstFile := filepath.Join(gamePath, overwriteDir)
 	fmt.Printf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
 
-	// decompression.OverrideControl()
-
+	err = decompression.OverrideControl(unDecompressionPath, overrideDstFile, dftPath)
+	if err != nil {
+		fmt.Printf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
+		return
+	}
 	// 进行安装
 }
 
