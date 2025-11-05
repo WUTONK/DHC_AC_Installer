@@ -44,12 +44,12 @@ type Node struct {
 	// decidedAction: 最终动作（overwrite/skip/backup/rename/ask）
 	// decidedTarget: 目标相对路径（为空则等于 relPath；未来支持映射时会使用）
 	// decidedSource: 决策来源（"rule" | "inherit" | "default"）
-	// renameFileName: 要将符合规则的文件重命名为的名称
-	hasDecision    bool
-	decidedAction  OverrideAction
-	decidedTarget  string
-	decidedSource  string // rule | inherit | default
-	renameFileName string
+	// newName: 要将符合规则的文件重命名为的名称
+	hasDecision   bool
+	decidedAction OverrideAction
+	decidedTarget string
+	decidedSource string // rule | inherit | default
+	newName       string // 重命名后的文件名（仅当 decidedAction == OverrideActionRename 时有效）
 }
 
 // Task 计划项（此阶段仅输出计划，不实际执行 I/O）
@@ -61,12 +61,12 @@ type Task struct {
 	//         - 若 decidedTarget 为空：Target = dstRoot + relPath
 	//         注意：此字段存储的是完整路径，而非相对路径，可直接用于文件操作
 	// IsDir: 是否为目录级任务（目录级任务生成后会剪枝，避免对子项重复执行）
-	Path           string
-	Action         OverrideAction
-	Target         string
-	IsDir          bool
-	IsBackup       bool
-	RenameFilename string
+	Path     string
+	Action   OverrideAction
+	Target   string
+	IsDir    bool
+	IsBackup bool
+	NewName  string
 	// TODO: 处理需要备份和重命名的情况（在现在backup属于一个单独的action操作 而不是附带操作）
 	// 添加覆盖到某个特定路径的支持
 	// 重命名仅仅支持单一文件级（某一文件或某一文件夹），需要添加检测逻辑
@@ -190,18 +190,20 @@ func (o OverrideStruct) Backup(modType string, needBackupPath string) error {
 
 // 覆盖起始目录
 
-// 接收一个文件路径并提取出文件名 然后将传入的路径的文件改为此文件名
-func (o OverrideStruct) Rename(srcFilePath, dstFilePath string) error {
+// Rename 将 oldPath 重命名为 newPath
+func (o OverrideStruct) Rename(oldPath, newPath string) error {
 	funcIdt := "-service.decompression.Rename-"
-	// 获取dst去文件名路径
-	dstDir := filepath.Dir(dstFilePath)
-	// 读取src文件名
-	srcFilename := filepath.Base(srcFilePath)
-	// 合成new dstname（使用 filepath.Join 以保证跨平台兼容性）
-	newDstnamePath := filepath.Join(dstDir, srcFilename)
-	err := os.Rename(dstFilePath, newDstnamePath)
+
+	// 确保目标目录存在
+	targetDir := filepath.Dir(newPath)
+	if err := os.MkdirAll(targetDir, 0755); err != nil {
+		return fmt.Errorf("%s无法创建目标目录 %s: %v", funcIdt, targetDir, err)
+	}
+
+	// 执行重命名操作
+	err := os.Rename(oldPath, newPath)
 	if err != nil {
-		return fmt.Errorf("%s重命名操作失败 错误信息: %v", funcIdt, err)
+		return fmt.Errorf("%s重命名操作失败: 从 %s 到 %s, 错误: %v", funcIdt, oldPath, newPath, err)
 	}
 
 	return nil
@@ -487,14 +489,14 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 			return err
 		}
 		ruleDec = &ActionDecision{action: act, target: "", source: "rule"}
-		if act == "rename" {
+		if act == OverrideActionRename {
 			ruleDec.newName = hits[0].NewName
 		}
 	}
 
-	// 继承：仅当未命中规则且父节点存在决策时生效
+	// 继承：仅当未命中规则且父节点存在决策时生效 不继承rename选项
 	var inheritDec *ActionDecision
-	if ruleDec == nil && parent != nil {
+	if ruleDec == nil && parent != nil && parent.action != OverrideActionRename {
 		inheritDec = &ActionDecision{action: parent.action, target: parent.target, source: "inherit"}
 	}
 
@@ -511,6 +513,10 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 		node.decidedAction = final.action
 		node.decidedTarget = final.target
 		node.decidedSource = final.source
+		// 如果是 rename 操作，保存新文件名
+		if final.action == OverrideActionRename {
+			node.newName = final.newName
+		}
 	}
 
 	// 如果不是叶节点 遍历
@@ -586,11 +592,10 @@ func pruneTree(node *Node) {
 
 // UniformInfo 存储节点的子树一致性信息（两阶段剪枝用）
 type UniformInfo struct {
-	subtreeUniform        bool           // 子树是否完全一致
-	uniformAction         OverrideAction // 统一的动作（仅在 subtreeUniform=true 时有效）
-	uniformTarget         string         // 统一的目标（仅在 subtreeUniform=true 时有效）
-	uniformSource         string         // 统一的来源（仅在 subtreeUniform=true 时有效）
-	uniformRenameFilename string         // 统一的重命名后文件名（仅在 subtreeUniform=true 时有效）
+	subtreeUniform bool           // 子树是否完全一致
+	uniformAction  OverrideAction // 统一的动作（仅在 subtreeUniform=true 时有效）
+	uniformTarget  string         // 统一的目标（仅在 subtreeUniform=true 时有效）
+	uniformSource  string         // 统一的来源（仅在 subtreeUniform=true 时有效）
 }
 
 // computeUniformInfo: 阶段1 - 自底向上计算每个节点的 subtreeUniform 和 uniformAction/target
@@ -652,8 +657,8 @@ func computeUniformInfo(node *Node, uniformInfo map[*Node]*UniformInfo) {
 		}
 		if base == nil {
 			base = chDec
-		} else if base.action != chDec.action || base.target != chDec.target {
-			// 子节点动作或目标不一致，父节点不一致
+		} else if base.action != chDec.action || base.target != chDec.target || chDec.action == OverrideActionRename {
+			// 子节点动作或目标不一致或有 rename 操作，父节点不一致
 			info.subtreeUniform = false
 			uniformInfo[node] = info
 			return
@@ -709,7 +714,7 @@ func applyPruning(node *Node, uniformInfo map[*Node]*UniformInfo, parentApplied 
 	}
 }
 
-// clearDescendantDecisions: 清空整棵子树的决策，表示“由父目录整体动作处理”。
+// clearDescendantDecisions: 清空整棵子树的决策，表示"由父目录整体动作处理"。
 // 目的：防止在执行计划中对子项重复下达任务；保持目录级任务的原子性与可读性。
 func clearDescendantDecisions(node *Node) {
 	var dfs func(n *Node)
@@ -719,6 +724,7 @@ func clearDescendantDecisions(node *Node) {
 			ch.decidedAction = ""
 			ch.decidedTarget = ""
 			ch.decidedSource = ""
+			ch.newName = ""
 			dfs(ch)
 		}
 	}
@@ -755,12 +761,17 @@ func generateExecutionPlan(node *Node, dstRoot string) []Task {
 		// 子树仍有决策，继续下钻以尊重更具体的子规则
 	}
 	if !node.isDir && node.hasDecision {
-		tasks = append(tasks, Task{
+		task := Task{
 			Path:   node.relPath,
 			Action: node.decidedAction,
 			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
 			IsDir:  false,
-		})
+		}
+		// 如果是 rename 操作，设置新文件名
+		if node.decidedAction == OverrideActionRename {
+			task.NewName = node.newName
+		}
+		tasks = append(tasks, task)
 		return tasks
 	}
 	for _, ch := range node.children {
@@ -825,23 +836,38 @@ func ComplyTask(srcDirPath, modType string, tasks []Task) error {
 		switch task.Action {
 		case OverrideActionOverwrite:
 			// 问题 现在的是相对路径
-			err := o.Overwrite(filepath.Join(srcDirPath, task.Path), task.Target)
+			fullSrcDirPath := filepath.Join(srcDirPath, task.Path) // SrcDirPath在磁盘中的完整路径
+			err := o.Overwrite(fullSrcDirPath, task.Target)
 			if err != nil {
 				return fmt.Errorf("%s执行Overwrite时发生错误 task:%v", funcIdt, task)
 			}
 		case OverrideActionSkip:
 			continue
 		case OverrideActionBackup:
-			err := o.Backup(modType, filepath.Join(srcDirPath, task.Path))
+			fullSrcDirPath := filepath.Join(srcDirPath, task.Path)
+			err := o.Backup(modType, fullSrcDirPath)
 			if err != nil {
 				return fmt.Errorf("%s执行Backup时发生错误 task:%v", funcIdt, task)
 			}
 		case OverrideActionRename:
-			err := o.Rename()
-			if err != nil {
-				return fmt.Errorf("%s执行Rename时发生错误 task:%v", funcIdt, task)
+			fullSrcPath := filepath.Join(srcDirPath, task.Path)
+			// 先复制文件到目标位置
+			if err := o.Overwrite(fullSrcPath, task.Target); err != nil {
+				return fmt.Errorf("%s执行Rename时复制文件失败 task:%v, err:%v", funcIdt, task, err)
+			}
+			// 然后重命名目标文件
+			if task.NewName != "" {
+				targetDir := filepath.Dir(task.Target)
+				newTargetPath := filepath.Join(targetDir, task.NewName)
+				err := o.Rename(task.Target, newTargetPath)
+				if err != nil {
+					return fmt.Errorf("%s执行Rename时重命名失败 task:%v, err:%v", funcIdt, task, err)
+				}
+			} else {
+				return fmt.Errorf("%s执行Rename时缺少NewName字段 task:%v", funcIdt, task)
 			}
 		case OverrideActionAsk:
+			continue // TODO:支持询问用户
 		default:
 			continue
 		}

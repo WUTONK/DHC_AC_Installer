@@ -34,6 +34,7 @@ type Rule struct {
 	Pattern string `json:"pattern"`
 	Action  string `json:"action"`
 	Backup  bool   `json:"backup"`
+	NewName string `json:"newName"`
 }
 
 // DhcFileTagIdentify 文件Tag识别
