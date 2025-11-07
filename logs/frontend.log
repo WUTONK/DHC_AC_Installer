@@ -7,7 +7,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  2.51 kB
-✓ built in 208ms
+✓ built in 214ms
 
 build the electron main process successfully
 
@@ -18,13 +18,13 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.49 kB
-✓ built in 11ms
+✓ built in 7ms
 
 build the electron preload files successfully
 
 -----
 
-22:38:23 [vite] (client) Re-optimizing dependencies because lockfile has changed
+23:34:21 [vite] (client) Re-optimizing dependencies because lockfile has changed
 dev server running for the electron renderer process at:
 
   ➜  Local:   http://localhost:5173/
@@ -32,4 +32,660 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
+23:34:22 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/animation.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] (client) Pre-transform error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+23:34:23 [vite] Internal server error: Can't find stylesheet to import.
+  ╷
+1 │ @import "~@semi-bot/semi-theme-dhc-semi/scss/index.scss";
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  - 1:9  root stylesheet
+      at Object.wrapException (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:2292:47)
+      at _EvaluateVisitor1._evaluate0$_loadStylesheet$4$baseUrl$forImport (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:101516:19)
+      at _EvaluateVisitor1._evaluate0$_loadStylesheet$3$forImport (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:101538:19)
+      at _EvaluateVisitor__visitDynamicImport_closure1.call$0 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103909:17)
+      at _EvaluateVisitor1._evaluate0$_withStackFrame$1$3 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103033:25)
+      at _EvaluateVisitor1._evaluate0$_withStackFrame$3 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103039:19)
+      at _EvaluateVisitor1._evaluate0$_visitDynamicImport$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:101464:19)
+      at _EvaluateVisitor1.visitImportRule$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:101437:17)
+      at ImportRule0.accept$1$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:107591:22)
+      at ImportRule0.accept$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:107594:19)
+      at _EvaluateVisitor1.visitStylesheet$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:101066:16)
+      at _EvaluateVisitor__execute_closure1.call$0 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103579:10)
+      at _EvaluateVisitor1._evaluate0$_withEnvironment$1$2 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:102873:25)
+      at _EvaluateVisitor1._evaluate0$_withEnvironment$2 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:102878:19)
+      at _EvaluateVisitor1._evaluate0$_execute$5$configuration$namesInErrors$nodeWithSpan (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:100954:13)
+      at _EvaluateVisitor1._evaluate0$_execute$2 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:100967:19)
+      at _EvaluateVisitor_run__closure1.call$0 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103494:25)
+      at _EvaluateVisitor1._evaluate0$_addExceptionTrace$1$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103127:23)
+      at _EvaluateVisitor1._evaluate0$_addExceptionTrace$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103144:19)
+      at _EvaluateVisitor_run_closure1.call$0 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:103487:19)
+      at Object._rootRun (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:5368:16)
+      at StaticClosure.<anonymous> (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:124700:16)
+      at _CustomZone.run$1$1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:39394:39)
+      at Object._runZoned (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:5460:89)
+      at Object.runZoned (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:5457:16)
+      at _EvaluateVisitor1.run$2 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:100872:16)
+      at Object._compileStylesheet1 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:25187:113)
+      at Object.compileString (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:25179:18)
+      at StaticClosure.compileString0 (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:24806:20)
+      at Object.Primitives_applyFunction (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:2171:30)
+      at Object.Function_apply (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:6403:16)
+      at _callDartFunctionFast (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:8151:16)
+      at sass.compileString (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/sass@1.93.3/node_modules/sass/sass.dart.js:8129:18)
+      at LoadPluginContext.load (/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite-plugin-semi-theme@0.6.0/node_modules/vite-plugin-semi-theme/index.js:43:16)
+      at EnvironmentPluginContainer.load (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30946:56)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26074:21)
+      at async viteTransformMiddleware (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:27187:20)
  ELIFECYCLE  Command failed.
