@@ -1,0 +1,33 @@
+diff --git a/node_modules/vite-plugin-semi-theme/index.js b/node_modules/vite-plugin-semi-theme/index.js
+index 0000000..1111111 100644
+--- a/node_modules/vite-plugin-semi-theme/index.js
++++ b/node_modules/vite-plugin-semi-theme/index.js
+@@ -50,11 +50,20 @@ module.exports = function ({ theme, options = {} }) {
+             importers: [
+               {
+                 findFileUrl(url) {
+                   if (url.startsWith("~")) {
+-                    return new URL(
+-                      url.substring(1),
+-                      pathToFileURL(
+-                        scssFilePath.match(/^(\S*\/node_modules\/)/)[0]
+-                      )
+-                    );
++                    try {
++                      // Use require.resolve to properly resolve the package path (works with pnpm)
++                      const resolvedPath = require.resolve(url.substring(1));
++                      return pathToFileURL(resolvedPath);
++                    } catch (e) {
++                      // Fallback to original method if require.resolve fails
++                      const match = scssFilePath.match(/^(\S*\/node_modules\/)/);
++                      if (match) {
++                        return new URL(
++                          url.substring(1),
++                          pathToFileURL(match[0])
++                        );
++                      }
++                      return null;
++                    }
+                   }
+ 
+                   let filePath = Path.resolve(Path.dirname(scssFilePath), url);

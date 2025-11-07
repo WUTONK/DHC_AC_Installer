@@ -16,6 +16,12 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react(), SemiPlugin({ theme: '@semi-bot/semi-theme-dhc-semi' })]
+    plugins: [
+      react(),
+      SemiPlugin({
+        theme: '@semi-bot/semi-theme-dhc-semi',
+        options: {}
+      })
+    ]
   }
 })

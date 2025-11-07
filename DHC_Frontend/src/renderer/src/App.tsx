@@ -3,6 +3,7 @@ import React from 'react'
 import { Layout,Nav, Button,Avatar} from '@douyinfe/semi-ui'
 import { useState } from 'react'
 import { IconHome, IconCart, IconBookmark, IconEdit } from '@douyinfe/semi-icons';
+import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
@@ -28,6 +29,8 @@ function App(): React.JSX.Element {
         return <ShutokoWiki />
       case 'NetDemo':
         return <NetDemo></NetDemo>
+      case 'ComponentTest':
+        return <ComponentTest></ComponentTest>
       default:
         return <div>Not Found</div>
     }
@@ -80,7 +83,8 @@ function App(): React.JSX.Element {
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
                 { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
-                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />}
+                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
+                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />}
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
