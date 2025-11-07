@@ -1,5 +1,5 @@
 import './assets/main.css'
-import '@douyinfe/semi-ui/dist/css/semi.css'
+import '@semi-bot/semi-theme-dhc-semi/semi.min.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

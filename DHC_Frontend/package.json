@@ -27,7 +27,6 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@semi-bot/semi-theme-dhc-semi": "^1.0.1",
-    "@semi-bot/semi-theme-dhc-theme": "^1.0.1",
     "electron-updater": "^6.3.9",
     "react-markdown": "^10.1.0"
   },
@@ -39,6 +38,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.20",
     "electron": "^38.1.2",
     "electron-builder": "^25.1.8",
     "electron-vite": "^4.0.0",
@@ -46,16 +46,16 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
-    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
     "prettier": "^3.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
-    "tailwindcss": "^3.4.14",
     "typescript": "^5.8.3",
-    "vite": "^7.0.5"
+    "vite": "^7.0.5",
+    "vite-plugin-semi-theme": "^0.6.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
