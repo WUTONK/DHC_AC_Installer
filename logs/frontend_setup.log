@@ -1,9 +1,55 @@
-Lockfile is up to date, resolution step is skipped
-Already up to date
-
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 773, reused 730, downloaded 5, added 0
+Progress: resolved 872, reused 790, downloaded 36, added 0
+ WARN  10 deprecated subdependencies found: @npmcli/move-file@2.0.1, are-we-there-yet@3.0.1, boolean@3.2.0, gauge@4.0.4, glob@7.2.3, glob@8.1.0, inflight@1.0.6, lodash.isequal@4.5.0, npmlog@6.0.2, rimraf@3.0.2
+Packages: +827
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 873, reused 791, downloaded 36, added 572
+Progress: resolved 873, reused 791, downloaded 36, added 826
+Progress: resolved 873, reused 791, downloaded 36, added 827, done
+.../esbuild@0.25.10/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.25.10/node_modules/esbuild postinstall: Done
 
 > dhc-frontend@1.0.0 postinstall /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend
 > echo 'Skipping electron-builder install-app-deps due to pnpm issue'
 
 Skipping electron-builder install-app-deps due to pnpm issue
-Done in 676ms using pnpm v10.17.1
+
+dependencies:
++ @douyinfe/semi-icons 2.86.0
++ @douyinfe/semi-theme-default 2.86.0
++ @douyinfe/semi-ui 2.86.0
++ @electron-toolkit/preload 3.0.2
++ @electron-toolkit/utils 4.0.0
++ @semi-bot/semi-theme-dhc-semi 1.0.1
++ @semi-bot/semi-theme-dhc-theme 1.0.1
++ electron-updater 6.6.2
++ react-markdown 10.1.0
+
+devDependencies:
++ @electron-toolkit/eslint-config-prettier 3.0.0
++ @electron-toolkit/eslint-config-ts 3.1.0
++ @electron-toolkit/tsconfig 1.0.1
++ @types/node 22.18.6
++ @types/react 18.3.24
++ @types/react-dom 18.3.1
++ @vitejs/plugin-react 4.7.0
++ autoprefixer 10.4.21
++ electron 38.1.2
++ electron-builder 25.1.8
++ electron-vite 4.0.1
++ eslint 9.36.0
++ eslint-plugin-react 7.37.5
++ eslint-plugin-react-hooks 5.2.0
++ eslint-plugin-react-refresh 0.4.21
++ postcss 8.5.6
++ prettier 3.6.2
++ react 18.3.1
++ react-dom 18.3.1
++ tailwindcss 3.4.18 (4.1.17 is available)
++ ts-node 10.9.2
++ tsx 4.20.5
++ typescript 5.9.2
++ vite 7.1.7
+
+Done in 5.8s using pnpm v10.17.1

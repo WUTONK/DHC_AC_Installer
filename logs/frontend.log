@@ -7,7 +7,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  2.51 kB
-✓ built in 38ms
+✓ built in 208ms
 
 build the electron main process successfully
 
@@ -18,12 +18,13 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.49 kB
-✓ built in 6ms
+✓ built in 11ms
 
 build the electron preload files successfully
 
 -----
 
+22:38:23 [vite] (client) Re-optimizing dependencies because lockfile has changed
 dev server running for the electron renderer process at:
 
   ➜  Local:   http://localhost:5173/

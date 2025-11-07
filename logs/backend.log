@@ -7,9 +7,48 @@
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
 [GIN-debug] GET    /api/GetServerInfo        --> DHC_Backend/handler.GetServerInfo (4 handlers)
-2025/11/03 10:07:11 Backend Server is running on port http://127.0.0.1:19810
-2025/11/03 10:07:11 Frontend login page is running on path http://localhost:11451
+2025/11/07 22:38:14 Backend Server is running on port http://127.0.0.1:19810
+2025/11/07 22:38:14 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-signal: interrupt
+Players: 0/30
+Approx RTT (HTTP): 415ms
+{
+  "Rtt": "415ms",
+  "Clients": 0,
+  "MaxClients": 30
+}
+[GIN] 2025/11/07 - 22:38:32 | 200 |  416.252125ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+Players: 0/30
+Approx RTT (HTTP): 55ms
+{
+  "Rtt": "55ms",
+  "Clients": 0,
+  "MaxClients": 30
+}
+[GIN] 2025/11/07 - 22:38:33 | 200 |   56.233959ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+Players: 0/30
+Approx RTT (HTTP): 58ms
+{
+  "Rtt": "58ms",
+  "Clients": 0,
+  "MaxClients": 30
+}
+[GIN] 2025/11/07 - 22:38:33 | 200 |    58.99425ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+Players: 0/30
+Approx RTT (HTTP): 57ms
+{
+  "Rtt": "57ms",
+  "Clients": 0,
+  "MaxClients": 30
+}
+[GIN] 2025/11/07 - 22:38:34 | 200 |   57.743167ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+Players: 0/30
+Approx RTT (HTTP): 54ms
+{
+  "Rtt": "54ms",
+  "Clients": 0,
+  "MaxClients": 30
+}
+[GIN] 2025/11/07 - 22:38:38 | 200 |   54.981875ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"

@@ -67,8 +67,7 @@ type Task struct {
 	IsDir    bool
 	IsBackup bool
 	NewName  string
-	// TODO: 处理需要备份和重命名的情况（在现在backup属于一个单独的action操作 而不是附带操作）
-	// 添加覆盖到某个特定路径的支持
+	// TODO: 处理需要备份的情况（在现在backup属于一个单独的action操作 而不是附带操作）
 	// 重命名仅仅支持单一文件级（某一文件或某一文件夹），需要添加检测逻辑
 	// 上分支如果重命名 会导致路径是旧的
 	// -解决方案1:在生成任务树后，从底向上查找是否有rename dir任务，如果有，那么根据rename改变目标路径
@@ -76,6 +75,8 @@ type Task struct {
 	// 			例如 car/a/b -> recar/a/b 我在第三层
 	// 			base改变 relPath = newRelPath := path[:nowClass-2]+relPath[nowClass-1:]
 	//那么如果有car/a/b/c呢 这个时候变成了recar/a/b/c 查看上级目录是否和自己对得上 对不上就执行一样的逻辑
+
+	// TODO:添加覆盖到某个特定路径的支持
 }
 
 // 接受*一个*文件并覆盖目标文件 如果目标文件不存在 它会被创建
