@@ -38,6 +38,16 @@ function App(): React.JSX.Element {
 
   const [activeKey, setActiveKey] = useState<string>('Home')
 
+  // 切换色彩模式
+  const switchMode = (): void => {
+    const body = document.body;
+    if (body.hasAttribute('theme-mode')) {
+      body.removeAttribute('theme-mode');
+    } else {
+      body.setAttribute('theme-mode', 'dark');
+    }
+  };
+
   return (
     <Layout style={{ border: '1px solid var(--semi-color-border)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
     <Header style={{ ...commonStyle }}>
@@ -62,7 +72,7 @@ function App(): React.JSX.Element {
                   ----
                 </span>
                 <span style={{ marginRight: '24px' }}>
-                  <Button>切换色彩模式</Button>
+                  <Button onClick={switchMode}>切换色彩模式</Button>
                 </span>
               </span>
               <Nav.Footer>
