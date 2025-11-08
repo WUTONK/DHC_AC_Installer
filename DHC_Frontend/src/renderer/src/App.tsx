@@ -49,7 +49,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <Layout style={{ border: '1px solid var(--semi-color-border)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Layout style={{ border: '1px solid var(--semi-color-border)', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
     <Header style={{ ...commonStyle }}>
           <div>
             <Nav mode='horizontal' defaultSelectedKeys={['Home']} style={{ ...commonStyle }}>
@@ -84,8 +84,8 @@ function App(): React.JSX.Element {
           </div>
         </Header>
 
-        <Layout style={{ flex: 1, display: 'flex' }}>
-          <Sider>
+        <Layout style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, height: 0 }}>
+          <Sider style={{ flexShrink: 0 }}>
             <Nav
               style={{ maxWidth: 200, height: '100%' }}
               selectedKeys={[activeKey]}
@@ -103,7 +103,7 @@ function App(): React.JSX.Element {
             />
           </Sider>
 
-          <Content>
+          <Content style={{ overflow: 'auto', flex: 1, minHeight: 0, height: '100%' }}>
             {renderPage(activeKey)}
           </Content>
         </Layout>

@@ -8,6 +8,9 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    minWidth: 900,
+    minHeight: Math.round(900 / (16 / 9)), // 根据16:9比例计算最小高度
+    aspectRatio: 16 / 9,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -23,6 +26,55 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  // 强制保持 16:9 窗口比例
+  let isResizing = false
+  const aspectRatio = 16 / 9
+  
+  // 使用 will-resize 事件（在 macOS 上可能不会触发，但作为第一道防线）
+  mainWindow.on('will-resize', (event, newBounds) => {
+    if (isResizing) return
+    
+    const currentBounds = mainWindow.getBounds()
+    const widthDelta = Math.abs(newBounds.width - currentBounds.width)
+    const heightDelta = Math.abs(newBounds.height - currentBounds.height)
+    
+    event.preventDefault()
+    isResizing = true
+    
+    if (widthDelta > heightDelta) {
+      // 宽度变化更大，根据宽度计算高度
+      const newHeight = Math.round(newBounds.width / aspectRatio)
+      mainWindow.setSize(newBounds.width, newHeight)
+    } else {
+      // 高度变化更大，根据高度计算宽度
+      const newWidth = Math.round(newBounds.height * aspectRatio)
+      mainWindow.setSize(newWidth, newBounds.height)
+    }
+    
+    setTimeout(() => {
+      isResizing = false
+    }, 0)
+  })
+  
+  // 使用 resize 事件作为补充（在 will-resize 不工作时强制保持比例）
+  mainWindow.on('resize', () => {
+    if (isResizing) return
+    
+    const bounds = mainWindow.getBounds()
+    const currentRatio = bounds.width / bounds.height
+    const tolerance = 0.01 // 允许 1% 的误差
+    
+    if (Math.abs(currentRatio - aspectRatio) > tolerance) {
+      isResizing = true
+      const newHeight = Math.round(bounds.width / aspectRatio)
+      mainWindow.setSize(bounds.width, newHeight)
+      
+      setTimeout(() => {
+        isResizing = false
+      }, 0)
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

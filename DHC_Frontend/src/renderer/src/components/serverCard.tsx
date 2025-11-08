@@ -1,13 +1,17 @@
 import React from 'react'
 import { Card, Descriptions, Button, Typography } from '@douyinfe/semi-ui'
+import SHMC_server_banner from '../../../../resources/image/server/banner/R34蓝_夜_湾岸东行.jpg'
+import SRP_server_logo_mini from '../../../../resources/icon/serverLogo/SRP_Logo_mini.png'
 
 interface ServerCardProps {
   // 可以在这里添加 props 类型定义
 }
 
+// 服务器横幅
+
 // Figma 设计中的图片资源
-const avatarImg = "http://localhost:3845/assets/eec0647d89630760a2dc24700f350822fc7c491f.png"
-const coverImg = "http://localhost:3845/assets/866a4bf0402883950393daf693d3826007ce10de.png"
+const avatarImg = SRP_server_logo_mini
+const coverImg = SHMC_server_banner
 
 const ServerCard: React.FC<ServerCardProps> = () => {
   const { Meta } = Card
