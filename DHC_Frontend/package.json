@@ -14,7 +14,6 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
-    "postinstall": "patch-package",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
@@ -57,7 +56,7 @@
     "tsx": "^4.20.5",
     "typescript": "^5.8.3",
     "vite": "^7.0.5",
-    "vite-plugin-semi-theme": "^0.6.0"
+    "vite-plugin-semi-theming": "0.1.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -67,6 +66,9 @@
     "overrides": {
       "@types/react": "18.3.24",
       "@types/react-dom": "18.3.1"
+    },
+    "patchedDependencies": {
+      "vite-plugin-semi-theming": "patches/vite-plugin-semi-theming.patch"
     }
   }
 }

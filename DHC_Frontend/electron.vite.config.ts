@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
-import SemiPlugin from 'vite-plugin-semi-theme'
+import semiTheming from 'vite-plugin-semi-theming'
 
 export default defineConfig({
   main: {
@@ -18,9 +18,8 @@ export default defineConfig({
     },
     plugins: [
       react(),
-      SemiPlugin({
-        theme: '@semi-bot/semi-theme-dhc-semi',
-        options: {}
+      semiTheming({
+        theme: '@semi-bot/semi-theme-dhc-semi'
       })
     ]
   }

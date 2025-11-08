@@ -1,0 +1,33 @@
+diff --git a/dist/index.js b/dist/index.js
+index 74deac41a8b7a1ce64507ec6d9306330aa536cf3..dbc53da420d69615354116247e73fe0281d1b4cc 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -31,12 +31,24 @@ export function semiTheming({ theme, ...options }) {
+                         {
+                             findFileUrl(url) {
+                                 if (url.startsWith('~')) {
+-                                    // Resolve theme scss from root node_modules
++                                    // Resolve theme scss using require.resolve (works with pnpm)
+                                     if (theme && url.startsWith(`~${theme}`)) {
+-                                        return pathToFileURL(path.resolve(viteConfig.root, 'node_modules', url.substring(1)));
++                                        try {
++                                            const resolvedPath = _require.resolve(url.substring(1));
++                                            return pathToFileURL(resolvedPath);
++                                        } catch (e) {
++                                            // Fallback to original method if require.resolve fails
++                                            return pathToFileURL(path.resolve(viteConfig.root, 'node_modules', url.substring(1)));
++                                        }
++                                    }
++                                    try {
++                                        const resolvedPath = _require.resolve(url.substring(1));
++                                        return pathToFileURL(resolvedPath);
++                                    } catch (e) {
++                                        // Fallback to original method if require.resolve fails
++                                        return pathToFileURL(path.resolve(scssFilePath.substring(0, scssFilePath.lastIndexOf('/node_modules/') +
++                                            '/node_modules/'.length), url.substring(1)));
+                                     }
+-                                    return pathToFileURL(path.resolve(scssFilePath.substring(0, scssFilePath.lastIndexOf('/node_modules/') +
+-                                        '/node_modules/'.length), url.substring(1)));
+                                 }
+                                 const filePath = path.resolve(path.dirname(scssFilePath), url);
+                                 if (existsSync(filePath)) {

@@ -8,6 +8,11 @@ overrides:
   '@types/react': 18.3.24
   '@types/react-dom': 18.3.1
 
+patchedDependencies:
+  vite-plugin-semi-theming:
+    hash: 1480d523560297185114be141bb62195cfa953a93e9e7f783495ad5afaac958c
+    path: patches/vite-plugin-semi-theming.patch
+
 importers:
 
   .:
@@ -115,9 +120,9 @@ importers:
       vite:
         specifier: ^7.0.5
         version: 7.1.7(@types/node@22.18.6)(jiti@1.21.7)(sass@1.93.3)(tsx@4.20.5)(yaml@2.8.1)
-      vite-plugin-semi-theme:
-        specifier: ^0.6.0
-        version: 0.6.0
+      vite-plugin-semi-theming:
+        specifier: 0.1.0
+        version: 0.1.0(patch_hash=1480d523560297185114be141bb62195cfa953a93e9e7f783495ad5afaac958c)
 
 packages:
 
@@ -3622,8 +3627,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  vite-plugin-semi-theme@0.6.0:
-    resolution: {integrity: sha512-xAhbbHKHCmc5+d++dt2FTXSQMf3C+1b2ZayP9CgFJq42cLnWmRxUbGBXiZQ/j8WSJvQwbhnUfyto7iyszPubaQ==}
+  vite-plugin-semi-theming@0.1.0:
+    resolution: {integrity: sha512-k/DjSFBB7+WNepTt2mM9GUt3VOMbhBEDaSEXsIHGIwJ4Xarcla8sYIdyGgbxSWKX9AVXDGbi4F+bHzqG+MxHBw==}
 
   vite@7.1.7:
     resolution: {integrity: sha512-VbA8ScMvAISJNJVbRDTJdCwqQoAareR/wutevKanhR2/1EkoXVZVkkORaYm/tNVCjP/UDTKtcw3bAkwOUdedmA==}
@@ -8137,7 +8142,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-plugin-semi-theme@0.6.0:
+  vite-plugin-semi-theming@0.1.0(patch_hash=1480d523560297185114be141bb62195cfa953a93e9e7f783495ad5afaac958c):
     dependencies:
       sass: 1.93.3
 
