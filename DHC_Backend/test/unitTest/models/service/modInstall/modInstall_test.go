@@ -3,6 +3,7 @@ package modinstall
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
 	"DHC_Backend/models/service/types"
+	"fmt"
 	"testing"
 )
 
@@ -12,9 +13,10 @@ func TestSingleModInstall(t *testing.T) {
 	modinstall.SingleModInstall(srcPath, filePassword, types.DftPathFromDir)
 }
 
-// enum
-// ActionDecision
-// decided
-// enum{rule, inherit, default}
-
-// 环境还原
+func TestInstallCm(t *testing.T) {
+	installPath, err := modinstall.InstallCm()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("CM已成功安装到%v\n", installPath)
+}

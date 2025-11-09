@@ -13,9 +13,15 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 	funcIdt := "-modinstall.SingleModInstall"
 	// 逻辑：
 	// 传入文件并解压（非压缩包直接复制）到中间目录
-	unDecompressionPath, errorTiming, err := decompression.Decompression(srcPath, filePassword, types.DftPathFromDir)
+	opts := decompression.DecompressionOptions{
+		SrcPath:             srcPath,
+		FilePassword:        filePassword,
+		IsMod:               true,
+		DftPathGetModOrPath: d,
+	}
+	unDecompressionPath, errorTiming, err := decompression.DecompressionWithOptions(opts)
 	if err != nil {
-		fmt.Printf("%s在调用decompression.Decompression()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
+		fmt.Printf("%s在调用decompression.DecompressionWithOptions()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
 		return
 	}
 	fmt.Printf("%s解压完成，解压目录: %s\n", funcIdt, unDecompressionPath)
