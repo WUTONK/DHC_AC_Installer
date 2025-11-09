@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+out/
+dist/
+build/
+*.tgz
+*.log
+
+# Test files and large test data
+DHC_Backend/test/simEnv/
+DHC_Backend/test/testModFile/
+DHC_Backend/resources/cache/
+DHC_Backend/resources/backup/
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+*.7z
+*.zip
+*.dds
+*.png
+*.jpg
+*.jpeg
+*.ico
+*.icns
+
+# Generated files
+DHC_Backend/models/tools/7z/
+DHC_Backend/main
+*.openapi.json
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+.tmp/
+*.tmp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# History files
+.history/
+.specstory/
+
+# Lock files (optional, but usually not needed for indexing)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+

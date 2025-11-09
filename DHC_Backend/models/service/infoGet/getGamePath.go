@@ -27,12 +27,7 @@ var testEnvType envType
 // init 初始化函数，从环境变量读取或设置默认值
 func init() {
 	// 读取是否为开发模式，接受 true/false（默认 false）
-	devStr := os.Getenv("DHC_DEV")
-	if devStr == "true" {
-		isDev = true
-	} else {
-		isDev = false
-	}
+	isDev := IsDevModeGet()
 
 	// 如果为开发模式，读取测试环境类型（默认 SimEnvHasDlc）
 	if isDev {
@@ -55,6 +50,15 @@ func SetDev(dev bool) {
 	// 如果切换到开发模式且 testEnvType 未初始化，设置默认值
 	if isDev && testEnvType == "" {
 		testEnvType = SimEnvHasDlc
+	}
+}
+
+func IsDevModeGet() bool {
+	devStr := os.Getenv("DHC_DEV")
+	if devStr == "true" {
+		return true
+	} else {
+		return false
 	}
 }
 

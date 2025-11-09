@@ -5,12 +5,24 @@ import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
   // Create the browser window.
+  // 设计尺寸：1920x1080 (Windows)，在 macOS 中缩放到 1280x720 显示
+  const designWidth = 1920
+  const designHeight = 1080
+  const scaleFactor = 720 / 1080 // 720h 显示 1080h 的内容
+
+  // 根据平台设置窗口大小
+  const isMacOS = process.platform === 'darwin'
+  const windowWidth = isMacOS ? Math.round(designWidth * scaleFactor) : designWidth // macOS: 1280, Windows: 1920
+  const windowHeight = isMacOS ? Math.round(designHeight * scaleFactor) : designHeight // macOS: 720, Windows: 1080
+  // 最小窗口尺寸：所有平台都设置为 720p
+  const minWidth = 1280
+  const minHeight = 720
+
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    minWidth: 900,
-    minHeight: Math.round(900 / (16 / 9)), // 根据16:9比例计算最小高度
-    aspectRatio: 16 / 9,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: minWidth,
+    minHeight: minHeight, // 所有平台：最小 1280x720 (720p)
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -28,21 +40,34 @@ function createWindow(): void {
     mainWindow.show()
   })
 
+  // 设置页面缩放：仅在 macOS 上应用缩放
+  // 在 macOS 上：在 720h 窗口中显示 1080h 的内容（缩放比例 = 720 / 1080 = 0.6667）
+  // 在 Windows 上：使用正常缩放（1.0），显示原始 1920x1080 设计
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (process.platform === 'darwin') {
+      // 仅在 macOS 上应用缩放
+      mainWindow.webContents.setZoomFactor(scaleFactor) // 0.6667，让 1080h 内容显示在 720h 窗口中
+    } else {
+      // Windows 和其他平台使用正常缩放
+      mainWindow.webContents.setZoomFactor(1.0)
+    }
+  })
+
   // 强制保持 16:9 窗口比例
   let isResizing = false
   const aspectRatio = 16 / 9
-  
+
   // 使用 will-resize 事件（在 macOS 上可能不会触发，但作为第一道防线）
   mainWindow.on('will-resize', (event, newBounds) => {
     if (isResizing) return
-    
+
     const currentBounds = mainWindow.getBounds()
     const widthDelta = Math.abs(newBounds.width - currentBounds.width)
     const heightDelta = Math.abs(newBounds.height - currentBounds.height)
-    
+
     event.preventDefault()
     isResizing = true
-    
+
     if (widthDelta > heightDelta) {
       // 宽度变化更大，根据宽度计算高度
       const newHeight = Math.round(newBounds.width / aspectRatio)
@@ -52,25 +77,25 @@ function createWindow(): void {
       const newWidth = Math.round(newBounds.height * aspectRatio)
       mainWindow.setSize(newWidth, newBounds.height)
     }
-    
+
     setTimeout(() => {
       isResizing = false
     }, 0)
   })
-  
+
   // 使用 resize 事件作为补充（在 will-resize 不工作时强制保持比例）
   mainWindow.on('resize', () => {
     if (isResizing) return
-    
+
     const bounds = mainWindow.getBounds()
     const currentRatio = bounds.width / bounds.height
     const tolerance = 0.01 // 允许 1% 的误差
-    
+
     if (Math.abs(currentRatio - aspectRatio) > tolerance) {
       isResizing = true
       const newHeight = Math.round(bounds.width / aspectRatio)
       mainWindow.setSize(bounds.width, newHeight)
-      
+
       setTimeout(() => {
         isResizing = false
       }, 0)

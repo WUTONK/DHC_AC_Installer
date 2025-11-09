@@ -18,6 +18,26 @@ import (
 // >)解压相关 - 支持.zip / .7z / .rar等压缩格式，解压后放在 rootpath/resources/cache/(标记类型)/(文件名) 目录下，例如 rootpath/resources/mod/shutokoMap
 // >)覆盖相关 - 支持覆盖/跳过同名目录或取消操作、覆盖警告模式（不警告、警告）被覆盖目录备份和还原，记录重点事件 (覆盖信息、安装时间戳)
 
+// DecompressionOptions 解压配置选项
+// 使用配置结构体模式来处理可选参数，这是Go中推荐的替代可选参数的方式
+type DecompressionOptions struct {
+	// SrcPath 源文件路径（必需）
+	SrcPath string
+
+	// FilePassword 压缩文件密码（可选，默认为空）
+	FilePassword string
+
+	// 模组解压相关选项
+	// IsMod 是否为模组解压（与 DstFilePath 互斥，只能设置一个）
+	IsMod bool
+	// DftPathGetModOrPath 模组标记文件获取方式（仅在 IsMod=true 时使用）
+	DftPathGetModOrPath types.DftPathGetModOrPath
+
+	// 普通文件解压相关选项
+	// DstFilePath 目标文件路径（与 IsMod 互斥，仅在 IsMod=false 时使用）
+	DstFilePath string
+}
+
 // 检测 7zip 路径并添加 如果不存在就下载
 
 func SzInstall() {
@@ -148,13 +168,56 @@ func SzTest() string {
 	return "PASS"
 }
 
+// DecompressionWithOptions 使用配置结构体的解压函数（推荐使用）
+// 这是改进后的API，使用配置结构体来处理可选参数，更加清晰和类型安全
+//
+// 示例用法：
+//
+//	// 模组解压
+//	opts := DecompressionOptions{
+//	    SrcPath: "/path/to/mod.zip",
+//	    IsMod: true,
+//	    DftPathGetModOrPath: types.DftPathFromDir,
+//	}
+//	path, timing, err := DecompressionWithOptions(opts)
+//
+//	// 普通文件解压
+//	opts := DecompressionOptions{
+//	    SrcPath: "/path/to/file.zip",
+//	    DstFilePath: "/path/to/destination",
+//	}
+//	path, timing, err := DecompressionWithOptions(opts)
+func DecompressionWithOptions(opts DecompressionOptions) (unDecompressionPath, errorTiming string, err error) {
+	funcIdt := "-service.decompression.DecompressionWithOptions-"
+
+	// 参数验证
+	if opts.SrcPath == "" {
+		return "", "before", fmt.Errorf("%s源文件路径不能为空", funcIdt)
+	}
+	if opts.IsMod && opts.DstFilePath != "" {
+		return "", "before", fmt.Errorf("%sIsMod 和 DstFilePath 不能同时设置", funcIdt)
+	}
+	if !opts.IsMod && opts.DstFilePath == "" {
+		return "", "before", fmt.Errorf("%s非模组解压时必须提供 DstFilePath", funcIdt)
+	}
+
+	// 调用原有实现
+	return Decompression(
+		opts.SrcPath,
+		opts.FilePassword,
+		opts.IsMod,
+		opts.DstFilePath,
+		opts.DftPathGetModOrPath,
+	)
+}
+
 // 解压功能 支持.zip / .7z / .rar等压缩格式
 // 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
 // 参数：- 来源路径 目标路径 文件密码 dfc文件获取方式(详见源码)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
 //
 // 返回值：-解压目录 错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
-func Decompression(srcPath string, filePassword string, dftPathGetModOrPath types.DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
+func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath string, dftPathGetModOrPath types.DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
 	funcIdt := "-service.decompression.Decompression-"
 
 	// 获取后端根目录
@@ -164,10 +227,8 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath type
 	}
 
 	// 识别压缩文件类型 可识别是否为分卷 是否为未压缩文件
-	isVolume := false    //是否为分卷
-	comparableType := "" //压缩类型
-
-	dhcFileTag := DhcFileTag{}
+	isVolume := false          //是否为分卷
+	comparableType := ""       //压缩类型
 	szPath := Get7zPath(false) // 获取7z路径
 	// 先拆分出文件名
 	fileInfo, fileInfoErr := os.Stat(srcPath)
@@ -176,23 +237,26 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath type
 	}
 	fileName := fileInfo.Name()
 
-	// 获取dhcFileTag.json路径
-	fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
-	switch dftPathGetModOrPath {
-	case types.DftPathFromDir:
-		dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
-		dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
-	case types.DftPathFromCompressRoot:
-		// TODO: 从压缩包根目录文件中读取 dhcFileTag.json
-	default:
-		fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
-		dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
-	}
-	if err != nil {
-		if err.Error() == "notFound" {
-			dhcFileTag.ModType = "undefined"
-		} else {
-			return "", "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s", funcIdt, err)
+	var dhcFileTag DhcFileTag
+	if isMod {
+		// 获取dhcFileTag.json路径
+		fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
+		switch dftPathGetModOrPath {
+		case types.DftPathFromDir:
+			dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
+			dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
+		case types.DftPathFromCompressRoot:
+			// TODO: 从压缩包根目录文件中读取 dhcFileTag.json
+		default:
+			fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
+			dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
+		}
+		if err != nil {
+			if err.Error() == "notFound" {
+				dhcFileTag.ModType = "undefined"
+			} else {
+				return "", "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s", funcIdt, err)
+			}
 		}
 	}
 
@@ -244,7 +308,12 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath type
 	// 例:rootpath/resources/cache/Map/shutoko
 	// 去掉fileName的尾缀，只保留文件名部分
 	removeSuffixFilename := fileNameList[0]
-	midDirPath := filepath.Join(backendRootPath, "resources", "cache", dhcFileTag.ModType, removeSuffixFilename)
+	var midDirPath string
+	if isMod {
+		midDirPath = filepath.Join(backendRootPath, "resources", "cache", dhcFileTag.ModType, removeSuffixFilename)
+	} else {
+		midDirPath = dstFilePath
+	}
 	fmt.Printf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
 
 	// 确保中间目录存在
@@ -306,4 +375,29 @@ func Decompression(srcPath string, filePassword string, dftPathGetModOrPath type
 	}
 
 	return midDirPath, "", nil
+}
+
+// TODO：保留此函数以保持向后兼容 如在测试后无实用性需删除
+// 模组解压接口（推荐使用 DecompressionWithOptions）
+// 保留此函数以保持向后兼容
+func DecompressionMod(srcPath string, filePassword string, dftPathGetModOrPath types.DftPathGetModOrPath) (unDecompressionPath, errorTiming string, err error) {
+	opts := DecompressionOptions{
+		SrcPath:             srcPath,
+		FilePassword:        filePassword,
+		IsMod:               true,
+		DftPathGetModOrPath: dftPathGetModOrPath,
+	}
+	return DecompressionWithOptions(opts)
+}
+
+// 其他文件解压接口（推荐使用 DecompressionWithOptions）
+// 保留此函数以保持向后兼容
+func DecompressionFile(srcPath string, filePassword string, dstFilePath string) (unDecompressionPath, errorTiming string, err error) {
+	opts := DecompressionOptions{
+		SrcPath:      srcPath,
+		FilePassword: filePassword,
+		IsMod:        false,
+		DstFilePath:  dstFilePath,
+	}
+	return DecompressionWithOptions(opts)
 }
