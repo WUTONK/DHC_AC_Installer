@@ -12,3 +12,4 @@ DHC_Backend/models/tools/7z/windows/
 # testModFIle
 DHC_Backend/resources/cache
 DHC_Backend/test/testModFile
+DHC_Backend/test/windows_finder
