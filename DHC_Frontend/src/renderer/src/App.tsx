@@ -7,6 +7,7 @@ import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
+import CustomModal from './components/Modal';
 
 // const { Title, Text } = Typography
 
@@ -37,6 +38,7 @@ function App(): React.JSX.Element {
   }
 
   const [activeKey, setActiveKey] = useState<string>('Home')
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
 
   // 切换色彩模式
   const switchMode = (): void => {
@@ -47,6 +49,22 @@ function App(): React.JSX.Element {
       body.setAttribute('theme-mode', 'dark');
     }
   };
+
+  // 打开弹窗
+  const openModal = (): void => {
+    setModalVisible(true)
+  }
+
+  // 关闭弹窗
+  const closeModal = (): void => {
+    setModalVisible(false)
+  }
+
+  // 确认按钮回调
+  const handleOk = (): void => {
+    console.log('确认操作')
+    closeModal()
+  }
 
   return (
     <Layout style={{ border: '1px solid var(--semi-color-border)', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -73,6 +91,9 @@ function App(): React.JSX.Element {
                 </span>
                 <span style={{ marginRight: '24px' }}>
                   <Button onClick={switchMode}>切换色彩模式</Button>
+                </span>
+                <span style={{ marginRight: '24px' }}>
+                  <Button onClick={openModal}>打开弹窗</Button>
                 </span>
               </span>
               <Nav.Footer>
@@ -109,6 +130,20 @@ function App(): React.JSX.Element {
         </Layout>
 
     <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
+
+    {/* 弹窗示例 */}
+    <CustomModal
+      visible={modalVisible}
+      onCancel={closeModal}
+      onOk={handleOk}
+      title="示例弹窗"
+      width={520}
+    >
+      <div style={{ padding: '10px 0' }}>
+        <p>这是一个弹窗示例，你可以在这里放置任何内容。</p>
+        <p>点击确定或取消按钮来关闭弹窗。</p>
+      </div>
+    </CustomModal>
   </Layout>
   )
 

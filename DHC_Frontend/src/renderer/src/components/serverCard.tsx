@@ -17,6 +17,14 @@ const ServerCard: React.FC<ServerCardProps> = () => {
   const { Meta } = Card
   const { Text } = Typography
 
+  const handleJoinServer = (): void => {
+    console.log('========================================')
+    console.log('按钮被点击了！')
+    console.log('时间:', new Date().toLocaleString())
+    console.log('服务器: 上海湾岸午夜俱乐部服务器')
+    console.log('========================================')
+  }
+
   return (
     <Card
       style={{ width: 360, height: 445 }}
@@ -58,11 +66,8 @@ const ServerCard: React.FC<ServerCardProps> = () => {
           <Button
             theme="solid"
             type="primary"
-            style={{
-              height: 32,
-              backgroundColor: 'var(--color-button_primary-bg-default, #89c79f)',
-              color: 'var(--color-button_primary-text-default, #ffffff)'
-            }}
+            onClick={handleJoinServer}
+            className="server-card-button"
           >
             加入服务器
           </Button>
