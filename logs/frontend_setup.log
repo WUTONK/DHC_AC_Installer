@@ -1,12 +1,4 @@
 Lockfile is up to date, resolution step is skipped
 Already up to date
 
-╭ Warning ─────────────────────────────────────────────────────────────────────╮
-│                                                                              │
-│   Ignored build scripts: @parcel/watcher.                                    │
-│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
-│   to run scripts.                                                            │
-│                                                                              │
-╰──────────────────────────────────────────────────────────────────────────────╯
-
-Done in 529ms using pnpm v10.17.1
+Done in 590ms using pnpm v10.17.1

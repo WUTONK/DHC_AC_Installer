@@ -1,6 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Modal, Button } from '@douyinfe/semi-ui'
 
+// 加入服务器须知弹窗
+
 interface CustomModalProps {
   visible: boolean
   onCancel: () => void
@@ -14,15 +16,15 @@ interface CustomModalProps {
   closable?: boolean
   maskClosable?: boolean
 }
-
+// joinServerInstructionsModal
+// 加入服务器须知弹窗
 const CustomModal: React.FC<CustomModalProps> = ({
   visible,
   onCancel,
   onOk,
-  title = '提示',
-  children,
+  title = '加入服务器须知',
   width = 520,
-  okText = '确定',
+  okText = '同意并加入',
   cancelText = '取消',
   footer,
   closable = true,
@@ -37,6 +39,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 
   return (
     <Modal
+      className="join-server-modal"
       title={title}
       visible={visible}
       onCancel={onCancel}
@@ -46,7 +49,9 @@ const CustomModal: React.FC<CustomModalProps> = ({
       closable={closable}
       maskClosable={maskClosable}
     >
-      {children}
+      <div>
+        aaa
+      </div>
     </Modal>
   )
 }

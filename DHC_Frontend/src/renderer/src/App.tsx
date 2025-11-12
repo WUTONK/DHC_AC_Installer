@@ -7,7 +7,7 @@ import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
-import CustomModal from './components/Modal';
+import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 
 // const { Title, Text } = Typography
 
@@ -24,6 +24,8 @@ function App(): React.JSX.Element {
   // 页面选择
   const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
+      case 'Home':
+        return <div style={{ padding: '20px' }}>欢迎来到首页</div>
       case 'ModInstallPage':
         return <ModInstallPage />
       case 'ShutokoWiki':
@@ -38,7 +40,7 @@ function App(): React.JSX.Element {
   }
 
   const [activeKey, setActiveKey] = useState<string>('Home')
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
 
   // 切换色彩模式
   const switchMode = (): void => {
@@ -51,19 +53,19 @@ function App(): React.JSX.Element {
   };
 
   // 打开弹窗
-  const openModal = (): void => {
-    setModalVisible(true)
+  const openSemiModal = (): void => {
+    setSemiModalVisible(true)
   }
 
   // 关闭弹窗
-  const closeModal = (): void => {
-    setModalVisible(false)
+  const closeSemiModal = (): void => {
+    setSemiModalVisible(false)
   }
 
-  // 确认按钮回调
-  const handleOk = (): void => {
+   // 确认按钮回调
+   const semiHandleOk = (): void => {
     console.log('确认操作')
-    closeModal()
+    closeSemiModal()
   }
 
   return (
@@ -93,7 +95,10 @@ function App(): React.JSX.Element {
                   <Button onClick={switchMode}>切换色彩模式</Button>
                 </span>
                 <span style={{ marginRight: '24px' }}>
-                  <Button onClick={openModal}>打开弹窗</Button>
+                  <Button onClick={openSemiModal}>打开弹窗</Button>
+                </span>
+                <span style={{ marginRight: '24px' }}>
+                <Button onClick={openSemiModal}>打开官方弹窗</Button>
                 </span>
               </span>
               <Nav.Footer>
@@ -124,26 +129,21 @@ function App(): React.JSX.Element {
             />
           </Sider>
 
+          {/* 内容页面 */}
           <Content style={{ overflow: 'auto', flex: 1, minHeight: 0, height: '100%' }}>
             {renderPage(activeKey)}
           </Content>
+
         </Layout>
 
     <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
 
-    {/* 弹窗示例 */}
-    <CustomModal
-      visible={modalVisible}
-      onCancel={closeModal}
-      onOk={handleOk}
-      title="示例弹窗"
-      width={520}
-    >
-      <div style={{ padding: '10px 0' }}>
-        <p>这是一个弹窗示例，你可以在这里放置任何内容。</p>
-        <p>点击确定或取消按钮来关闭弹窗。</p>
-      </div>
-    </CustomModal>
+    <JoinServerInstructionsModal
+      visible={semiModalVisible}
+      onCancel={closeSemiModal}
+      onOk={semiHandleOk}
+    />
+
   </Layout>
   )
 

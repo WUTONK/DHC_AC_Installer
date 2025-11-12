@@ -85,20 +85,11 @@
   }
 }
 
-/* 自定义服务器卡片按钮样式 */
-/* .server-card-button {
-  height: 32px;
-  background-color: #89c79f !important;
-  color: #ffffff !important;
-  border-color: #89c79f !important;
+/* 自定义 Modal 字体大小 */
+.join-server-modal .semi-modal-body {
+  font-size: 18px !important;
 }
 
-.server-card-button:hover {
-  background-color: #75b38a !important;
-  border-color: #75b38a !important;
+.join-server-modal .semi-modal-body * {
+  font-size: 18px !important;
 }
-
-.server-card-button:active {
-  background-color: #62a075 !important;
-  border-color: #62a075 !important;
-} */
