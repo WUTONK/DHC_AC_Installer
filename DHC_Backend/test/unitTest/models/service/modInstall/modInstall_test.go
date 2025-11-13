@@ -20,3 +20,8 @@ func TestInstallCm(t *testing.T) {
 	}
 	fmt.Printf("CM已成功安装到%v\n", installPath)
 }
+
+func TestImportResourceDetection(t *testing.T) {
+	var res modinstall.ResourceType = modinstall.Cars
+	modinstall.ImportResourceDetection(res)
+}
