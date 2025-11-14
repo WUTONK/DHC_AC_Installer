@@ -81,9 +81,6 @@ func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, car string
 	return rm[resourceType].Items[pkg].Items[car].State, true
 }
 
-// 旧版兼容：保持原有的 map[string]map[string]map[string]ResourceState 类型
-type LegacyResourceMap map[string]map[string]map[string]ResourceState
-
 var carsResourceMap = ResourceMap{
 	Cars: NewResourceStateInfo(notImported),
 }
@@ -95,6 +92,8 @@ func init() {
 	_ = Shaders
 	_ = Dashboard
 	_ = pass
+
+	// 包信息
 
 	// 初始化示例数据
 	carsResourceMap.SetState(Cars, "SHMC", "R34", pass)

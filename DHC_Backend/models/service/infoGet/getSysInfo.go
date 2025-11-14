@@ -3,6 +3,8 @@ package infoGet
 import (
 	"fmt"
 
+	humanize "github.com/dustin/go-humanize"
+	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 )
 
@@ -29,4 +31,19 @@ func GetSysInfo() sysInfo {
 	}
 
 	return userSysInfo
+}
+
+func GetDiskUsage(path string) error {
+	di, err := disk.Usage(path)
+	if err != nil {
+		return err
+	}
+	percentage := (float64(di.Total-di.Free) / float64(di.Total)) * 100
+	fmt.Printf("%s of %s disk space used (%0.2f%%)\n",
+		humanize.Bytes(di.Total-di.Free),
+		humanize.Bytes(di.Total),
+		percentage,
+	)
+
+	return nil
 }
