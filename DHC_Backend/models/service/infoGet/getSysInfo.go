@@ -33,6 +33,7 @@ func GetSysInfo() sysInfo {
 	return userSysInfo
 }
 
+// 计算传入路径所属的硬盘分区的剩余空间
 func GetDiskUsage(path string) error {
 	di, err := disk.Usage(path)
 	if err != nil {
