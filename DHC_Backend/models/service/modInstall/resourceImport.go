@@ -143,7 +143,7 @@ func ImportResourceDetection(resource ResourceType) {
 			categoryComplete = false
 		}
 
-		var ResourceMapNow = ResourceMap{}
+		// var ResourceMapNow = ResourceMap{}
 		// 将 files 转换为ResourceMap{}
 
 		// 遍历并检查缺失文件夹 得到已存在列表

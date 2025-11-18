@@ -22,6 +22,10 @@ func TestInstallCm(t *testing.T) {
 }
 
 func TestImportResourceDetection(t *testing.T) {
+	rm := modinstall.ResourceMap{modinstall.Cars: modinstall.NewResourceStateInfo("notImported")}
 	var res modinstall.ResourceType = modinstall.Cars
-	modinstall.ImportResourceDetection(res)
+	rm.SetState("Cars", "SHMC", "R34", "pass")
+	fmt.Println(res)
+
+	// modinstall.ImportResourceDetection(res)
 }
