@@ -2,6 +2,7 @@ package modinstall
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -101,6 +102,45 @@ func init() {
 	carsResourceMap.SetState(Cars, "DDM", "Supra", incomplete)
 }
 
+type ResourceJson struct {
+	Categorys Categorys `json:"categorys"`
+}
+
+type mods map[string]int
+type Pkgs map[string]mods
+type SubCategorys map[string]Pkgs
+type Categorys map[string]SubCategorys
+
+// 构建完整资源结构 Build a complete resource structure
+// 从 json 构建一个包含了所有资源项目的ResourceMap 用来和实际存在资源进行比对
+func (rm ResourceMap) BuildCompleteResourceStructure() ResourceMap {
+	backendRootPath, _ := infoGet.GetBackendRootPath()
+	isDev := infoGet.IsDevModeGet()
+
+	// 得到对应类型的资源表文件夹
+	jsonFileName := "pkgInfo.json"
+	var resourceJsonFilePath string
+	if isDev {
+		resourceJsonFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", jsonFileName)
+	} else {
+		resourceJsonFilePath = filepath.Join(backendRootPath, "resources", jsonFileName)
+	}
+
+	resourceJsonFile, _ := os.Open(resourceJsonFilePath)
+	defer resourceJsonFile.Close()
+
+	var cs Categorys
+
+	resourceJsonFileDecode := json.NewDecoder(resourceJsonFile)
+	resourceJsonFileDecode.Decode(&cs)
+
+	fmt.Println(cs)
+
+	rm = ResourceMap{}
+
+	return rm
+}
+
 // 导入资源检测：返回一个已导入资源情况列表 map[string]map[string]bool
 func ImportResourceDetection(resource ResourceType) {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
@@ -143,7 +183,7 @@ func ImportResourceDetection(resource ResourceType) {
 			categoryComplete = false
 		}
 
-		// var ResourceMapNow = ResourceMap{}
+		// var rm = ResourceMap{}
 		// 将 files 转换为ResourceMap{}
 
 		// 遍历并检查缺失文件夹 得到已存在列表

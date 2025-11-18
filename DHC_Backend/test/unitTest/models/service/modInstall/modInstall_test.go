@@ -3,6 +3,7 @@ package modinstall
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
 	"DHC_Backend/models/service/types"
+	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -22,10 +23,22 @@ func TestInstallCm(t *testing.T) {
 }
 
 func TestImportResourceDetection(t *testing.T) {
-	rm := modinstall.ResourceMap{modinstall.Cars: modinstall.NewResourceStateInfo("notImported")}
-	var res modinstall.ResourceType = modinstall.Cars
+	rm := modinstall.ResourceMap{}
+	// var res modinstall.ResourceType = modinstall.Cars
 	rm.SetState("Cars", "SHMC", "R34", "pass")
-	fmt.Println(res)
+
+	// 使用JSON序列化输出
+	jsonData, err := json.MarshalIndent(rm, "", "  ")
+	if err != nil {
+		fmt.Printf("序列化错误: %v\n", err)
+	} else {
+		fmt.Println(string(jsonData))
+	}
 
 	// modinstall.ImportResourceDetection(res)
+}
+
+func TestBuildCompleteResourceStructure(t *testing.T) {
+	rm := modinstall.ResourceMap{}
+	rm.BuildCompleteResourceStructure()
 }
