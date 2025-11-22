@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // 资源导入
@@ -113,7 +114,7 @@ type Categorys map[string]SubCategorys
 
 // 构建完整资源结构 Build a complete resource structure
 // 从 json 构建一个包含了所有资源项目的ResourceMap 用来和实际存在资源进行比对
-func (rm ResourceMap) BuildCompleteResourceStructure() ResourceMap {
+func (rm ResourceMap) BuildCompleteResourceStructure() Categorys {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
 
@@ -136,12 +137,10 @@ func (rm ResourceMap) BuildCompleteResourceStructure() ResourceMap {
 
 	fmt.Println(cs)
 
-	rm = ResourceMap{}
-
-	return rm
+	return cs
 }
 
-// 导入资源检测：返回一个已导入资源情况列表 map[string]map[string]bool
+// 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
 func ImportResourceDetection(resource ResourceType) {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
@@ -165,26 +164,55 @@ func ImportResourceDetection(resource ResourceType) {
 		_ = categoryComplete
 		_ = subCategoryComplete
 
-		var files []string
+		var paths []string
+		var pathPrefix string // 文件前缀
 
 		err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
-			filepath.ToSlash(path)
-			files = append(files, path)
+			// 去除多余项 如 a/b/cars/shmc/r34
+			path = filepath.ToSlash(path)
+
+			// 前缀为定义 寻找前缀
+			if pathPrefix == "" {
+				pathSplit := strings.Split(path, "/")
+				for i, v := range pathSplit {
+					if v == string(resource) {
+						pathPrefix = strings.Join(pathSplit[:i], "/") + "/"
+						break
+					}
+				}
+			}
+
+			path = strings.TrimPrefix(path, pathPrefix)
+			paths = append(paths, path)
 			return nil
 		})
+
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Printf("%v\n", files)
+		fmt.Printf("%v\n", paths)
 
 		// 检查大类完整性
-		if len(files) == 1 {
+
+		// 无下属小类
+		if len(paths) == 1 {
 			categoryComplete = false
 		}
 
-		// var rm = ResourceMap{}
+		var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
+		var rm = ResourceMap{}
 		// 将 files 转换为ResourceMap{}
+		for i, path := range paths {
+			pathlen := len(strings.Split(path, "/"))
+			pathSplit := strings.Split(path, "/")
+			// 小类
+			if pathlen == 2 {
+				// 检测目录大小
+				// if infoGet.GetDirSize(pathPrefix+path) >=
+				// rm[resource]=NewResourceStateInfo()
+			}
+		}
 
 		// 遍历并检查缺失文件夹 得到已存在列表
 
@@ -194,6 +222,30 @@ func ImportResourceDetection(resource ResourceType) {
 		// 资源不完整
 	}
 
+}
+
+// 计算完整 ResourceMap 大/小类的总体积（字节）
+func CalculateResourceMapSize(mode string, resType ResourceType, subCategoryName string) int64 {
+	var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
+	var size int64
+
+	if mode == "category" {
+		// 获取指定小类的所有包
+		pkgs, ok := completeRm[string(resType)][subCategoryName]
+		if !ok {
+			return 0
+		}
+
+		// 遍历所有包
+		for _, mods := range pkgs {
+			// 遍历每个包下的所有 mod，累加大小
+			for _, modSize := range mods {
+				size += int64(modSize)
+			}
+		}
+	}
+
+	return size
 }
 
 // 资源完整性检测

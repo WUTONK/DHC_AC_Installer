@@ -23,6 +23,9 @@ const ServerCard: React.FC<ServerCardProps> = () => {
     console.log('时间:', new Date().toLocaleString())
     console.log('服务器: 上海湾岸午夜俱乐部服务器')
     console.log('========================================')
+    // 在新窗口打开网页
+    const serverUrl = 'https://example.com' // TODO: 替换为实际的服务器网页地址
+    window.open(serverUrl, '_blank')
   }
 
   return (
