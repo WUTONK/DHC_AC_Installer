@@ -49,8 +49,12 @@ const CustomModal: React.FC<CustomModalProps> = ({
       closable={closable}
       maskClosable={maskClosable}
     >
-      <div>
-        aaa
+      <div className="bg-gray-100 p-5 rounded">
+        <ul className="bg-white p-4 pl-5 rounded m-0">
+          <li>提示文字</li>
+          <li>提示文字</li>
+          <li>提示文字</li>
+        </ul>
       </div>
     </Modal>
   )

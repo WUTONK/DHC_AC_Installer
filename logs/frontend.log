@@ -3,11 +3,12 @@
 > electron-vite dev
 
 vite v7.1.7 building SSR bundle for development...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
 transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  4.40 kB
-✓ built in 481ms
+✓ built in 218ms
 
 build the electron main process successfully
 
@@ -18,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.49 kB
-✓ built in 10ms
+✓ built in 8ms
 
 build the electron preload files successfully
 
@@ -33,9 +34,20 @@ start electron app...
 
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-Open dev tool...
-[42830:1117/235305.618440:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-[42830:1117/235305.618526:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
-2025-11-17 23:53:22.350 Electron[42830:89075598] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
-23:54:06 [vite] (client) hmr update /src/ShutokoWiki.tsx, /src/assets/main.css
+2025-11-23 23:16:46.279 Electron[22213:93561862] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+23:17:25 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:17:34 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:26:16 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:26:19 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:27:44 [vite] (client) hmr update /src/assets/main.css
+23:27:47 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:28:07 [vite] (client) hmr update /src/assets/main.css
+23:28:15 [vite] (client) hmr update /src/assets/main.css
+23:28:15 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:28:58 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:29:05 [vite] (client) hmr update /src/assets/main.css
+23:29:37 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:29:45 [vite] (client) hmr update /src/assets/main.css
+23:29:45 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
+23:30:09 [vite] (client) hmr update /src/components/joinServerInstructionsModal.tsx, /src/assets/main.css
  ELIFECYCLE  Command failed.
