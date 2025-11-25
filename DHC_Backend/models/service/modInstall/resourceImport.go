@@ -26,9 +26,9 @@ const (
 type ResourceState string
 
 const (
-	pass        ResourceState = "pass"
-	notImported ResourceState = "notImported"
-	incomplete  ResourceState = "incomplete"
+	Pass        ResourceState = "pass"
+	NotImported ResourceState = "notImported"
+	Incomplete  ResourceState = "incomplete"
 )
 
 // ResourceStateInfo 表示资源的状态信息，包含状态和子项
@@ -58,18 +58,19 @@ func NewResourceStateInfo(state ResourceState) *ResourceStateInfo {
 func (rm ResourceMap) SetState(resourceType ResourceType, pkg string, car string, state ResourceState) {
 	// 确保 ResourceType 层级存在
 	if rm[resourceType] == nil {
-		rm[resourceType] = NewResourceStateInfo(notImported)
+		rm[resourceType] = NewResourceStateInfo(NotImported)
 	}
 
 	// 确保 pkg 层级存在
 	if rm[resourceType].Items[pkg] == nil {
-		rm[resourceType].Items[pkg] = NewResourceStateInfo(notImported)
+		rm[resourceType].Items[pkg] = NewResourceStateInfo(NotImported)
 	}
 
 	// 设置 car 的状态
 	rm[resourceType].Items[pkg].Items[car] = NewResourceStateInfo(state)
 }
 
+// 通过路径设置 ResourceMap 状态
 func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state ResourceState) {
 	// 支持一级、二级、三级路径
 	// 一级：cars -> 设置整个资源类型的状态
@@ -85,7 +86,7 @@ func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state R
 
 	// 确保 ResourceType 层级存在
 	if (*resMap)[resourceType] == nil {
-		(*resMap)[resourceType] = NewResourceStateInfo(notImported)
+		(*resMap)[resourceType] = NewResourceStateInfo(NotImported)
 	}
 
 	switch len(parts) {
@@ -96,17 +97,17 @@ func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state R
 		// 二级路径：设置包的状态
 		pkg := parts[1]
 		if (*resMap)[resourceType].Items[pkg] == nil {
-			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(notImported)
+			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(NotImported)
 		}
 		(*resMap)[resourceType].Items[pkg].State = state
 	case 3:
 		// 三级路径：设置具体车辆的状态
 		pkg := parts[1]
-		car := parts[2]
+		mod := parts[2]
 		if (*resMap)[resourceType].Items[pkg] == nil {
-			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(notImported)
+			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(NotImported)
 		}
-		(*resMap)[resourceType].Items[pkg].Items[car] = NewResourceStateInfo(state)
+		(*resMap)[resourceType].Items[pkg].Items[mod] = NewResourceStateInfo(state)
 	default:
 		return // 路径层级过多，不支持
 	}
@@ -115,13 +116,13 @@ func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state R
 // 辅助函数：获取资源状态
 func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, car string) (ResourceState, bool) {
 	if rm[resourceType] == nil {
-		return notImported, false
+		return NotImported, false
 	}
 	if rm[resourceType].Items[pkg] == nil {
-		return notImported, false
+		return NotImported, false
 	}
 	if rm[resourceType].Items[pkg].Items[car] == nil {
-		return notImported, false
+		return NotImported, false
 	}
 	return rm[resourceType].Items[pkg].Items[car].State, true
 }
@@ -136,8 +137,8 @@ type ResourceSubCategories map[string]ModEntries
 type ResourceCatalog map[string]ResourceSubCategories
 
 // 构建完整资源结构 Build a complete resource structure
-// 从 json 构建一个包含了所有资源项目的 ResourceMap 用来和实际存在资源进行比对
-func BuildCompleteResourceStructure() ResourceCatalog {
+// 从 json 构建一个包含了所有资源项目的 ResourceStructure 用来和实际存在资源进行比对
+func BuildCompleteResourceCatalog() ResourceCatalog {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
 
@@ -181,16 +182,16 @@ func BuildCompleteInitResourceMap(resource ResourceType, catalog ResourceCatalog
 
 	for _, resType := range resourceTypes {
 		if rm[resType] == nil {
-			rm[resType] = NewResourceStateInfo(notImported)
+			rm[resType] = NewResourceStateInfo(NotImported)
 		}
 
 		subCs := catalog[string(resType)]
 		for pkg := range subCs {
 			if rm[resType].Items[pkg] == nil {
-				rm[resType].Items[pkg] = NewResourceStateInfo(notImported)
+				rm[resType].Items[pkg] = NewResourceStateInfo(NotImported)
 			}
 			for mod := range subCs[pkg] {
-				rm[resType].Items[pkg].Items[mod] = NewResourceStateInfo(notImported)
+				rm[resType].Items[pkg].Items[mod] = NewResourceStateInfo(NotImported)
 			}
 		}
 	}
@@ -198,12 +199,21 @@ func BuildCompleteInitResourceMap(resource ResourceType, catalog ResourceCatalog
 	return rm
 }
 
+// 获取 mod 体积
+func GetModSizeFromPath(catalog ResourceCatalog, path string) (int, error) {
+	pathSplit := strings.Split(path, "/")
+	if len(pathSplit) != 3 {
+		return 0, fmt.Errorf("不支持三级目录以外的路径")
+	}
+	return catalog[pathSplit[0]][pathSplit[1]][pathSplit[2]], nil
+}
+
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
 // ImportResourceDetection 返回指定资源类型的导入情况
 func ImportResourceDetection(resource ResourceType) ResourceMap {
 	// 从json获取目前resource的完整资源信息 并构建一个完整结构的 ResourceMap
-	cs := BuildCompleteResourceStructure()
-	completeRm := BuildCompleteInitResourceMap(resource, cs)
+	resCl := BuildCompleteResourceCatalog()
+	completeRm := BuildCompleteInitResourceMap(resource, resCl)
 
 	rm := completeRm
 
@@ -229,7 +239,7 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		_ = categoryComplete
 		_ = subCategoryComplete
 
-		fileMap := make(map[string]int)
+		fileSetMap := make(map[string]ResourceState)
 		var paths []string
 		var pathPrefix string // 文件前缀
 
@@ -238,6 +248,8 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 			// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34 需要去除 'a/b/'
 			path = filepath.ToSlash(path)
 			size := info.Size()
+			_ = size       // TODO: 后续用于完整性检查
+			_ = fileSetMap // TODO: 后续用于存储状态
 
 			// 前缀为定义 寻找前缀
 			if pathPrefix == "" {
@@ -257,7 +269,23 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 			// 还需要剔除 mod 层级下的路径 例如 cars/shmc/rx7/1.kn5 仅保留 cars/shmc/rx7
 			pathSplit := strings.Split(path, "/")
 			if len(pathSplit) < 4 {
-				fileMap[path] = int(size)
+				// State判断
+
+				// 是 mod ,进行完整性检查
+				if len(pathSplit) == 3 {
+					getSize, _ := GetModSizeFromPath(resCl, path)
+					if size < int64(getSize) {
+						completeRm.SetStateWithPath(&rm, path, Incomplete)
+					} else if size == 0 {
+						completeRm.SetStateWithPath(&rm, path, NotImported)
+					}
+				}
+
+				// 不是 mod 只检测是不是未引入
+				if size == 0 {
+					completeRm.SetStateWithPath(&rm, path, NotImported)
+				}
+
 				paths = append(paths, path)
 			}
 

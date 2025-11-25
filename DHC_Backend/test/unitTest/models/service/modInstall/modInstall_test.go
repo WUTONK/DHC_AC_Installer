@@ -41,14 +41,12 @@ func TestImportResourceDetection(t *testing.T) {
 }
 
 func TestBuildCompleteResourceStructure(t *testing.T) {
-	rm := modinstall.ResourceMap{}
-	rm.BuildCompleteResourceStructure()
+	modinstall.BuildCompleteResourceCatalog()
 }
 
 // 测试转化
 func TestConversion(t *testing.T) {
-	rm := modinstall.ResourceMap{}
-	cs := rm.BuildCompleteResourceStructure()
+	cs := modinstall.BuildCompleteResourceCatalog()
 	result := modinstall.BuildCompleteInitResourceMap("cars", cs)
 	// 使用JSON序列化输出
 	jsonData, err := json.MarshalIndent(result, "", "  ")
