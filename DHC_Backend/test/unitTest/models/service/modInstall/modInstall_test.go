@@ -24,7 +24,7 @@ func TestInstallCm(t *testing.T) {
 
 func TestImportResourceDetection(t *testing.T) {
 	rm := modinstall.ResourceMap{}
-	// var res modinstall.ResourceType = modinstall.Cars
+	var res modinstall.ResourceType = modinstall.Cars
 	rm.SetState("Cars", "SHMC", "R34", "pass")
 
 	// 使用JSON序列化输出
@@ -35,10 +35,33 @@ func TestImportResourceDetection(t *testing.T) {
 		fmt.Println(string(jsonData))
 	}
 
-	// modinstall.ImportResourceDetection(res)
+	modinstall.ImportResourceDetection(res)
 }
 
 func TestBuildCompleteResourceStructure(t *testing.T) {
 	rm := modinstall.ResourceMap{}
 	rm.BuildCompleteResourceStructure()
 }
+
+// map[
+//   categorys: map[
+//     car: map[
+//       DDM: map[
+//         SUPRA: 1024
+//       ]
+//       SHMC: map[
+//         R32: 2048
+//         R34: 1024
+//       ]
+//     ]
+//     tracks: map[
+//       main: map[
+//         SRP_093: 200000
+//       ]
+//       sub: map[
+//         NEW_LOOP: 30000
+//         SRP_C1: 20000
+//       ]
+//     ]
+//   ]
+// ]

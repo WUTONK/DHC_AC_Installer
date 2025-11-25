@@ -16,7 +16,7 @@ import (
 type ResourceType string
 
 const (
-	Maps      ResourceType = "maps"
+	Tracks    ResourceType = "tracks"
 	Cars      ResourceType = "cars"
 	Shaders   ResourceType = "shaders"
 	Dashboard ResourceType = "dashboard"
@@ -89,7 +89,7 @@ var carsResourceMap = ResourceMap{
 
 func init() {
 	// 确保常量被使用
-	_ = Maps
+	_ = Tracks
 	_ = Cars
 	_ = Shaders
 	_ = Dashboard
@@ -168,7 +168,7 @@ func ImportResourceDetection(resource ResourceType) {
 		var pathPrefix string // 文件前缀
 
 		err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
-			// 去除多余项 如 a/b/cars/shmc/r34
+			// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34 需要去除 'a/b/'
 			path = filepath.ToSlash(path)
 
 			// 前缀为定义 寻找前缀
@@ -183,7 +183,12 @@ func ImportResourceDetection(resource ResourceType) {
 			}
 
 			path = strings.TrimPrefix(path, pathPrefix)
-			paths = append(paths, path)
+			// 还需要剔除 mod 层级下的路径 例如 cars/shmc/rx7/1.kn5 仅保留 cars/shmc/rx7
+			pathSplit := strings.Split(path, "/")
+			if len(pathSplit) < 4 {
+				paths = append(paths, path)
+			}
+
 			return nil
 		})
 
@@ -191,6 +196,7 @@ func ImportResourceDetection(resource ResourceType) {
 			panic(err)
 		}
 
+		fmt.Println("------fileWalk------")
 		fmt.Printf("%v\n", paths)
 
 		// 检查大类完整性
@@ -200,19 +206,19 @@ func ImportResourceDetection(resource ResourceType) {
 			categoryComplete = false
 		}
 
-		var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
-		var rm = ResourceMap{}
-		// 将 files 转换为ResourceMap{}
-		for i, path := range paths {
-			pathlen := len(strings.Split(path, "/"))
-			pathSplit := strings.Split(path, "/")
-			// 小类
-			if pathlen == 2 {
-				// 检测目录大小
-				// if infoGet.GetDirSize(pathPrefix+path) >=
-				// rm[resource]=NewResourceStateInfo()
-			}
-		}
+		// var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
+		// var rm = ResourceMap{}
+		// // 将 files 转换为ResourceMap{}
+		// for i, path := range paths {
+		// 	pathlen := len(strings.Split(path, "/"))
+		// 	pathSplit := strings.Split(path, "/")
+		// 	// 小类
+		// 	if pathlen == 2 {
+		// 		// 检测目录大小
+		// 		// if infoGet.GetDirSize(pathPrefix+path) >=
+		// 		// rm[resource]=NewResourceStateInfo()
+		// 	}
+		// }
 
 		// 遍历并检查缺失文件夹 得到已存在列表
 
