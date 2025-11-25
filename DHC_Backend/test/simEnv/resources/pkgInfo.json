@@ -1,6 +1,6 @@
 {
-    "categorys": {
-        "cars": {
+    "categorys": { 
+        "cars": { 
             "SHMC": {
                 "R34": 1024,
                 "R32": 2048

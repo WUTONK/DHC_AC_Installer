@@ -20,6 +20,7 @@ const (
 	Cars      ResourceType = "cars"
 	Shaders   ResourceType = "shaders"
 	Dashboard ResourceType = "dashboard"
+	All       ResourceType = "all"
 )
 
 type ResourceState string
@@ -103,18 +104,18 @@ func init() {
 	carsResourceMap.SetState(Cars, "DDM", "Supra", incomplete)
 }
 
+// 以下数据类型是从json解析数据用
 type ResourceJson struct {
-	Categorys Categorys `json:"categorys"`
+	Catalog ResourceCatalog `json:"categorys"`
 }
 
-type mods map[string]int
-type Pkgs map[string]mods
-type SubCategorys map[string]Pkgs
-type Categorys map[string]SubCategorys
+type ModEntries map[string]int
+type ResourceSubCategories map[string]ModEntries
+type ResourceCatalog map[string]ResourceSubCategories
 
 // 构建完整资源结构 Build a complete resource structure
-// 从 json 构建一个包含了所有资源项目的ResourceMap 用来和实际存在资源进行比对
-func (rm ResourceMap) BuildCompleteResourceStructure() Categorys {
+// 从 json 构建一个包含了所有资源项目的 ResourceMap 用来和实际存在资源进行比对
+func (rm ResourceMap) BuildCompleteResourceStructure() ResourceCatalog {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
 
@@ -130,18 +131,81 @@ func (rm ResourceMap) BuildCompleteResourceStructure() Categorys {
 	resourceJsonFile, _ := os.Open(resourceJsonFilePath)
 	defer resourceJsonFile.Close()
 
-	var cs Categorys
-
+	var res ResourceJson
 	resourceJsonFileDecode := json.NewDecoder(resourceJsonFile)
-	resourceJsonFileDecode.Decode(&cs)
+	if err := resourceJsonFileDecode.Decode(&res); err != nil {
+		fmt.Println("decode pkgInfo.json failed:", err)
+		return ResourceCatalog{}
+	}
 
-	fmt.Println(cs)
+	fmt.Println(res.Catalog)
 
-	return cs
+	// 把最外层 catalog 包装去掉
+	return res.Catalog
+}
+
+// 接受从 json 中解析出的数据 然后用其构建一个完整的初始化的ResourceMap
+func BuildCompleteInitResourceMap(resource ResourceType, catalog ResourceCatalog) ResourceMap {
+	rm := ResourceMap{}
+	var resourceTypes []ResourceType
+
+	if resource == All {
+		for resName := range catalog {
+			resourceTypes = append(resourceTypes, ResourceType(resName))
+		}
+	} else {
+		resourceTypes = append(resourceTypes, resource)
+	}
+
+	// cs
+	// map[
+	//   categorys: map[
+	//     car: map[
+	//       DDM: map[
+	//         SUPRA: 1024
+	//       ]
+	//       SHMC: map[
+	//         R32: 2048
+	//         R34: 1024
+	//       ]
+	//     ]
+	//     tracks: map[
+	//       main: map[
+	//         SRP_093: 200000
+	//       ]
+	//       sub: map[
+	//         NEW_LOOP: 30000
+	//         SRP_C1: 20000
+	//       ]
+	//     ]
+	//   ]
+	// ]
+
+	for _, resType := range resourceTypes {
+		if rm[resType] == nil {
+			rm[resType] = NewResourceStateInfo(notImported)
+		}
+
+		subCs := catalog[string(resType)]
+		for pkg := range subCs {
+			if rm[resType].Items[pkg] == nil {
+				rm[resType].Items[pkg] = NewResourceStateInfo(notImported)
+			}
+			for mod := range subCs[pkg] {
+				rm[resType].Items[pkg].Items[mod] = NewResourceStateInfo(notImported)
+			}
+		}
+	}
+
+	return rm
 }
 
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
-func ImportResourceDetection(resource ResourceType) {
+// ImportResourceDetection 返回指定资源类型的导入情况
+func ImportResourceDetection(resource ResourceType) ResourceMap {
+	completeRm := carsResourceMap.BuildCompleteResourceStructure()[string(resource)] // 从json获取目前resource的完整资源信息
+	rm := ResourceMap{resource: NewResourceStateInfo(notImported)}
+
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
 
@@ -163,13 +227,16 @@ func ImportResourceDetection(resource ResourceType) {
 		// 消费一下避免报错
 		_ = categoryComplete
 		_ = subCategoryComplete
+		_ = completeRm
 
+		fileMap := make(map[string]int)
 		var paths []string
 		var pathPrefix string // 文件前缀
 
 		err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
 			// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34 需要去除 'a/b/'
 			path = filepath.ToSlash(path)
+			size := info.Size()
 
 			// 前缀为定义 寻找前缀
 			if pathPrefix == "" {
@@ -186,6 +253,7 @@ func ImportResourceDetection(resource ResourceType) {
 			// 还需要剔除 mod 层级下的路径 例如 cars/shmc/rx7/1.kn5 仅保留 cars/shmc/rx7
 			pathSplit := strings.Split(path, "/")
 			if len(pathSplit) < 4 {
+				fileMap[path] = int(size)
 				paths = append(paths, path)
 			}
 
@@ -196,62 +264,33 @@ func ImportResourceDetection(resource ResourceType) {
 			panic(err)
 		}
 
-		fmt.Println("------fileWalk------")
-		fmt.Printf("%v\n", paths)
-
-		// 检查大类完整性
-
-		// 无下属小类
-		if len(paths) == 1 {
-			categoryComplete = false
-		}
-
-		// var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
-		// var rm = ResourceMap{}
-		// // 将 files 转换为ResourceMap{}
-		// for i, path := range paths {
-		// 	pathlen := len(strings.Split(path, "/"))
-		// 	pathSplit := strings.Split(path, "/")
-		// 	// 小类
-		// 	if pathlen == 2 {
-		// 		// 检测目录大小
-		// 		// if infoGet.GetDirSize(pathPrefix+path) >=
-		// 		// rm[resource]=NewResourceStateInfo()
-		// 	}
-		// }
-
-		// 遍历并检查缺失文件夹 得到已存在列表
-
-		// 检查小类完整性
-		// 检查具体包
-
-		// 资源不完整
 	}
 
+	return rm
 }
 
 // 计算完整 ResourceMap 大/小类的总体积（字节）
-func CalculateResourceMapSize(mode string, resType ResourceType, subCategoryName string) int64 {
-	var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
-	var size int64
+// func CalculateResourceMapSize(mode string, resType ResourceType, subCategoryName string) int64 {
+// 	var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
+// 	var size int64
 
-	if mode == "category" {
-		// 获取指定小类的所有包
-		pkgs, ok := completeRm[string(resType)][subCategoryName]
-		if !ok {
-			return 0
-		}
+// 	if mode == "category" {
+// 		// 获取指定小类的所有包
+// 		pkgs, ok := completeRm[string(resType)][subCategoryName]
+// 		if !ok {
+// 			return 0
+// 		}
 
-		// 遍历所有包
-		for _, mods := range pkgs {
-			// 遍历每个包下的所有 mod，累加大小
-			for _, modSize := range mods {
-				size += int64(modSize)
-			}
-		}
-	}
+// 		// 遍历所有包
+// 		for _, mods := range pkgs {
+// 			// 遍历每个包下的所有 mod，累加大小
+// 			for _, modSize := range mods {
+// 				size += int64(modSize)
+// 			}
+// 		}
+// 	}
 
-	return size
-}
+// 	return size
+// }
 
 // 资源完整性检测

@@ -7,32 +7,32 @@ out/
 dist/
 build/
 *.tgz
-*.log
+# *.log
 
 # Test files and large test data
-DHC_Backend/test/simEnv/
-DHC_Backend/test/testModFile/
-DHC_Backend/resources/cache/
-DHC_Backend/resources/backup/
+# DHC_Backend/test/simEnv/
+# DHC_Backend/test/testModFile/
+# DHC_Backend/resources/cache/
+# DHC_Backend/resources/backup/
 
-# Binary files
-*.exe
-*.dll
-*.so
-*.dylib
-*.7z
-*.zip
-*.dds
-*.png
-*.jpg
-*.jpeg
-*.ico
-*.icns
+# # Binary files
+# *.exe
+# *.dll
+# *.so
+# *.dylib
+# *.7z
+# *.zip
+# *.dds
+# *.png
+# *.jpg
+# *.jpeg
+# *.ico
+# *.icns
 
-# Generated files
-DHC_Backend/models/tools/7z/
-DHC_Backend/main
-*.openapi.json
+# # Generated files
+# DHC_Backend/models/tools/7z/
+# DHC_Backend/main
+# *.openapi.json
 
 # Logs
 logs/

@@ -36,11 +36,27 @@ func TestImportResourceDetection(t *testing.T) {
 	}
 
 	modinstall.ImportResourceDetection(res)
+	// map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]
+	// {map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]}
 }
 
 func TestBuildCompleteResourceStructure(t *testing.T) {
 	rm := modinstall.ResourceMap{}
 	rm.BuildCompleteResourceStructure()
+}
+
+// 测试转化
+func TestConversion(t *testing.T) {
+	rm := modinstall.ResourceMap{}
+	cs := rm.BuildCompleteResourceStructure()
+	result := modinstall.BuildCompleteInitResourceMap("cars", cs)
+	// 使用JSON序列化输出
+	jsonData, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		fmt.Printf("序列化错误: %v\n", err)
+	} else {
+		fmt.Println(string(jsonData))
+	}
 }
 
 // map[
