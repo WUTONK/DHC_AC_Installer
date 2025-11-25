@@ -228,74 +228,139 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
 	}
 
-	// 检查车辆包
+	// 检查资源包
 	// 资源分为 大类和小类和具体包（car/SHMC/R34）
-	if resource == Cars {
+	// 支持所有资源类型，不仅仅是 Cars
+	var pathPrefix string             // 文件前缀
+	modDirs := make(map[string]int64) // 存储 mod 目录路径和总大小
 
-		var categoryComplete bool    // 大类完整性
-		var subCategoryComplete bool // 小类
-
-		// 消费一下避免报错
-		_ = categoryComplete
-		_ = subCategoryComplete
-
-		fileSetMap := make(map[string]ResourceState)
-		var paths []string
-		var pathPrefix string // 文件前缀
-
-		// 遍历文件并填充 rm
-		err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
-			// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34 需要去除 'a/b/'
-			path = filepath.ToSlash(path)
-			size := info.Size()
-			_ = size       // TODO: 后续用于完整性检查
-			_ = fileSetMap // TODO: 后续用于存储状态
-
-			// 前缀为定义 寻找前缀
-			if pathPrefix == "" {
-				pathSplit := strings.Split(path, "/")
-				for i, v := range pathSplit {
-					if v == string(resource) {
-						pathPrefix = strings.Join(pathSplit[:i], "/") + "/"
-						break
-					}
-				}
-			}
-
-			path = strings.TrimPrefix(path, pathPrefix)
-
-			// 如果是层级小于3级的包 那么判定为不是mods 这种情况下只判断size是否 =0 如果是的话 那么直接判定为不完整
-
-			// 还需要剔除 mod 层级下的路径 例如 cars/shmc/rx7/1.kn5 仅保留 cars/shmc/rx7
-			pathSplit := strings.Split(path, "/")
-			if len(pathSplit) < 4 {
-				// State判断
-
-				// 是 mod ,进行完整性检查
-				if len(pathSplit) == 3 {
-					getSize, _ := GetModSizeFromPath(resCl, path)
-					if size < int64(getSize) {
-						completeRm.SetStateWithPath(&rm, path, Incomplete)
-					} else if size == 0 {
-						completeRm.SetStateWithPath(&rm, path, NotImported)
-					}
-				}
-
-				// 不是 mod 只检测是不是未引入
-				if size == 0 {
-					completeRm.SetStateWithPath(&rm, path, NotImported)
-				}
-
-				paths = append(paths, path)
-			}
-
-			return nil
-		})
-
+	// 遍历文件并填充 rm
+	err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			return err
+		}
+
+		// 跳过目录，只处理文件
+		if info.IsDir() {
+			return nil
+		}
+
+		// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34/1.kn5 需要去除 'a/b/'
+		path = filepath.ToSlash(path)
+
+		// 前缀为定义 寻找前缀
+		if pathPrefix == "" {
+			pathSplit := strings.Split(path, "/")
+			for i, v := range pathSplit {
+				if v == string(resource) {
+					pathPrefix = strings.Join(pathSplit[:i], "/") + "/"
+					break
+				}
+			}
+		}
+
+		relativePath := strings.TrimPrefix(path, pathPrefix)
+		pathSplit := strings.Split(relativePath, "/")
+
+		// 只处理三级路径（resource/pkg/mod），忽略更深层的文件
+		// 例如 cars/shmc/rx7/1.kn5 -> cars/shmc/rx7
+		if len(pathSplit) >= 3 {
+			modPath := strings.Join(pathSplit[:3], "/")
+			modDirs[modPath] += info.Size()
+		} else if len(pathSplit) == 2 {
+			// 二级路径（resource/pkg），标记为存在
+			pkgPath := strings.Join(pathSplit[:2], "/")
+			// 如果目录存在且有内容，标记为 pass（至少部分导入）
+			rm.SetStateWithPath(&rm, pkgPath, Pass)
+		} else if len(pathSplit) == 1 {
+			// 一级路径（resource），标记为存在
+			rm.SetStateWithPath(&rm, relativePath, Pass)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	// 处理所有检测到的 mod 目录，进行完整性检查
+	for modPath, totalSize := range modDirs {
+		expectedSize, err := GetModSizeFromPath(resCl, modPath)
+		if err != nil {
+			// 如果无法从 catalog 获取大小，中断
 			panic(err)
 		}
 
+		if totalSize == 0 {
+			// 目录存在但为空
+			rm.SetStateWithPath(&rm, modPath, NotImported)
+		} else if totalSize < int64(expectedSize) {
+			// 文件大小小于预期，标记为不完整
+			rm.SetStateWithPath(&rm, modPath, Incomplete)
+		} else {
+			// 文件大小符合预期，标记为通过
+			rm.SetStateWithPath(&rm, modPath, Pass)
+		}
+	}
+
+	// -- rm 状态处理
+	// 通过已经被处理过的 rm 判断上级的状态 (自下而上)
+	// 先判断 pkg（二级）的状态，再判断根资源类型（一级）的状态
+	// 全部未引入 -> notImported
+	// 全部通过 -> pass
+	// 有通过但有的未引入 -> Incomplete
+	rootItemsAllNotImport := true
+	rootItemsAllPass := true
+
+	for pkgName, pkgInfo := range rm[ResourceType(resource)].Items {
+		// 如果 pkg 下没有任何 mod，保持 NotImported 状态
+		if len(pkgInfo.Items) == 0 {
+			continue
+		}
+
+		allNotImport := true
+		allPass := true
+
+		// 遍历 pkg 下的所有 mod，判断 pkg 的状态
+		for _, modInfo := range pkgInfo.Items {
+			switch modInfo.State {
+			case Pass:
+				allNotImport = false
+			case Incomplete:
+				allNotImport = false
+				allPass = false
+			case NotImported:
+				allPass = false
+			}
+		}
+
+		// 根据 mod 的状态设置 pkg 的状态
+		if allNotImport {
+			// 所有 mod 都是 NotImported，pkg 保持 NotImported（初始状态）
+			continue
+		} else if allPass {
+			// 所有 mod 都是 Pass，pkg 设置为 Pass
+			rm[ResourceType(resource)].Items[pkgName].State = Pass
+			rootItemsAllNotImport = false
+		} else {
+			// 有 Pass 但有不完整的或未导入的，pkg 设置为 Incomplete
+			rm[ResourceType(resource)].Items[pkgName].State = Incomplete
+			rootItemsAllNotImport = false
+			rootItemsAllPass = false
+		}
+	}
+
+	// 根据所有 pkg 的状态设置根资源类型的状态
+	if rootItemsAllNotImport {
+		// 所有 pkg 都是 NotImported，根状态保持 NotImported（初始状态）
+		// 不需要更新
+	} else if rootItemsAllPass {
+		// 所有 pkg 都是 Pass，根状态设置为 Pass
+		rm[ResourceType(resource)].State = Pass
+	} else {
+		// 有 pkg 是 Pass 或 Incomplete，根状态设置为 Incomplete
+		rm[ResourceType(resource)].State = Incomplete
 	}
 
 	return rm
