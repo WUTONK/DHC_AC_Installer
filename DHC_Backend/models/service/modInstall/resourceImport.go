@@ -70,6 +70,48 @@ func (rm ResourceMap) SetState(resourceType ResourceType, pkg string, car string
 	rm[resourceType].Items[pkg].Items[car] = NewResourceStateInfo(state)
 }
 
+func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state ResourceState) {
+	// 支持一级、二级、三级路径
+	// 一级：cars -> 设置整个资源类型的状态
+	// 二级：cars/shmc -> 设置某个包的状态
+	// 三级：cars/shmc/rx7 -> 设置具体车辆的状态
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 {
+		return // 空路径
+	}
+
+	resourceType := ResourceType(parts[0])
+
+	// 确保 ResourceType 层级存在
+	if (*resMap)[resourceType] == nil {
+		(*resMap)[resourceType] = NewResourceStateInfo(notImported)
+	}
+
+	switch len(parts) {
+	case 1:
+		// 一级路径：只设置资源类型的状态
+		(*resMap)[resourceType].State = state
+	case 2:
+		// 二级路径：设置包的状态
+		pkg := parts[1]
+		if (*resMap)[resourceType].Items[pkg] == nil {
+			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(notImported)
+		}
+		(*resMap)[resourceType].Items[pkg].State = state
+	case 3:
+		// 三级路径：设置具体车辆的状态
+		pkg := parts[1]
+		car := parts[2]
+		if (*resMap)[resourceType].Items[pkg] == nil {
+			(*resMap)[resourceType].Items[pkg] = NewResourceStateInfo(notImported)
+		}
+		(*resMap)[resourceType].Items[pkg].Items[car] = NewResourceStateInfo(state)
+	default:
+		return // 路径层级过多，不支持
+	}
+}
+
 // 辅助函数：获取资源状态
 func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, car string) (ResourceState, bool) {
 	if rm[resourceType] == nil {
@@ -84,26 +126,6 @@ func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, car string
 	return rm[resourceType].Items[pkg].Items[car].State, true
 }
 
-var carsResourceMap = ResourceMap{
-	Cars: NewResourceStateInfo(notImported),
-}
-
-func init() {
-	// 确保常量被使用
-	_ = Tracks
-	_ = Cars
-	_ = Shaders
-	_ = Dashboard
-	_ = pass
-
-	// 包信息
-
-	// 初始化示例数据
-	carsResourceMap.SetState(Cars, "SHMC", "R34", pass)
-	carsResourceMap.SetState(Cars, "SHMC", "R35", pass)
-	carsResourceMap.SetState(Cars, "DDM", "Supra", incomplete)
-}
-
 // 以下数据类型是从json解析数据用
 type ResourceJson struct {
 	Catalog ResourceCatalog `json:"categorys"`
@@ -115,7 +137,7 @@ type ResourceCatalog map[string]ResourceSubCategories
 
 // 构建完整资源结构 Build a complete resource structure
 // 从 json 构建一个包含了所有资源项目的 ResourceMap 用来和实际存在资源进行比对
-func (rm ResourceMap) BuildCompleteResourceStructure() ResourceCatalog {
+func BuildCompleteResourceStructure() ResourceCatalog {
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
 
@@ -157,30 +179,6 @@ func BuildCompleteInitResourceMap(resource ResourceType, catalog ResourceCatalog
 		resourceTypes = append(resourceTypes, resource)
 	}
 
-	// cs
-	// map[
-	//   categorys: map[
-	//     car: map[
-	//       DDM: map[
-	//         SUPRA: 1024
-	//       ]
-	//       SHMC: map[
-	//         R32: 2048
-	//         R34: 1024
-	//       ]
-	//     ]
-	//     tracks: map[
-	//       main: map[
-	//         SRP_093: 200000
-	//       ]
-	//       sub: map[
-	//         NEW_LOOP: 30000
-	//         SRP_C1: 20000
-	//       ]
-	//     ]
-	//   ]
-	// ]
-
 	for _, resType := range resourceTypes {
 		if rm[resType] == nil {
 			rm[resType] = NewResourceStateInfo(notImported)
@@ -203,8 +201,11 @@ func BuildCompleteInitResourceMap(resource ResourceType, catalog ResourceCatalog
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
 // ImportResourceDetection 返回指定资源类型的导入情况
 func ImportResourceDetection(resource ResourceType) ResourceMap {
-	completeRm := carsResourceMap.BuildCompleteResourceStructure()[string(resource)] // 从json获取目前resource的完整资源信息
-	rm := ResourceMap{resource: NewResourceStateInfo(notImported)}
+	// 从json获取目前resource的完整资源信息 并构建一个完整结构的 ResourceMap
+	cs := BuildCompleteResourceStructure()
+	completeRm := BuildCompleteInitResourceMap(resource, cs)
+
+	rm := completeRm
 
 	backendRootPath, _ := infoGet.GetBackendRootPath()
 	isDev := infoGet.IsDevModeGet()
@@ -227,12 +228,12 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		// 消费一下避免报错
 		_ = categoryComplete
 		_ = subCategoryComplete
-		_ = completeRm
 
 		fileMap := make(map[string]int)
 		var paths []string
 		var pathPrefix string // 文件前缀
 
+		// 遍历文件并填充 rm
 		err := filepath.Walk(resourceDir, func(path string, info os.FileInfo, err error) error {
 			// 去除资源文件夹路径前缀 如 a/b/cars/shmc/r34 需要去除 'a/b/'
 			path = filepath.ToSlash(path)
@@ -250,6 +251,9 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 			}
 
 			path = strings.TrimPrefix(path, pathPrefix)
+
+			// 如果是层级小于3级的包 那么判定为不是mods 这种情况下只判断size是否 =0 如果是的话 那么直接判定为不完整
+
 			// 还需要剔除 mod 层级下的路径 例如 cars/shmc/rx7/1.kn5 仅保留 cars/shmc/rx7
 			pathSplit := strings.Split(path, "/")
 			if len(pathSplit) < 4 {
