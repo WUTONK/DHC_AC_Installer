@@ -205,7 +205,26 @@ func GetModSizeFromPath(catalog ResourceCatalog, path string) (int, error) {
 	if len(pathSplit) != 3 {
 		return 0, fmt.Errorf("不支持三级目录以外的路径")
 	}
-	return catalog[pathSplit[0]][pathSplit[1]][pathSplit[2]], nil
+
+	// 检查路径是否在 catalog 中存在
+	resourceType, pkg, mod := pathSplit[0], pathSplit[1], pathSplit[2]
+
+	resourceSubCategories, ok := catalog[resourceType]
+	if !ok {
+		return 0, fmt.Errorf("资源类型 %s 不存在", resourceType)
+	}
+
+	modEntries, ok := resourceSubCategories[pkg]
+	if !ok {
+		return 0, fmt.Errorf("包 %s 不存在", pkg)
+	}
+
+	size, ok := modEntries[mod]
+	if !ok {
+		return 0, fmt.Errorf("mod %s 不存在", mod)
+	}
+
+	return size, nil
 }
 
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
@@ -266,15 +285,15 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		// 例如 cars/shmc/rx7/1.kn5 -> cars/shmc/rx7
 		if len(pathSplit) >= 3 {
 			modPath := strings.Join(pathSplit[:3], "/")
-			modDirs[modPath] += info.Size()
-		} else if len(pathSplit) == 2 {
-			// 二级路径（resource/pkg），标记为存在
-			pkgPath := strings.Join(pathSplit[:2], "/")
-			// 如果目录存在且有内容，标记为 pass（至少部分导入）
-			rm.SetStateWithPath(&rm, pkgPath, Pass)
-		} else if len(pathSplit) == 1 {
-			// 一级路径（resource），标记为存在
-			rm.SetStateWithPath(&rm, relativePath, Pass)
+			// 检查路径是否在 catalog 中存在
+			_, err := GetModSizeFromPath(resCl, modPath)
+			if err != nil {
+				// 路径不在 catalog 中，报警
+				fmt.Printf("警告: 检测到不在 catalog 中的资源路径: %s\n", modPath)
+				// 不添加到 modDirs，跳过该路径
+			} else {
+				modDirs[modPath] += info.Size()
+			}
 		}
 
 		return nil
