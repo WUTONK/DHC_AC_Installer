@@ -28,13 +28,16 @@ func TestImportResourceDetection(t *testing.T) {
 	// 调用 ImportResourceDetection 获取完整的资源检测结果
 	rm := modinstall.ImportResourceDetection(res)
 
-	// 使用JSON序列化输出完整结构
-	jsonData, err := json.MarshalIndent(rm, "", "  ")
-	if err != nil {
-		fmt.Printf("序列化错误: %v\n", err)
-	} else {
-		fmt.Println(string(jsonData))
-	}
+	// // 使用JSON序列化输出完整结构
+	// jsonData, err := json.MarshalIndent(rm, "", "  ")
+	// if err != nil {
+	// 	fmt.Printf("序列化错误: %v\n", err)
+	// } else {
+	// 	fmt.Println(string(jsonData))
+	// }
+
+	modinstall.ResourceMapToJson(rm)
+
 	// map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]
 	// {map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]}
 }

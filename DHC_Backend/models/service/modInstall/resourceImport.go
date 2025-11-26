@@ -33,8 +33,8 @@ const (
 
 // ResourceStateInfo 表示资源的状态信息，包含状态和子项
 type ResourceStateInfo struct {
-	State ResourceState                 // 当前层级的状态
-	Items map[string]*ResourceStateInfo // 子项映射（pkg -> state info 或 car -> state info）
+	State ResourceState                 `json:"state"` // 当前层级的状态
+	Items map[string]*ResourceStateInfo `json:"items"` // 子项映射（pkg -> state info 或 car -> state info）
 }
 
 // ResourceMap 表示完整的资源状态映射结构
@@ -385,28 +385,17 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 	return rm
 }
 
-// 计算完整 ResourceMap 大/小类的总体积（字节）
-// func CalculateResourceMapSize(mode string, resType ResourceType, subCategoryName string) int64 {
-// 	var completeRm = ResourceMap{}.BuildCompleteResourceStructure()
-// 	var size int64
-
-// 	if mode == "category" {
-// 		// 获取指定小类的所有包
-// 		pkgs, ok := completeRm[string(resType)][subCategoryName]
-// 		if !ok {
-// 			return 0
-// 		}
-
-// 		// 遍历所有包
-// 		for _, mods := range pkgs {
-// 			// 遍历每个包下的所有 mod，累加大小
-// 			for _, modSize := range mods {
-// 				size += int64(modSize)
-// 			}
-// 		}
-// 	}
-
-// 	return size
+// type ResourceMapJson struct {
+// 	State ``
 // }
 
-// 资源完整性检测
+// 用于将资源检测后得到的 resourceMap 转为 json 传给前端
+func ResourceMapToJson(rm ResourceMap) ([]byte, error) {
+	jsonBytes, err := json.Marshal(rm)
+	if err != nil {
+		errinfo := fmt.Errorf("转化时发生错误:%v", err)
+		return nil, errinfo
+	}
+
+	return jsonBytes, nil
+}
