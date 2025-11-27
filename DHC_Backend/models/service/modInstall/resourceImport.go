@@ -229,7 +229,31 @@ func GetModSizeFromPath(catalog ResourceCatalog, path string) (int, error) {
 
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
 // ImportResourceDetection 返回指定资源类型的导入情况
-func ImportResourceDetection(resource ResourceType) ResourceMap {
+func ImportResourceDetection(resource ResourceType) (ResourceMap, error) {
+
+	// 获取所有资源模式
+	if resource == All {
+		// 获取所有资源类型（排除 All）
+		var allResourceTypes = []ResourceType{
+			Tracks,
+			Cars,
+			Shaders,
+			Dashboard,
+		}
+
+		polymerizationRm := ResourceMap{}
+
+		for _, v := range allResourceTypes {
+			resultRm, err := ImportResourceDetection(v)
+			if err != nil {
+				return polymerizationRm, err
+			}
+			polymerizationRm[v] = resultRm[v]
+		}
+
+		return polymerizationRm, nil
+	}
+
 	// 从json获取目前resource的完整资源信息 并构建一个完整结构的 ResourceMap
 	resCl := BuildCompleteResourceCatalog()
 	completeRm := BuildCompleteInitResourceMap(resource, resCl)
@@ -245,6 +269,9 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		resourceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources", string(resource))
 	} else {
 		resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
+	}
+	if !infoGet.IsFileOrDirExists(resourceDir) {
+		return rm, fmt.Errorf("资源目录%s不存在", resourceDir)
 	}
 
 	// 检查资源包
@@ -382,20 +409,16 @@ func ImportResourceDetection(resource ResourceType) ResourceMap {
 		rm[ResourceType(resource)].State = Incomplete
 	}
 
-	return rm
+	return rm, nil
 }
 
-// type ResourceMapJson struct {
-// 	State ``
-// }
-
 // 用于将资源检测后得到的 resourceMap 转为 json 传给前端
-func ResourceMapToJson(rm ResourceMap) ([]byte, error) {
+func ResourceMapToJson(rm ResourceMap) (string, error) {
 	jsonBytes, err := json.Marshal(rm)
 	if err != nil {
 		errinfo := fmt.Errorf("转化时发生错误:%v", err)
-		return nil, errinfo
+		return "", errinfo
 	}
 
-	return jsonBytes, nil
+	return string(jsonBytes), nil
 }

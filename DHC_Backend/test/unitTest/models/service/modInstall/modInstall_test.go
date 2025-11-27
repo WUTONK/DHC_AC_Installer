@@ -23,10 +23,15 @@ func TestInstallCm(t *testing.T) {
 }
 
 func TestImportResourceDetection(t *testing.T) {
-	var res modinstall.ResourceType = modinstall.Cars
+	// var res modinstall.ResourceType = modinstall.Cars
+	var res modinstall.ResourceType = modinstall.All
 
 	// 调用 ImportResourceDetection 获取完整的资源检测结果
-	rm := modinstall.ImportResourceDetection(res)
+	rm, err := modinstall.ImportResourceDetection(res)
+	if err != nil {
+		fmt.Printf("发生错误")
+		fmt.Println(err.Error())
+	}
 
 	// // 使用JSON序列化输出完整结构
 	// jsonData, err := json.MarshalIndent(rm, "", "  ")
@@ -36,7 +41,11 @@ func TestImportResourceDetection(t *testing.T) {
 	// 	fmt.Println(string(jsonData))
 	// }
 
-	modinstall.ResourceMapToJson(rm)
+	jsondata, err := modinstall.ResourceMapToJson(rm)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(jsondata)
 
 	// map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]
 	// {map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]}

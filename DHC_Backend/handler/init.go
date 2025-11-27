@@ -68,3 +68,8 @@ func getGamePath(c *gin.Context) {
 		GamePath: gamefile,
 	})
 }
+
+// 获取引入资源完整性信息
+func getImportedResourceIntegrityInfo() {
+
+}
