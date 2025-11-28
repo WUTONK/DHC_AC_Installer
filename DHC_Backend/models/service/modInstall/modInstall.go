@@ -8,6 +8,47 @@ import (
 	"path/filepath"
 )
 
+// 资源包将会分为：
+// - 完整包(全部资源)
+// - 最小包(仅主图+一个C1环线副图+SHMC车包)
+// - 完整地图包|完整车辆包|完整光影包|完整仪表盘包
+
+// 从资源包引入资源
+// 参数：-资源包路径
+func DhcResoucePkgImport(pkgPath string) error {
+	funcIdt := "-modInstall.DhcResoucePkgImport-"
+
+	// 解压到 DHC_Backend/resources/importResourceCache
+	// 然后拿去覆盖 DHC_Backend/resources
+	var dstFilePath string
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
+	}
+
+	isDevMode := infoGet.IsDevModeGet()
+	if isDevMode {
+		dstFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", "importResourceCache")
+	} else {
+		dstFilePath = filepath.Join(backendRootPath, "resources", "importResourceCache")
+		// TODO：补充非开发模式下获取 windows desktop 路径函数
+	}
+
+	options := decompression.DecompressionOptions{
+		SrcPath:     pkgPath,
+		DstFilePath: dstFilePath,
+	}
+
+	_, errorTiming, err := decompression.DecompressionWithOptions(options)
+	if err != nil {
+		return fmt.Errorf("%s解压失败:errorTiming:%s, err:%s", funcIdt, errorTiming, err)
+	}
+
+	fmt.Println("资源引入成功")
+	return nil
+
+}
+
 // 单模组安装
 func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetModOrPath) {
 	funcIdt := "-modinstall.SingleModInstall"

@@ -9,27 +9,8 @@ import (
 	"strings"
 )
 
-// 资源导入
-
 // 导入资源检测
 // 地图 车辆 光影 仪表盘
-type ResourceType string
-
-const (
-	Tracks    ResourceType = "tracks"
-	Cars      ResourceType = "cars"
-	Shaders   ResourceType = "shaders"
-	Dashboard ResourceType = "dashboard"
-	All       ResourceType = "all"
-)
-
-type ResourceState string
-
-const (
-	Pass        ResourceState = "pass"
-	NotImported ResourceState = "notImported"
-	Incomplete  ResourceState = "incomplete"
-)
 
 // ResourceStateInfo 表示资源的状态信息，包含状态和子项
 type ResourceStateInfo struct {

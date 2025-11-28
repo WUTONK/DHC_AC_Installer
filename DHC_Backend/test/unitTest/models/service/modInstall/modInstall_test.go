@@ -57,3 +57,11 @@ func TestConversion(t *testing.T) {
 		fmt.Println(string(jsonData))
 	}
 }
+
+func TestDhcResoucePkgImport(t *testing.T) {
+	pkgPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/windows_finder/desktop/DhcRescousePkgs/逆天车辆包.zip"
+	err := modinstall.DhcResoucePkgImport(pkgPath)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}

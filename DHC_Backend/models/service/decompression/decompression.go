@@ -299,6 +299,9 @@ func DecompressionWithOptions(opts DecompressionOptions) (unDecompressionPath, e
 		return "", "before", fmt.Errorf("%s非模组解压时必须提供 DstFilePath", funcIdt)
 	}
 
+	// 模组解压到底要不要只能传目录而不能直接传文件？？？
+	// 可以两个都保留 如果要通过目录那就使用 DecompressionModWithOptions 否则直接调用 Decompression
+
 	// 调用原有实现
 	return Decompression(
 		opts.SrcPath,
@@ -309,9 +312,7 @@ func DecompressionWithOptions(opts DecompressionOptions) (unDecompressionPath, e
 	)
 }
 
-// 我现在要实现的功能是 可以传入一个模组目录 然后从目录中获取dft文件 然后调用 Decompression 进行解压
-
-// 解压功能 支持.zip / .7z / .rar等压缩格式
+// 解压功能 支持.zip / .7z / .rar压缩格式 支持分卷格式：传入任意序号的分卷压缩文件 函数会自动查找第一个分卷压缩文件并从其开始解压
 // 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
 // 参数：- 来源路径 文件密码 是否为模组 目标路径 dft文件路径或dfc文件获取方式(从模组目录还是从压缩包内获取)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
@@ -469,21 +470,6 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 
 		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	} else {
-		// 分卷解压逻辑
-		// 7z工具只需要指定第一个分卷文件（数字最小的），它会自动查找并读取后续的分卷文件
-		// 所以不需要手动排序和逐个解压，也不需要乱序解压
-
-		// 现在的问题是 我们貌似是用单一文件来检测是否为分卷 但是分卷解压传进去的一定是volume files 的上级目录
-		// 由此可得 在用户调用时 我们一定知道其是否为分卷格式 所以我们这里不用手动检测
-		// 我们把是否为分卷写在dft里就好了
-		// 不 我们后续的模式是 为每一个mod做一个文件夹 然后每个文件夹放一个dftJson 如果mod文件夹没有dftJson 那么就用pkg层级的 如果pkg层级也没有 就用class层级的
-		// 所以不用标记是否为分卷 我们只用处理：进入mod包目录 然后找到一个压缩文件 如果压缩文件不止一个（分卷） 那么就解压第一个（因为7z会从第一个开始自动解压完分卷
-		// 这个函数只用负责 将 mod 层级的目录解压并放到中间目录里
-
-		// 将dft写在压缩包内 适用于两种情况 ： 1.非分卷 2.分卷的001文件
-		// 那么保留检测的功能就只有 如果dft内没有填写为是分卷 但是实际检测出来又是分卷 就报错 如果分卷不是001也报错
-		// 必须简化！引用资源是固定死的 这都是我们写好的 用户毋需考虑
-		// 用户资源命名格式 ： class_pkg_modName 例: maps_srp_srp0.9.3 或者是 class_pkg (maps_srp) or class (maps)
 
 		// 获取分卷文件的目录
 		volumeDir := filepath.Dir(srcPath)
