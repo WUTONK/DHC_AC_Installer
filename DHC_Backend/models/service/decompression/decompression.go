@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -102,6 +104,102 @@ func Get7zPath(isTestSz bool) string {
 	}
 
 	return szPath
+}
+
+// extractVolumeNumber 从文件名中提取分卷数字
+// 支持的格式：
+//   - zip分卷：file.z01, file.z02 -> 返回 1, 2
+//   - 7z分卷：file.7z.001, file.7z.002 -> 返回 1, 2
+//   - rar分卷：file.part1.rar, file.part2.rar -> 返回 1, 2
+//
+// 如果不是分卷文件或无法提取数字，返回 -1
+func extractVolumeNumber(fileName string, comparableType string) int {
+	fileNameList := strings.Split(fileName, ".")
+	lastSuffix := fileNameList[len(fileNameList)-1]
+
+	switch comparableType {
+	case "zip":
+		// zip分卷格式：file.z01, file.z02
+		if strings.HasPrefix(lastSuffix, "z") && len(lastSuffix) >= 3 {
+			// 提取 z 后面的数字
+			numStr := lastSuffix[1:]
+			num, err := strconv.Atoi(numStr)
+			if err == nil {
+				return num
+			}
+		}
+	case "7z":
+		// 7z分卷格式：file.7z.001, file.7z.002
+		if len(fileNameList) >= 3 {
+			secondLastSuffix := fileNameList[len(fileNameList)-2]
+			if secondLastSuffix == "7z" && len(lastSuffix) == 3 {
+				num, err := strconv.Atoi(lastSuffix)
+				if err == nil {
+					return num
+				}
+			}
+		}
+	case "rar":
+		// rar分卷格式：file.part1.rar, file.part2.rar
+		if len(fileNameList) >= 2 {
+			secondLastSuffix := fileNameList[len(fileNameList)-2]
+			if strings.HasPrefix(secondLastSuffix, "part") {
+				// 提取 part 后面的数字
+				numStr := strings.TrimPrefix(secondLastSuffix, "part")
+				num, err := strconv.Atoi(numStr)
+				if err == nil {
+					return num
+				}
+			}
+		}
+	}
+
+	return -1
+}
+
+// findFirstVolumeFile 在指定目录中查找第一个分卷文件（数字最小的）
+// 返回第一个分卷文件的完整路径，如果未找到则返回错误
+func findFirstVolumeFile(dirPath string, comparableType string) (string, error) {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return "", fmt.Errorf("读取目录失败: %v", err)
+	}
+
+	type volumeFile struct {
+		path   string
+		number int
+	}
+
+	var volumeFiles []volumeFile
+
+	// 遍历目录，找到所有分卷文件
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		fileName := entry.Name()
+		volumeNum := extractVolumeNumber(fileName, comparableType)
+
+		if volumeNum != -1 {
+			volumeFiles = append(volumeFiles, volumeFile{
+				path:   filepath.Join(dirPath, fileName),
+				number: volumeNum,
+			})
+		}
+	}
+
+	if len(volumeFiles) == 0 {
+		return "", fmt.Errorf("在目录 %s 中未找到分卷文件", dirPath)
+	}
+
+	// 按分卷数字排序
+	sort.Slice(volumeFiles, func(i, j int) bool {
+		return volumeFiles[i].number < volumeFiles[j].number
+	})
+
+	// 返回第一个分卷文件（数字最小的）
+	return volumeFiles[0].path, nil
 }
 
 func SzTest() string {
@@ -211,9 +309,11 @@ func DecompressionWithOptions(opts DecompressionOptions) (unDecompressionPath, e
 	)
 }
 
+// 我现在要实现的功能是 可以传入一个模组目录 然后从目录中获取dft文件 然后调用 Decompression 进行解压
+
 // 解压功能 支持.zip / .7z / .rar等压缩格式
 // 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
-// 参数：- 来源路径 目标路径 文件密码 dfc文件获取方式(详见源码)
+// 参数：- 来源路径 文件密码 是否为模组 目标路径 dft文件路径或dfc文件获取方式(从模组目录还是从压缩包内获取)
 //   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
 //
 // 返回值：-解压目录 错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
@@ -246,7 +346,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 			dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
 			dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
 		case types.DftPathFromCompressRoot:
-			// TODO: 从压缩包根目录文件中读取 dhcFileTag.json
+			// TODO: 从压缩包根目录文件中读取 dhcFileTag.json（可能需要删除该逻辑 因为mod安装可能永远都不会需要从压缩包根目录文件中读取 dhcFileTag.json）
 		default:
 			fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
 			dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
@@ -276,7 +376,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		comparableType = "7z"
 	case "rar":
 		comparableType = "rar"
-		// 识别是否为分卷 - rar分卷格式：file.part1.rar, file.part2.rar
+		// 识别是否为 rar分卷 - rar分卷格式：file.part1.rar, file.part2.rar
 		if len(fileNameList) >= 2 {
 			secondLastSuffix := fileNameList[len(fileNameList)-2]
 			if strings.HasPrefix(secondLastSuffix, "part") {
@@ -370,8 +470,59 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	} else {
 		// 分卷解压逻辑
-		// TODO: 实现分卷解压逻辑
-		return "", "before", fmt.Errorf("%s分卷解压功能尚未实现", funcIdt)
+		// 7z工具只需要指定第一个分卷文件（数字最小的），它会自动查找并读取后续的分卷文件
+		// 所以不需要手动排序和逐个解压，也不需要乱序解压
+
+		// 现在的问题是 我们貌似是用单一文件来检测是否为分卷 但是分卷解压传进去的一定是volume files 的上级目录
+		// 由此可得 在用户调用时 我们一定知道其是否为分卷格式 所以我们这里不用手动检测
+		// 我们把是否为分卷写在dft里就好了
+		// 不 我们后续的模式是 为每一个mod做一个文件夹 然后每个文件夹放一个dftJson 如果mod文件夹没有dftJson 那么就用pkg层级的 如果pkg层级也没有 就用class层级的
+		// 所以不用标记是否为分卷 我们只用处理：进入mod包目录 然后找到一个压缩文件 如果压缩文件不止一个（分卷） 那么就解压第一个（因为7z会从第一个开始自动解压完分卷
+		// 这个函数只用负责 将 mod 层级的目录解压并放到中间目录里
+
+		// 将dft写在压缩包内 适用于两种情况 ： 1.非分卷 2.分卷的001文件
+		// 那么保留检测的功能就只有 如果dft内没有填写为是分卷 但是实际检测出来又是分卷 就报错 如果分卷不是001也报错
+		// 必须简化！引用资源是固定死的 这都是我们写好的 用户毋需考虑
+		// 用户资源命名格式 ： class_pkg_modName 例: maps_srp_srp0.9.3 或者是 class_pkg (maps_srp) or class (maps)
+
+		// 获取分卷文件的目录
+		volumeDir := filepath.Dir(srcPath)
+
+		// 查找第一个分卷文件（数字最小的）
+		firstVolumePath, err := findFirstVolumeFile(volumeDir, comparableType)
+		if err != nil {
+			return "", "before", fmt.Errorf("%s查找第一个分卷文件失败: %v", funcIdt, err)
+		}
+
+		fmt.Printf("%s找到第一个分卷文件: %s\n", funcIdt, firstVolumePath)
+
+		// 创建7z可执行文件路径
+		szExecutable := filepath.Join(szPath, "7zz")
+		if runtime.GOOS == "windows" {
+			szExecutable = filepath.Join(szPath, "7z.exe")
+		}
+
+		// 解压第一个分卷文件，7z会自动处理后续分卷
+		// 使用-y参数自动覆盖所有文件
+		cmd := exec.Command(szExecutable, "x", firstVolumePath, "-o"+midDirPath+"/", "-y")
+		cmd.Dir = backendRootPath
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err = cmd.Run()
+		outStr, errStr := stdout.String(), stderr.String()
+		if err == nil {
+			errStr = "无错误输出"
+		}
+		fmt.Printf("7z分卷解压命令输出: %s\n 7z分卷解压命令错误: %s\n", outStr, errStr)
+
+		if err != nil {
+			fmt.Printf("%s分卷解压失败: 错误=%v\n", funcIdt, err)
+			return "", "before", fmt.Errorf("%s分卷解压失败: %v", funcIdt, err)
+		}
+
+		fmt.Printf("%s解压分卷压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	}
 
 	return midDirPath, "", nil
@@ -387,6 +538,7 @@ func DecompressionMod(srcPath string, filePassword string, dftPathGetModOrPath t
 		IsMod:               true,
 		DftPathGetModOrPath: dftPathGetModOrPath,
 	}
+
 	return DecompressionWithOptions(opts)
 }
 

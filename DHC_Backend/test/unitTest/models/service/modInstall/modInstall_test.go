@@ -33,22 +33,12 @@ func TestImportResourceDetection(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 
-	// // 使用JSON序列化输出完整结构
-	// jsonData, err := json.MarshalIndent(rm, "", "  ")
-	// if err != nil {
-	// 	fmt.Printf("序列化错误: %v\n", err)
-	// } else {
-	// 	fmt.Println(string(jsonData))
-	// }
-
 	jsondata, err := modinstall.ResourceMapToJson(rm)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	fmt.Println(jsondata)
 
-	// map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]
-	// {map[cars:map[DDM:map[SUPRA:1024] SHMC:map[R32:2048 R34:1024]] tracks:map[main:map[SRP_093:200000] sub:map[NEW_LOOP:30000 SRP_C1:20000]]]}
 }
 
 func TestBuildCompleteResourceStructure(t *testing.T) {
@@ -67,26 +57,3 @@ func TestConversion(t *testing.T) {
 		fmt.Println(string(jsonData))
 	}
 }
-
-// map[
-//   categorys: map[
-//     car: map[
-//       DDM: map[
-//         SUPRA: 1024
-//       ]
-//       SHMC: map[
-//         R32: 2048
-//         R34: 1024
-//       ]
-//     ]
-//     tracks: map[
-//       main: map[
-//         SRP_093: 200000
-//       ]
-//       sub: map[
-//         NEW_LOOP: 30000
-//         SRP_C1: 20000
-//       ]
-//     ]
-//   ]
-// ]
