@@ -5,6 +5,8 @@ import (
 	"DHC_Backend/models/service/infoGet"
 	"DHC_Backend/models/service/types"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 )
 
@@ -13,39 +15,67 @@ import (
 // - 最小包(仅主图+一个C1环线副图+SHMC车包)
 // - 完整地图包|完整车辆包|完整光影包|完整仪表盘包
 
-// 从资源包引入资源
+// 从资源包引入资源到本地资源库
 // 参数：-资源包路径
-func DhcResoucePkgImport(pkgPath string) error {
+// 返回值： -安装资源列表
+func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 	funcIdt := "-modInstall.DhcResoucePkgImport-"
+
+	rm := ResourceMap{}
 
 	// 解压到 DHC_Backend/resources/importResourceCache
 	// 然后拿去覆盖 DHC_Backend/resources
-	var dstFilePath string
 	backendRootPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
-		return fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
+		return nil, fmt.Errorf("%s获取根目录路径时发生错误: %v", funcIdt, err)
 	}
 
+	var midFilePath string
 	isDevMode := infoGet.IsDevModeGet()
 	if isDevMode {
-		dstFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", "importResourceCache")
+		midFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", "importResourceCache")
 	} else {
-		dstFilePath = filepath.Join(backendRootPath, "resources", "importResourceCache")
+		midFilePath = filepath.Join(backendRootPath, "resources", "importResourceCache")
 		// TODO：补充非开发模式下获取 windows desktop 路径函数
+	}
+
+	var resourceJsonFilePath string
+	if isDevMode {
+		resourceJsonFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+	} else {
+		resourceJsonFilePath = filepath.Join(backendRootPath, "resources")
 	}
 
 	options := decompression.DecompressionOptions{
 		SrcPath:     pkgPath,
-		DstFilePath: dstFilePath,
+		DstFilePath: midFilePath,
 	}
 
 	_, errorTiming, err := decompression.DecompressionWithOptions(options)
 	if err != nil {
-		return fmt.Errorf("%s解压失败:errorTiming:%s, err:%s", funcIdt, errorTiming, err)
+		return nil, fmt.Errorf("%s解压失败:errorTiming:%s, err:%s", funcIdt, errorTiming, err)
+	}
+
+	// 检测中间目录得到 ResouceMap
+	rm, err = ImportResourceDetection(All, DetectionPath(midFilePath))
+	if err != nil {
+		return nil, fmt.Errorf("%s检测资源包ResourceMap失败: err:%s", funcIdt, err)
+	}
+
+	// 将中间目录中的文件复制到资源文件夹
+	err = copyDir(midFilePath, resourceJsonFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("%s复制资源文件失败: err:%s", funcIdt, err)
+	}
+
+	// 清除缓存
+	err = os.RemoveAll(midFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("%s重要错误: 引入资源包时资源包缓存清除失败: err:%s", funcIdt, err)
 	}
 
 	fmt.Println("资源引入成功")
-	return nil
+	return rm, nil
 
 }
 
@@ -99,7 +129,44 @@ func m() {
 
 }
 
-// 导入模组包到本地
-func local() {
+// copyDir 递归复制目录及其内容
+func copyDir(srcDir, dstDir string) error {
+	return filepath.WalkDir(srcDir, func(srcPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 
+		// 计算目标路径
+		relPath, err := filepath.Rel(srcDir, srcPath)
+		if err != nil {
+			return err
+		}
+		dstPath := filepath.Join(dstDir, relPath)
+
+		if d.IsDir() {
+			// 创建目标目录
+			return os.MkdirAll(dstPath, os.ModePerm)
+		} else {
+			// 复制文件
+			// 确保目标目录存在
+			if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
+				return err
+			}
+
+			srcFile, err := os.Open(srcPath)
+			if err != nil {
+				return err
+			}
+			defer srcFile.Close()
+
+			dstFile, err := os.Create(dstPath)
+			if err != nil {
+				return err
+			}
+			defer dstFile.Close()
+
+			_, err = io.Copy(dstFile, srcFile)
+			return err
+		}
+	})
 }

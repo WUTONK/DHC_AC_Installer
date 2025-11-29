@@ -339,6 +339,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 	fileName := fileInfo.Name()
 
 	var dhcFileTag DhcFileTag
+
 	if isMod {
 		// 获取dhcFileTag.json路径
 		fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
@@ -415,6 +416,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 	} else {
 		midDirPath = dstFilePath
 	}
+
 	fmt.Printf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
 
 	// 确保中间目录存在

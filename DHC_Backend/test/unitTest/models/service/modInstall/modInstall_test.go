@@ -26,8 +26,10 @@ func TestImportResourceDetection(t *testing.T) {
 	// var res modinstall.ResourceType = modinstall.Cars
 	var res modinstall.ResourceType = modinstall.All
 
+	var DetectionPath modinstall.DetectionPath = modinstall.Local
+
 	// 调用 ImportResourceDetection 获取完整的资源检测结果
-	rm, err := modinstall.ImportResourceDetection(res)
+	rm, err := modinstall.ImportResourceDetection(res, DetectionPath)
 	if err != nil {
 		fmt.Printf("发生错误")
 		fmt.Println(err.Error())
@@ -59,9 +61,16 @@ func TestConversion(t *testing.T) {
 }
 
 func TestDhcResoucePkgImport(t *testing.T) {
-	pkgPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/windows_finder/desktop/DhcRescousePkgs/逆天车辆包.zip"
-	err := modinstall.DhcResoucePkgImport(pkgPath)
+	pkgPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/windows_finder/desktop/DhcRescousePkgs/SHMC_r32车辆包.zip"
+	// /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/windows_finder/desktop/DhcRescousePkgs/SHMC_r32车辆包.zip
+	ResouceMap, err := modinstall.DhcResoucePkgImport(pkgPath)
 	if err != nil {
 		fmt.Println(err.Error())
+	}
+	jsonData, err := json.MarshalIndent(ResouceMap, "", "  ")
+	if err != nil {
+		fmt.Printf("序列化错误: %v\n", err)
+	} else {
+		fmt.Println(string(jsonData))
 	}
 }

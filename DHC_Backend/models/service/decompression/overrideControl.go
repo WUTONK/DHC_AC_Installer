@@ -836,7 +836,6 @@ func ComplyTask(srcDirPath, modType string, tasks []Task) error {
 	for _, task := range tasks {
 		switch task.Action {
 		case OverrideActionOverwrite:
-			// 问题 现在的是相对路径
 			fullSrcDirPath := filepath.Join(srcDirPath, task.Path) // SrcDirPath在磁盘中的完整路径
 			err := o.Overwrite(fullSrcDirPath, task.Target)
 			if err != nil {

@@ -208,9 +208,16 @@ func GetModSizeFromPath(catalog ResourceCatalog, path string) (int, error) {
 	return size, nil
 }
 
+type DetectionPath string
+
+const (
+	Local DetectionPath = "Local"
+)
+
 // 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
 // ImportResourceDetection 返回指定资源类型的导入情况
-func ImportResourceDetection(resource ResourceType) (ResourceMap, error) {
+// 参数 ： -要检测的类型(如果为 All 那么会检测所有资源) 检测路径（缺省为本地资源路径）
+func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath) (ResourceMap, error) {
 
 	// 获取所有资源模式
 	if resource == All {
@@ -225,7 +232,7 @@ func ImportResourceDetection(resource ResourceType) (ResourceMap, error) {
 		polymerizationRm := ResourceMap{}
 
 		for _, v := range allResourceTypes {
-			resultRm, err := ImportResourceDetection(v)
+			resultRm, err := ImportResourceDetection(v, DetectionPath)
 			if err != nil {
 				return polymerizationRm, err
 			}
@@ -246,13 +253,23 @@ func ImportResourceDetection(resource ResourceType) (ResourceMap, error) {
 
 	// 得到对应类型的资源文件夹
 	var resourceDir string
-	if isDev {
-		resourceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources", string(resource))
+
+	if DetectionPath == Local {
+		if isDev {
+			resourceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources", string(resource))
+		} else {
+			resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
+		}
+		if !infoGet.IsFileOrDirExists(resourceDir) {
+			return rm, fmt.Errorf("资源目录%s不存在", resourceDir)
+		}
+
 	} else {
-		resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
-	}
-	if !infoGet.IsFileOrDirExists(resourceDir) {
-		return rm, fmt.Errorf("资源目录%s不存在", resourceDir)
+		resourceDir = string(DetectionPath)
+		if !infoGet.IsFileOrDirExists(resourceDir) {
+			// 在传入资源包时 资源类型可能是缺失的 这个时候不应该报错 而是尝试检测下一个类型 直到所有类型遍历完成
+			return nil, nil
+		}
 	}
 
 	// 检查资源包
