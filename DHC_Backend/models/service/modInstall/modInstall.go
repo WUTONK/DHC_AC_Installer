@@ -541,50 +541,31 @@ func ResetSimEnvModDirectories() error {
 		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
 	}
 
-	// 备份路径
-	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "envBackup", "AC_SKELETON_HASDLC", "Assetto Corsa")
+	// 备份路径（备份目录在 acRoot/envBackup 下，直接是 AC_SKELETON_HASDLC/content）
+	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC")
 
-	// 需要清理/恢复的模组目录（content 下的子目录）
-	modDirectories := []string{
-		"content/cars",
-		"content/tracks",
-		"content/dashboard",
-		"content/shaders",
-	}
+	// 获取 content 目录路径
+	contentPath := filepath.Join(gamePath, "content")
+	backupContentPath := filepath.Join(backupPath, "content")
 
 	fmt.Printf("%s开始重置 simenv 模组目录...\n", funcIdt)
 
-	// 遍历需要清理的目录
-	for _, modDir := range modDirectories {
-		gameModPath := filepath.Join(gamePath, modDir)
-		backupModPath := filepath.Join(backupPath, modDir)
-
-		// 检查备份目录是否存在
-		if _, err := os.Stat(backupModPath); os.IsNotExist(err) {
-			fmt.Printf("%s警告: 备份目录不存在，跳过恢复: %s\n", funcIdt, backupModPath)
-			// 如果备份不存在，直接删除游戏目录中的模组目录
-			if err := os.RemoveAll(gameModPath); err != nil {
-				fmt.Printf("%s警告: 删除目录失败: %s, 错误: %v\n", funcIdt, gameModPath, err)
-			} else {
-				fmt.Printf("%s已删除目录: %s\n", funcIdt, gameModPath)
-			}
-			continue
-		}
-
-		// 删除游戏目录中的模组目录
-		if err := os.RemoveAll(gameModPath); err != nil {
-			fmt.Printf("%s警告: 删除目录失败: %s, 错误: %v\n", funcIdt, gameModPath, err)
-			continue
-		}
-		fmt.Printf("%s已删除目录: %s\n", funcIdt, gameModPath)
-
-		// 从备份恢复
-		if err := copyDir(backupModPath, gameModPath); err != nil {
-			fmt.Printf("%s警告: 从备份恢复失败: %s -> %s, 错误: %v\n", funcIdt, backupModPath, gameModPath, err)
-			continue
-		}
-		fmt.Printf("%s已从备份恢复: %s -> %s\n", funcIdt, backupModPath, gameModPath)
+	// 检查备份 content 目录是否存在
+	if _, err := os.Stat(backupContentPath); os.IsNotExist(err) {
+		return fmt.Errorf("%s备份 content 目录不存在: %s", funcIdt, backupContentPath)
 	}
+
+	// 删除游戏目录中的 content 目录
+	if err := os.RemoveAll(contentPath); err != nil {
+		return fmt.Errorf("%s删除 content 目录失败: %s, 错误: %v", funcIdt, contentPath, err)
+	}
+	fmt.Printf("%s已删除 content 目录: %s\n", funcIdt, contentPath)
+
+	// 从备份复制整个 content 目录
+	if err := copyDir(backupContentPath, contentPath); err != nil {
+		return fmt.Errorf("%s从备份恢复 content 目录失败: %s -> %s, 错误: %v", funcIdt, backupContentPath, contentPath, err)
+	}
+	fmt.Printf("%s已从备份恢复 content 目录: %s -> %s\n", funcIdt, backupContentPath, contentPath)
 
 	fmt.Printf("%s simenv 模组目录重置完成\n", funcIdt)
 	return nil

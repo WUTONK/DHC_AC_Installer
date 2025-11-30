@@ -79,17 +79,93 @@ type Task struct {
 	// TODO:添加覆盖到某个特定路径的支持
 }
 
-// 接受*一个*文件并覆盖目标文件 如果目标文件不存在 它会被创建
-func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
+// Overwrite 覆盖文件或目录
+// 如果源路径是文件，则复制文件；如果是目录，则递归复制整个目录
+// 如果目标文件/目录不存在，它会被创建
+func (o OverrideStruct) Overwrite(srcPath, dstPath string) error {
 	funcIdt := "-service.decompression.Overwrite-"
 
-	srcFile, err := os.Open(srcFilePath)
+	// 检查源路径是文件还是目录
+	srcInfo, err := os.Stat(srcPath)
+	if err != nil {
+		return fmt.Errorf("%s无法获取源路径信息: %v", funcIdt, err)
+	}
+
+	if srcInfo.IsDir() {
+		// 目录处理：递归复制整个目录
+		// 确保目标目录的父目录存在
+		if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
+			return fmt.Errorf("%s创建目标目录父目录失败: %v", funcIdt, err)
+		}
+
+		// 如果目标目录已存在，先删除
+		if _, err := os.Stat(dstPath); err == nil {
+			if err := os.RemoveAll(dstPath); err != nil {
+				return fmt.Errorf("%s删除已存在的目标目录失败: %v", funcIdt, err)
+			}
+		}
+
+		// 使用 filepath.WalkDir 递归复制
+		err := filepath.WalkDir(srcPath, func(srcFilePath string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// 计算相对路径
+			relPath, err := filepath.Rel(srcPath, srcFilePath)
+			if err != nil {
+				return err
+			}
+			dstFilePath := filepath.Join(dstPath, relPath)
+
+			if d.IsDir() {
+				// 创建目标目录
+				return os.MkdirAll(dstFilePath, os.ModePerm)
+			} else {
+				// 复制文件
+				// 确保目标目录存在
+				if err := os.MkdirAll(filepath.Dir(dstFilePath), os.ModePerm); err != nil {
+					return err
+				}
+
+				srcFile, err := os.Open(srcFilePath)
+				if err != nil {
+					return err
+				}
+				defer srcFile.Close()
+
+				dstFile, err := os.Create(dstFilePath)
+				if err != nil {
+					return err
+				}
+				defer dstFile.Close()
+
+				_, err = io.Copy(dstFile, srcFile)
+				return err
+			}
+		})
+
+		if err != nil {
+			return fmt.Errorf("%s递归复制目录失败: %s -> %s, err:%v", funcIdt, srcPath, dstPath, err)
+		}
+
+		fmt.Printf("%s成功复制目录从 %s 到 %s\n", funcIdt, srcPath, dstPath)
+		return nil
+	}
+
+	// 文件处理：复制单个文件
+	srcFile, err := os.Open(srcPath)
 	if err != nil {
 		return fmt.Errorf("%s无法打开srcfile: %v", funcIdt, err)
 	}
 	defer srcFile.Close()
 
-	dstFile, err := os.Create(dstFilePath)
+	// 确保目标目录存在
+	if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
+		return fmt.Errorf("%s创建目标目录失败: %v", funcIdt, err)
+	}
+
+	dstFile, err := os.Create(dstPath)
 	if err != nil {
 		return fmt.Errorf("%s无法创建dstfile: %v", funcIdt, err)
 	}
@@ -97,10 +173,10 @@ func (o OverrideStruct) Overwrite(srcFilePath, dstFilePath string) error {
 
 	bytesWritten, err := io.Copy(dstFile, srcFile)
 	if err != nil {
-		return fmt.Errorf("%s无法复制并覆盖srcFile:%s 到 dstFile:%s ,err:%v", funcIdt, srcFilePath, dstFilePath, err)
+		return fmt.Errorf("%s无法复制并覆盖srcFile:%s 到 dstFile:%s ,err:%v", funcIdt, srcPath, dstPath, err)
 	}
 
-	fmt.Printf("%s成功复制 %d 字节从 %s 到 %s\n", funcIdt, bytesWritten, srcFilePath, dstFilePath)
+	fmt.Printf("%s成功复制 %d 字节从 %s 到 %s\n", funcIdt, bytesWritten, srcPath, dstPath)
 	return nil
 }
 func (o OverrideStruct) Skip() error {

@@ -105,6 +105,8 @@ func GetDftPath(srcPath string, unDecompressionPath string, d types.DftPathGetMo
 }
 
 // FindDftJsonWithPriority 按优先级查找 dft.json 文件
+// 参数： - mod 目录在系统中的路径
+// 返回值：最高层级的 modPath 的路径
 // 优先级：mod级别 > pkg级别 > 大类级别（级别越高权限越高）
 // 路径结构：resources/{resourceType}/{pkg}/{mod}/
 // 查找顺序：
