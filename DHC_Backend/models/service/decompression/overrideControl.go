@@ -375,7 +375,9 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 
 	// 阶段4：生成执行计划（仅输出计划，暂不执行 I/O）
 	// 目录整体任务优先于文件任务；被剪枝的子树不会产生重复任务。
-	tasks := generateExecutionPlan(root, dstDirPath)
+	// 获取源目录名，用于处理根节点（relPath = "."）的情况
+	srcDirName := filepath.Base(srcDirPath)
+	tasks := generateExecutionPlan(root, dstDirPath, srcDirName)
 
 	// 打印计划摘要
 	fmt.Printf("%s规划完成：共生成 %d 个任务\n", funcIdt, len(tasks))
@@ -812,7 +814,7 @@ func clearDescendantDecisions(node *Node) {
 // 规划阶段：生成执行计划
 // =====================
 
-// generateExecutionPlan: 根据剪枝后的树，生成“目录级任务优先”的执行计划。
+// generateExecutionPlan: 根据剪枝后的树，生成"目录级任务优先"的执行计划。
 // -若当前节点是目录，且存在目录级整体动作：产生一个目录任务并停止下钻（子树已被父处理）。
 // -若当前节点是文件，且存在决策：产生文件任务。
 // -否则继续遍历子节点。
@@ -821,16 +823,18 @@ func clearDescendantDecisions(node *Node) {
 // -backup: 可先调用 o.Backup 再执行覆盖；或将备份也纳入 Task 类型
 // -rename: 针对文件时对 dst 路径做重命名；目录级 rename 需谨慎设计
 // 并发：可基于目录切片并发执行，但要控制并发度与错误聚合。
-func generateExecutionPlan(node *Node, dstRoot string) []Task {
+// srcDirName: 源目录名称，用于处理根节点（relPath = "."）的情况
+func generateExecutionPlan(node *Node, dstRoot string, srcDirName string) []Task {
 	var tasks []Task
 	// 目录整体动作：作为一个目录级任务，下方已剪枝或无决策
 	if node.isDir && node.hasDecision && isWholeDirAction(node.decidedAction) {
 		// 仅当子树不存在任何决策（已被剪枝或本就无决策）时，才能安全上提为目录任务
 		if !subtreeHasDecisions(node) {
+			target := buildTarget(dstRoot, node.relPath, node.decidedTarget, srcDirName)
 			tasks = append(tasks, Task{
 				Path:   node.relPath,
 				Action: node.decidedAction,
-				Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
+				Target: target,
 				IsDir:  true,
 			})
 			return tasks
@@ -841,7 +845,7 @@ func generateExecutionPlan(node *Node, dstRoot string) []Task {
 		task := Task{
 			Path:   node.relPath,
 			Action: node.decidedAction,
-			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget),
+			Target: buildTarget(dstRoot, node.relPath, node.decidedTarget, srcDirName),
 			IsDir:  false,
 		}
 		// 如果是 rename 操作，设置新文件名
@@ -852,16 +856,21 @@ func generateExecutionPlan(node *Node, dstRoot string) []Task {
 		return tasks
 	}
 	for _, ch := range node.children {
-		tasks = append(tasks, generateExecutionPlan(ch, dstRoot)...)
+		tasks = append(tasks, generateExecutionPlan(ch, dstRoot, srcDirName)...)
 	}
 	return tasks
 }
 
-// buildTarget: 将“目标相对路径”拼接到 dstRoot，若未指定则沿用源相对路径
+// buildTarget: 将"目标相对路径"拼接到 dstRoot，若未指定则沿用源相对路径
 // 未来支持映射时：decidedTarget 由规则提供；未提供则按 relPath 对齐。
-func buildTarget(dstRoot, relPath, decidedTarget string) string {
+// 特殊处理：当 relPath = "." 时（根节点），使用 srcDirName 来构建目标路径
+func buildTarget(dstRoot, relPath, decidedTarget, srcDirName string) string {
 	if decidedTarget != "" {
 		return filepath.Join(dstRoot, decidedTarget)
+	}
+	// 当 relPath = "." 时（根节点），使用源目录名来构建目标路径
+	if relPath == "." {
+		return filepath.Join(dstRoot, srcDirName)
 	}
 	return filepath.Join(dstRoot, relPath)
 }
