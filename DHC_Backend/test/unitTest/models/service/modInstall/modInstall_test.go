@@ -98,7 +98,7 @@ func TestMultiModInstall(t *testing.T) {
 		return
 	}
 
-	fmt.Println("MultiModInstall 执行成功")
+	fmt.Println("MultiModInstall 执行完成")
 }
 
 // TestResetSimEnvModDirectories 测试 simenv 模组目录重置功能（垃圾回收）

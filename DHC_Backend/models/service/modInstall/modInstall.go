@@ -58,7 +58,7 @@ import (
    压缩包 → 解压到中间目录 → 读取配置 → 复制到游戏目录
    mod.rar  cache/{type}/{name}/  dft.json   content/...
 
-4. 单模组安装 (SingleModInstallFromDir - 已解压目录)
+4. 单模组安装 (SingleModInstallFromDir - 从已解压资源目录安装)
    目录 → 读取配置 → 直接复制到游戏目录 (跳过解压)
    dir/    dft.json   content/...
 
