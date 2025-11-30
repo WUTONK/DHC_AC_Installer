@@ -11,6 +11,90 @@ import (
 	"strings"
 )
 
+/*
+================================================================================
+模组安装系统架构与流程说明
+================================================================================
+
+【系统架构】
+─────────────────────────────────────────────────────────────────────────────
+外部资源包 → DhcResoucePkgImport → 资源库 → MultiModInstall → 游戏目录
+   pkg.zip      (引入)          resources/    (批量安装)    content/
+
+                    ┌─────────────────────┐
+                    │ DhcResoucePkgImport │  资源包引入
+                    └──────────┬──────────┘
+                               ▼
+                    ┌─────────────────────┐
+                    │   资源库 Storage     │  resources/{type}/{pkg}/{mod}/
+                    └──────────┬──────────┘
+                               ▼
+                    ┌─────────────────────┐
+                    │   MultiModInstall   │  批量安装入口
+                    └──────────┬──────────┘
+                    ┌──────────┴──────────┐
+         ┌──────────▼──────────┐  ┌───────▼──────────────┐
+         │  SingleModInstall   │  │SingleModInstallFromDir│
+         │  (压缩包→中间→游戏)   │  │  (目录→游戏，跳过解压) │
+         └──────────┬──────────┘  └───────┬──────────────┘
+                    └──────────┬──────────┘
+         ┌──────────▼─────────────────────▼──────────┐
+         │  decompression.OverrideControl()          │  复制到游戏目录
+         └──────────────────────────────────────────┘
+
+
+【核心流程】
+─────────────────────────────────────────────────────────────────────────────
+
+1. 资源引入 (DhcResoucePkgImport)
+   外部资源包 → 解压到临时缓存 → 检测资源 → 复制到资源库 → 清理缓存
+   pkg.zip    importCache/      ResourceMap   resources/     删除缓存
+
+2. 模组安装 (MultiModInstall)
+   路径列表 → 展开路径 → 完整性检查 → 遍历安装
+   ["cars/SHMC"]  expandPaths()  检查状态     SingleModInstall/FromDir
+
+3. 单模组安装 (SingleModInstall - 压缩包)
+   压缩包 → 解压到中间目录 → 读取配置 → 复制到游戏目录
+   mod.rar  cache/{type}/{name}/  dft.json   content/...
+
+4. 单模组安装 (SingleModInstallFromDir - 已解压目录)
+   目录 → 读取配置 → 直接复制到游戏目录 (跳过解压)
+   dir/    dft.json   content/...
+
+
+【关键目录】
+─────────────────────────────────────────────────────────────────────────────
+• 外部资源包: 用户提供的压缩包
+• 临时引入缓存: resources/importResourceCache/ (引入时临时使用)
+• 资源库: resources/ 或 test/simEnv/resources/ (存储已解压模组)
+• 安装中间目录: resources/cache/{ModType}/{modName}/ (安装时临时使用)
+• 游戏目录: content/{cars|tracks|...}/ (最终安装位置)
+
+
+【函数调用链】
+─────────────────────────────────────────────────────────────────────────────
+DhcResoucePkgImport:
+  解压 → 检测资源 → 复制到资源库 → 清理
+
+MultiModInstall:
+  获取资源状态 → 展开路径 → 完整性检查 → 遍历安装
+
+SingleModInstall (压缩包):
+  解压到中间目录 → 获取配置 → 复制到游戏目录
+
+SingleModInstallFromDir (目录):
+  获取配置 → 直接复制到游戏目录
+
+
+【配置文件】
+─────────────────────────────────────────────────────────────────────────────
+dhcFileTag.json: {ModType, OverwriteStartingDir, OverrideRules}
+查找位置: DftPathFromDir (源目录) | DftPathFromCompressRoot (解压根目录)
+
+================================================================================
+*/
+
 // 资源包将会分为：
 // - 完整包(全部资源)
 // - 最小包(仅主图+一个C1环线副图+SHMC车包)
@@ -124,6 +208,44 @@ func SingleModInstall(srcPath string, d types.DftPathGetModOrPath) {
 	// 进行安装
 }
 
+// SingleModInstallFromDir 从已解压目录安装模组
+// 用于处理资源库中存储的是已解压目录的情况
+// 流程：目录 → 直接复制到游戏目录（跳过解压步骤）
+func SingleModInstallFromDir(srcDirPath string, d types.DftPathGetModOrPath) {
+	funcIdt := "-modinstall.SingleModInstallFromDir-"
+
+	// 获取 dft 文件路径
+	dftPath := decompression.GetDftPath(srcDirPath, srcDirPath, d)
+
+	// 获取游戏路径
+	gamePath, err := infoGet.GetGamePathAuto()
+	if err != nil {
+		fmt.Printf("%s获取游戏路径失败:%s\n", funcIdt, err)
+		return
+	}
+
+	// 读取配置文件
+	config, err := decompression.DecodeDhcFileTagConfig(dftPath)
+	if err != nil {
+		fmt.Printf("%s解码配置文件失败:%s\n", funcIdt, err)
+		return
+	}
+
+	// 处理 OverwriteStartingDir 为空的情况（使用默认值）
+	overwriteDir := config.OverwriteStartingDir
+	overrideDstFile := filepath.Join(gamePath, overwriteDir)
+	fmt.Printf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
+
+	// 直接从源目录复制到游戏目录（跳过中间目录和解压步骤）
+	err = decompression.OverrideControl(srcDirPath, overrideDstFile, dftPath)
+	if err != nil {
+		fmt.Printf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
+		return
+	}
+
+	fmt.Printf("%s从目录安装完成: %s -> %s\n", funcIdt, srcDirPath, overrideDstFile)
+}
+
 // copyDir 递归复制目录及其内容
 func copyDir(srcDir, dstDir string) error {
 	return filepath.WalkDir(srcDir, func(srcPath string, d os.DirEntry, err error) error {
@@ -210,11 +332,33 @@ func MultiModInstall(paths []string, dftFilePath string) error {
 	}
 
 	for _, path := range expandedPaths {
-		// 合成本地路径
-		currentModDirPath := localResouceDir + path
+		// 合成本地路径（使用 filepath.Join 确保路径正确）
+		currentModPath := filepath.Join(localResouceDir, path)
 
-		// 进行安装
-		SingleModInstall(currentModDirPath, types.DftPathGetModOrPath(dftFilePath))
+		// 检查路径是文件还是目录
+		fileInfo, err := os.Stat(currentModPath)
+		if err != nil {
+			fmt.Printf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
+			continue
+		}
+
+		if fileInfo.IsDir() {
+			// 如果是目录，先尝试在目录中查找压缩包文件
+			modFilePath := findModFileInDir(currentModPath)
+			if modFilePath != "" {
+				// 找到压缩包，使用压缩包安装流程
+				fmt.Printf("%s在目录中找到压缩包: %s\n", funcIdt, modFilePath)
+				SingleModInstall(modFilePath, types.DftPathGetModOrPath(dftFilePath))
+			} else {
+				// 目录中没有压缩包，说明是已解压目录，直接处理目录
+				fmt.Printf("%s检测到已解压目录，直接安装: %s\n", funcIdt, currentModPath)
+				SingleModInstallFromDir(currentModPath, types.DftPathGetModOrPath(dftFilePath))
+			}
+		} else {
+			// 如果是文件，直接使用（应该是压缩包）
+			fmt.Printf("%s检测到压缩包文件: %s\n", funcIdt, currentModPath)
+			SingleModInstall(currentModPath, types.DftPathGetModOrPath(dftFilePath))
+		}
 	}
 
 	fmt.Printf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
@@ -342,4 +486,106 @@ func expandPaths(rm ResourceMap, paths []string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+// findModFileInDir 在目录中查找模组文件（压缩包）
+// 支持的格式：.rar, .zip, .7z
+// 返回找到的第一个压缩包文件的完整路径，如果未找到则返回空字符串
+func findModFileInDir(dirPath string) string {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return ""
+	}
+
+	// 支持的压缩包扩展名
+	supportedExts := []string{".rar", ".zip", ".7z"}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		fileName := entry.Name()
+		ext := strings.ToLower(filepath.Ext(fileName))
+
+		// 检查是否是支持的压缩包格式
+		for _, supportedExt := range supportedExts {
+			if ext == supportedExt {
+				return filepath.Join(dirPath, fileName)
+			}
+		}
+	}
+
+	return ""
+}
+
+// ResetSimEnvModDirectories 重置 simenv 模组目录，实现垃圾回收
+// 该函数会清理 acRoot 下安装的模组，并从 envBackup 恢复原始状态
+// 主要用于测试环境的清理和重置
+func ResetSimEnvModDirectories() error {
+	funcIdt := "-modInstall.ResetSimEnvModDirectories-"
+
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("%s获取根目录失败: %v", funcIdt, err)
+	}
+
+	isDevMode := infoGet.IsDevModeGet()
+	if !isDevMode {
+		return fmt.Errorf("%s此函数仅在开发模式下可用", funcIdt)
+	}
+
+	// 获取游戏路径（simenv 环境）
+	gamePath, err := infoGet.GetGamePathAuto()
+	if err != nil {
+		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
+	}
+
+	// 备份路径
+	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "envBackup", "AC_SKELETON_HASDLC", "Assetto Corsa")
+
+	// 需要清理/恢复的模组目录（content 下的子目录）
+	modDirectories := []string{
+		"content/cars",
+		"content/tracks",
+		"content/dashboard",
+		"content/shaders",
+	}
+
+	fmt.Printf("%s开始重置 simenv 模组目录...\n", funcIdt)
+
+	// 遍历需要清理的目录
+	for _, modDir := range modDirectories {
+		gameModPath := filepath.Join(gamePath, modDir)
+		backupModPath := filepath.Join(backupPath, modDir)
+
+		// 检查备份目录是否存在
+		if _, err := os.Stat(backupModPath); os.IsNotExist(err) {
+			fmt.Printf("%s警告: 备份目录不存在，跳过恢复: %s\n", funcIdt, backupModPath)
+			// 如果备份不存在，直接删除游戏目录中的模组目录
+			if err := os.RemoveAll(gameModPath); err != nil {
+				fmt.Printf("%s警告: 删除目录失败: %s, 错误: %v\n", funcIdt, gameModPath, err)
+			} else {
+				fmt.Printf("%s已删除目录: %s\n", funcIdt, gameModPath)
+			}
+			continue
+		}
+
+		// 删除游戏目录中的模组目录
+		if err := os.RemoveAll(gameModPath); err != nil {
+			fmt.Printf("%s警告: 删除目录失败: %s, 错误: %v\n", funcIdt, gameModPath, err)
+			continue
+		}
+		fmt.Printf("%s已删除目录: %s\n", funcIdt, gameModPath)
+
+		// 从备份恢复
+		if err := copyDir(backupModPath, gameModPath); err != nil {
+			fmt.Printf("%s警告: 从备份恢复失败: %s -> %s, 错误: %v\n", funcIdt, backupModPath, gameModPath, err)
+			continue
+		}
+		fmt.Printf("%s已从备份恢复: %s -> %s\n", funcIdt, backupModPath, gameModPath)
+	}
+
+	fmt.Printf("%s simenv 模组目录重置完成\n", funcIdt)
+	return nil
 }

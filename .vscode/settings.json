@@ -10,7 +10,11 @@
   },
   "code-runner.ignoreSelection": true,
   // 禁止go test 缓存
-  "go.testFlags": ["-v", "-count=1"],
+  "go.testFlags": [
+    "-v",
+    "-count=1"
+  ],
+  "git.ignoreLimitWarning": true,
 }
 
 

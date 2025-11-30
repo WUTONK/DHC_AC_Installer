@@ -1,6 +1,7 @@
 package modinstall
 
 import (
+	"DHC_Backend/models/service/infoGet"
 	modinstall "DHC_Backend/models/service/modInstall"
 	"DHC_Backend/models/service/types"
 	"encoding/json"
@@ -10,8 +11,7 @@ import (
 
 func TestSingleModInstall(t *testing.T) {
 	srcPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/testModFile/car/ddm_toyota_corolla_levin_ae86_1.1/ddm_toyota_corolla_levin_ae86_1.1.rar"
-	filePassword := ""
-	modinstall.SingleModInstall(srcPath, filePassword, types.DftPathFromDir)
+	modinstall.SingleModInstall(srcPath, types.DftPathFromDir)
 }
 
 func TestInstallCm(t *testing.T) {
@@ -73,4 +73,44 @@ func TestDhcResoucePkgImport(t *testing.T) {
 	} else {
 		fmt.Println(string(jsonData))
 	}
+}
+
+// TestMultiModInstall 测试多模组安装功能
+func TestMultiModInstall(t *testing.T) {
+	// 设置开发模式，确保使用模拟环境
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
+	// 测试路径列表，支持一级、二级、三级路径
+	paths := []string{
+		"cars/SHMC/r32", // 三级路径：直接指定具体模组
+		"cars/SHMC",     // 二级路径：安装整个包下的所有模组
+		// "cars",          // 一级路径：安装所有车辆模组（可选，如果资源库中有很多车辆可能会很慢）
+	}
+
+	// 使用默认路径获取方式
+	dftFilePath := string(types.DftPathFromDir)
+
+	// 执行多模组安装
+	err := modinstall.MultiModInstall(paths, dftFilePath)
+	if err != nil {
+		t.Errorf("MultiModInstall 执行失败: %v", err)
+		return
+	}
+
+	fmt.Println("MultiModInstall 执行成功")
+}
+
+// TestResetSimEnvModDirectories 测试 simenv 模组目录重置功能（垃圾回收）
+func TestResetSimEnvModDirectories(t *testing.T) {
+	// 设置开发模式，确保使用模拟环境
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
+	err := modinstall.ResetSimEnvModDirectories()
+	if err != nil {
+		t.Errorf("ResetSimEnvModDirectories 执行失败: %v", err)
+		return
+	}
+	fmt.Println("ResetSimEnvModDirectories 执行成功，simenv 模组目录已重置")
 }
