@@ -81,13 +81,12 @@ func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 }
 
 // 单模组安装
-func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetModOrPath) {
+func SingleModInstall(srcPath string, d types.DftPathGetModOrPath) {
 	funcIdt := "-modinstall.SingleModInstall"
 	// 逻辑：
 	// 传入文件并解压（非压缩包直接复制）到中间目录
 	opts := decompression.DecompressionOptions{
 		SrcPath:             srcPath,
-		FilePassword:        filePassword,
 		IsMod:               true,
 		DftPathGetModOrPath: d,
 	}
@@ -96,7 +95,7 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 		fmt.Printf("%s在调用decompression.DecompressionWithOptions()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
 		return
 	}
-	fmt.Printf("%s解压完成，解压目录: %s\n", funcIdt, unDecompressionPath)
+	fmt.Printf("%s解压完成,解压目录: %s\n", funcIdt, unDecompressionPath)
 	// 检测覆盖规则
 
 	dftPath := decompression.GetDftPath(srcPath, unDecompressionPath, d)
@@ -123,98 +122,6 @@ func SingleModInstall(srcPath string, filePassword string, d types.DftPathGetMod
 		return
 	}
 	// 进行安装
-}
-
-// MultiModInstall 多模组安装
-// 传入路径列表，支持多层级路径（如 ["cars", "cars/shmc", "tracks", "cars/shmc/r34"]）
-// 路径格式：支持一级（cars）、二级（cars/shmc）、三级（cars/shmc/r34）路径
-//
-// 实现逻辑：
-// 1. 从本地资源库中获取完整的 ResourceMap
-// 2. 根据传入的路径列表，在 ResourceMap 中查找对应的资源
-// 3. 展开路径（如选择 cars/shmc，需要展开为所有子项：cars/shmc/r34, cars/shmc/rx7...）
-// 4. 遍历展开后的路径列表，调用 SingleModInstall 进行安装
-func MultiModInstall(paths []string) error {
-	funcIdt := "-modInstall.MultiModInstall-"
-
-	// 获取本地资源库的完整 ResourceMap
-	rm, err := ImportResourceDetection(All, Local)
-	if err != nil {
-		return fmt.Errorf("%s获取资源状态失败: %v", funcIdt, err)
-	}
-
-	// 展开路径：将用户选择的路径展开为所有需要安装的具体 mod 路径
-	// 例如：cars/shmc -> [cars/shmc/r34, cars/shmc/rx7, ...]
-	expandedPaths := expandPaths(rm, paths)
-
-	// TODO: 遍历 expandedPaths，对每个路径调用 SingleModInstall
-	// 需要：
-	// 1. 根据路径在本地资源库中找到对应的压缩包或文件
-	// 2. 调用 SingleModInstall 进行安装
-
-	fmt.Printf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
-	for _, path := range expandedPaths {
-		fmt.Printf("%s待安装路径: %s\n", funcIdt, path)
-	}
-
-	return nil
-}
-
-// expandPaths 展开路径列表为所有需要安装的具体 mod 路径
-// 例如：如果用户选择了 "cars/shmc"，需要展开为所有该包下的车辆路径
-func expandPaths(rm ResourceMap, paths []string) []string {
-	var expanded []string
-
-	for _, path := range paths {
-		parts := strings.Split(path, "/")
-
-		switch len(parts) {
-		case 1:
-			// 一级路径：cars -> 展开为所有 pkg 下的所有 mod
-			resourceType := ResourceType(parts[0])
-			if resourceInfo, exists := rm[resourceType]; exists {
-				for pkgName, pkgInfo := range resourceInfo.Items {
-					for modName := range pkgInfo.Items {
-						expanded = append(expanded, fmt.Sprintf("%s/%s/%s", parts[0], pkgName, modName))
-					}
-				}
-			}
-		case 2:
-			// 二级路径：cars/shmc -> 展开为所有该包下的 mod
-			resourceType := ResourceType(parts[0])
-			pkgName := parts[1]
-			if resourceInfo, exists := rm[resourceType]; exists {
-				if pkgInfo, exists := resourceInfo.Items[pkgName]; exists {
-					for modName := range pkgInfo.Items {
-						expanded = append(expanded, fmt.Sprintf("%s/%s/%s", parts[0], pkgName, modName))
-					}
-				}
-			}
-		case 3:
-			// 三级路径：cars/shmc/r34 -> 直接添加
-			expanded = append(expanded, path)
-		default:
-			// 不支持的路径格式，跳过
-			continue
-		}
-	}
-
-	// 去重：使用 map 记录已见过的路径，避免重复安装
-	// 例如：如果用户同时选择了 "cars/shmc" 和 "cars/shmc/r34"，
-	// 展开后可能都会产生 "cars/shmc/r34"，需要去重
-	seen := make(map[string]bool) // 记录已经处理过的路径
-	var result []string
-
-	for _, path := range expanded {
-		// 如果路径还没见过（map 中不存在或值为 false），则添加
-		if !seen[path] {
-			seen[path] = true             // 标记为已见过
-			result = append(result, path) // 添加到结果中
-		}
-		// 如果路径已经见过（seen[path] == true），则跳过，实现去重
-	}
-
-	return result
 }
 
 // copyDir 递归复制目录及其内容
@@ -257,4 +164,182 @@ func copyDir(srcDir, dstDir string) error {
 			return err
 		}
 	})
+}
+
+// MultiModInstall 多模组安装
+// 传入路径列表，支持多层级路径（如 ["cars", "cars/shmc", "tracks", "cars/shmc/r34"]）
+// 路径格式：支持一级（cars）、二级（cars/shmc）、三级（cars/shmc/r34）路径
+//
+// 实现逻辑：
+// 1. 从本地资源库中获取完整的 ResourceMap
+// 2. 根据传入的路径列表，在 ResourceMap 中查找对应的资源
+// 3. 展开路径（如选择 cars/shmc，需要展开为所有子项：cars/shmc/r34, cars/shmc/rx7...）
+// 4. 遍历展开后的路径列表，调用 SingleModInstall 进行安装
+func MultiModInstall(paths []string, dftFilePath string) error {
+	funcIdt := "-modInstall.MultiModInstall-"
+
+	var localResouceDir string
+	isDevMode := infoGet.IsDevModeGet()
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取根目录失败 error:%s", err)
+	}
+	if isDevMode {
+		localResouceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+	} else {
+		localResouceDir = filepath.Join(backendRootPath, "resources")
+	}
+
+	// 获取本地资源库的完整 ResourceMap
+	rm, err := ImportResourceDetection(All, Local)
+	if err != nil {
+		return fmt.Errorf("%s获取资源状态失败: %v", funcIdt, err)
+	}
+
+	// 展开路径：将用户选择的路径展开为所有需要安装的具体 mod 路径
+	// 例如：cars/shmc -> [cars/shmc/r34, cars/shmc/rx7, ...]
+	expandedPaths, err := expandPaths(rm, paths)
+	if err != nil {
+		return fmt.Errorf("%s在展开需安装模组路径列表时 发现了不支持的路径: %v", funcIdt, err)
+	}
+
+	// 进行完整性检查 查看是否有未通过完整性检测的模组在 expandPaths 待安装列表中，如果有就报错
+	err = PathCorresponModIntegrityCheck(expandedPaths)
+	if err != nil {
+		return fmt.Errorf("%s在对需安装模组路径列表进行完整性检查时 发现了未通过完整性检查的路径: %v", funcIdt, err)
+	}
+
+	for _, path := range expandedPaths {
+		// 合成本地路径
+		currentModDirPath := localResouceDir + path
+
+		// 进行安装
+		SingleModInstall(currentModDirPath, types.DftPathGetModOrPath(dftFilePath))
+	}
+
+	fmt.Printf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
+	for _, path := range expandedPaths {
+		fmt.Printf("%s待安装路径: %s\n", funcIdt, path)
+	}
+
+	return nil
+}
+
+// 路径对应模组完整性检查
+// 传入一个**展开了的**模组路径数组 此函数将会检查路径数组中的模组是否都在本地存在（完整的才被视为存在）
+func PathCorresponModIntegrityCheck(expandedPaths []string) error {
+	funcIdt := "-modInstall.PathCorresponModIntegrityCheck-"
+
+	// 空列表检查
+	if len(expandedPaths) == 0 {
+		return fmt.Errorf("%s传入的路径列表为空", funcIdt)
+	}
+
+	// 从json获取目前resource的完整资源信息 并构建一个完整结构的 ResourceMap
+	rm, err := ImportResourceDetection(All, Local)
+	if err != nil {
+		return fmt.Errorf("%s获取资源状态失败: %v", funcIdt, err)
+	}
+
+	for _, path := range expandedPaths {
+		// 空路径检查
+		path = strings.TrimSpace(path)
+		if path == "" {
+			return fmt.Errorf("%s检测到空路径", funcIdt)
+		}
+
+		splitPath := strings.Split(path, "/")
+		pathLength := len(splitPath)
+
+		// 严格检查：路径必须是精确的三级路径（resourceType/pkg/mod）
+		if pathLength != 3 {
+			return fmt.Errorf("%s检测到路径格式不正确:%s,期望格式为:resourceType/pkg/mod(如:cars/shmc/r34),实际长度为:%d", funcIdt, path, pathLength)
+		}
+
+		// 检查路径各段是否为空
+		if splitPath[0] == "" || splitPath[1] == "" || splitPath[2] == "" {
+			return fmt.Errorf("%s检测到路径包含空段:%s", funcIdt, path)
+		}
+
+		modState, isExist := rm.GetState(ResourceType(splitPath[0]), splitPath[1], splitPath[2])
+
+		// 检查资源是否存在
+		if !isExist {
+			return fmt.Errorf("%s检测到资源在本地不存在(资源未定义):%s", funcIdt, path)
+		}
+
+		// 检查资源是否完整（只有 Pass 状态才被认为是完整的）
+		if modState != Pass {
+			var stateDesc string
+			switch modState {
+			case NotImported:
+				stateDesc = "未导入"
+			case Incomplete:
+				stateDesc = "不完整"
+			default:
+				stateDesc = string(modState)
+			}
+			return fmt.Errorf("%s检测到资源在本地不完整,路径:%s,状态:%s", funcIdt, path, stateDesc)
+		}
+
+		// 资源存在且完整，继续检查下一个
+	}
+
+	return nil
+}
+
+// expandPaths 展开路径列表为所有需要安装的具体 mod 路径
+// 例如：如果用户选择了 "cars/shmc"，需要展开为所有该包下的车辆路径
+func expandPaths(rm ResourceMap, paths []string) ([]string, error) {
+	var expanded []string
+
+	for _, path := range paths {
+		parts := strings.Split(path, "/")
+
+		switch len(parts) {
+		case 1:
+			// 一级路径：cars -> 展开为所有 pkg 下的所有 mod
+			resourceType := ResourceType(parts[0])
+			if resourceInfo, exists := rm[resourceType]; exists {
+				for pkgName, pkgInfo := range resourceInfo.Items {
+					for modName := range pkgInfo.Items {
+						expanded = append(expanded, fmt.Sprintf("%s/%s/%s", parts[0], pkgName, modName))
+					}
+				}
+			}
+		case 2:
+			// 二级路径：cars/shmc -> 展开为所有该包下的 mod
+			resourceType := ResourceType(parts[0])
+			pkgName := parts[1]
+			if resourceInfo, exists := rm[resourceType]; exists {
+				if pkgInfo, exists := resourceInfo.Items[pkgName]; exists {
+					for modName := range pkgInfo.Items {
+						expanded = append(expanded, fmt.Sprintf("%s/%s/%s", parts[0], pkgName, modName))
+					}
+				}
+			}
+		case 3:
+			// 三级路径：cars/shmc/r34 -> 直接添加
+			expanded = append(expanded, path)
+		default:
+			// 不支持的路径格式，跳过
+
+			continue
+		}
+	}
+
+	// 去重：使用 map 记录已见过的路径，避免重复安装
+	// 例如：如果用户同时选择了 "cars/shmc" 和 "cars/shmc/r34"，
+	// 展开后可能都会产生 "cars/shmc/r34"，需要去重
+	seen := make(map[string]bool) // 记录已经处理过的路径
+	var result []string
+
+	for _, path := range expanded {
+		if !seen[path] {
+			seen[path] = true
+			result = append(result, path)
+		}
+	}
+
+	return result, nil
 }

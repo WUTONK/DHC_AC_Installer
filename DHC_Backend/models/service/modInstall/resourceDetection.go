@@ -95,17 +95,37 @@ func (rm ResourceMap) SetStateWithPath(resMap *ResourceMap, path string, state R
 }
 
 // 辅助函数：获取资源状态
-func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, car string) (ResourceState, bool) {
+// 参数：
+//   - resourceType: 资源类型（如 "cars", "tracks"）
+//   - pkg: 包名（如 "shmc"）
+//   - mod: 模组名（如 "r34"）
+//
+// 返回值：
+//   - ResourceState: 资源状态（如果路径不存在，返回 NotImported）
+//   - bool: 路径是否存在于 ResourceMap 中
+//   - true: 路径存在，返回的状态是有效的
+//   - false: 路径不存在（可能是未定义的资源），返回的 NotImported 状态仅表示"未找到"
+//
+// 使用示例：
+//
+//	state, exists := rm.GetState(Cars, "shmc", "r34")
+//	if !exists {
+//	    // 路径不存在，可能是资源未定义或路径错误
+//	}
+//	if exists && state == Pass {
+//	    // 资源存在且完整
+//	}
+func (rm ResourceMap) GetState(resourceType ResourceType, pkg string, mod string) (ResourceState, bool) {
 	if rm[resourceType] == nil {
 		return NotImported, false
 	}
 	if rm[resourceType].Items[pkg] == nil {
 		return NotImported, false
 	}
-	if rm[resourceType].Items[pkg].Items[car] == nil {
+	if rm[resourceType].Items[pkg].Items[mod] == nil {
 		return NotImported, false
 	}
-	return rm[resourceType].Items[pkg].Items[car].State, true
+	return rm[resourceType].Items[pkg].Items[mod].State, true
 }
 
 // 以下数据类型是从json解析数据用
