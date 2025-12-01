@@ -13,6 +13,34 @@ import (
 // 自动安装 Content Manager 并解压到 windows 桌面文件夹
 // 返回 CM 解压路径 和 错误
 // TODO: 实现显示下载进度
+
+// 进度条
+type ProgressWriter struct {
+	io.Reader       // 读取器
+	Total     int64 // 总大小
+	Current   int64 // 当前大小
+}
+
+// 实现 io.Reader 接口，给 io.Copy 消费 从而显示下载进度
+func (pro *ProgressWriter) Read(p []byte) (n int, err error) {
+	n, err = pro.Reader.Read(p) // 从底层 Reader 读取数据
+	pro.Current += int64(n)
+
+	// 只有当 Total > 0 时才显示百分比进度（ContentLength 可能为 -1 表示未知大小）
+	if pro.Total > 0 {
+		percentage := float64(pro.Current*100) / float64(pro.Total)
+		fmt.Printf("\r正在下载，下载进度：%.2f%%", percentage)
+		if pro.Current == pro.Total {
+			fmt.Printf("\r下载完成，下载进度：%.2f%%\n", percentage)
+		}
+	} else {
+		// 如果总大小未知，只显示已下载的字节数
+		fmt.Printf("\r正在下载，已下载：%d 字节", pro.Current)
+	}
+
+	return
+}
+
 func InstallCm() (string, error) {
 	funcIdt := "-modInstall.InstallCm-"
 	// 下载地址：https://acstuff.ru/app/latest.zip 压缩包下载到 DHC_Backend/resources/cache/cm/zip/
@@ -30,11 +58,11 @@ func InstallCm() (string, error) {
 		return "", fmt.Errorf("%s创建目录失败: %s", funcIdt, err)
 	}
 	tmpFilePath := filepath.Join(tmpFilepath, "latest.zip")
-	f, err := os.Create(tmpFilePath)
+	file, err := os.Create(tmpFilePath)
 	if err != nil {
 		return "", fmt.Errorf("%s文件保存出错: %s", funcIdt, err)
 	}
-	defer f.Close()
+	defer file.Close()
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -46,8 +74,11 @@ func InstallCm() (string, error) {
 		return "", fmt.Errorf("%s文件下载失败，状态码: %d", funcIdt, res.StatusCode)
 	}
 
-	_, err = io.Copy(f, res.Body)
-	if err != nil {
+	progress := &ProgressWriter{
+		Reader: res.Body,
+		Total:  res.ContentLength,
+	}
+	if _, err := io.Copy(file, progress); err != nil {
 		return "", fmt.Errorf("%s文件保存出错: %s", funcIdt, err)
 	}
 

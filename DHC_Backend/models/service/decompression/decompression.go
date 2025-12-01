@@ -439,7 +439,6 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 			return "", "before", fmt.Errorf("%s复制非压缩文件或不受支持的压缩格式文件时产生错误: %v", funcIdt, err)
 		}
 
-		// TODO:调用OverrideControl()
 		return midDirPath, "", nil
 	}
 

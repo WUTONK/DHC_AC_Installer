@@ -182,7 +182,7 @@ func getDownloadSpec(targetVersion string, sha256 string) (downloadSpec, error) 
 func detectLatestVersion() (string, error) {
 	// 尝试访问官方页面检测最新版本
 	// 这里使用一个简化的方法：尝试几个可能的版本号
-	// TODO:迭代为可以解析官方页面获取真实的最新版本
+	// TODO（远期）:迭代为可以解析官方页面获取真实的最新版本
 
 	// 已知的版本列表，按时间倒序
 	knownVersions := []string{"25.01", "23.01", "22.01", "21.07"}
