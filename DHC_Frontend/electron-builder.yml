@@ -1,7 +1,9 @@
-appId: com.electron.app
-productName: dhc-frontend
+appId: com.dhc.acinstaller
+productName: DHC AC Installer
+version: 1.0.0
 directories:
   buildResources: build
+  output: dist
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -9,34 +11,46 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}'
+  - '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}'
+  - '!**/node_modules/*.d.ts'
+  - '!**/node_modules/.bin'
+  - '!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}'
+  - '!.editorconfig'
+  - '!**/._*'
+  - '!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}'
+  - '!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}'
+  - '!**/{appveyor.yml,.travis.yml,circle.yml}'
+  - '!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}'
+  # 包含后端可执行文件（Windows 上应该是 .exe，但打包时使用 main）
+  - '../DHC_Backend/main'
+  - '../DHC_Backend/main.exe'
+  - '../DHC_Backend/resources/**'
 asarUnpack:
   - resources/**
+  - main
+  - main.exe
 win:
-  executableName: dhc-frontend
+  executableName: DHC-AC-Installer
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
-  target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+  createStartMenuShortcut: true
+  menuCategory: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: resources/icon.png
+  uninstallerIcon: resources/icon.png
+  installerHeaderIcon: resources/icon.png
+  include: build/installer.nsh
+  script: build/installer.nsh
 npmRebuild: false
 publish:
   provider: generic

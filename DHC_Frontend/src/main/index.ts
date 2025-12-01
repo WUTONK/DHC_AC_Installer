@@ -1,7 +1,52 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import { spawn, ChildProcess } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+
+// 后端进程管理
+let backendProcess: ChildProcess | null = null
+
+function startBackend(): void {
+  // 获取后端可执行文件路径
+  // Windows 上需要 .exe 扩展名，其他平台不需要
+  const backendExecutable = process.platform === 'win32' ? 'main.exe' : 'main'
+  const backendPath = is.dev
+    ? join(__dirname, '../../../DHC_Backend', backendExecutable)
+    : join(process.resourcesPath, backendExecutable)
+
+  console.log('Starting backend at:', backendPath)
+
+  // 启动后端进程
+  backendProcess = spawn(backendPath, [], {
+    cwd: is.dev ? join(__dirname, '../../../DHC_Backend') : process.resourcesPath,
+    stdio: 'inherit',
+    shell: false
+  })
+
+  backendProcess.on('error', (error) => {
+    console.error('Failed to start backend:', error)
+  })
+
+  backendProcess.on('exit', (code, signal) => {
+    console.log(`Backend process exited with code ${code} and signal ${signal}`)
+    backendProcess = null
+  })
+}
+
+function stopBackend(): void {
+  if (backendProcess) {
+    console.log('Stopping backend process...')
+    if (process.platform === 'win32') {
+      // Windows 使用 taskkill
+      spawn('taskkill', ['/pid', backendProcess.pid!.toString(), '/f', '/t'])
+    } else {
+      // macOS/Linux 使用 kill
+      backendProcess.kill('SIGTERM')
+    }
+    backendProcess = null
+  }
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -127,7 +172,12 @@ app.commandLine.appendSwitch('--disable-site-isolation-trials')
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.dhc.acinstaller')
+
+  // 启动后端服务
+  if (!is.dev || process.env['START_BACKEND'] !== 'false') {
+    startBackend()
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -179,8 +229,14 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    stopBackend()
     app.quit()
   }
+})
+
+// 应用退出时停止后端
+app.on('before-quit', () => {
+  stopBackend()
 })
 
 // In this file you can include the rest of your app's specific main process
