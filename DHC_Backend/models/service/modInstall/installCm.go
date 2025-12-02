@@ -124,3 +124,48 @@ func InstallCm() (string, error) {
 	fmt.Println("CM已成功安装到:", movedCmExePath)
 	return movedCmExePath, nil
 }
+
+// 检测本地 cm 位置
+// 返回值 cm是否存在 本地目录 错误
+func DetectLocalCmPath() (isCmExist bool, cmPath string, err error) {
+	funcIdt := "-modInstall.DetectLocalCmPath-"
+
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return false, "", fmt.Errorf("%s获取后端根目录失败: %w", funcIdt, err)
+	}
+
+	isDevMode := infoGet.IsDevModeGet()
+	var possiblePaths []string
+
+	if isDevMode {
+		// 开发模式：检查测试环境路径
+		devPath := filepath.Join(backendRootPath, "test", "simEnv", "Windows_finder", "desktop", "CM", "Content Manager.exe")
+		possiblePaths = append(possiblePaths, devPath)
+	} else {
+		// 非开发模式：检查 Windows 桌面路径
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return false, "", fmt.Errorf("%s获取用户主目录失败: %w", funcIdt, err)
+		}
+
+		// Windows 桌面可能的路径
+		desktopPaths := []string{
+			filepath.Join(homeDir, "Desktop", "CM", "Content Manager.exe"),
+			filepath.Join(homeDir, "桌面", "CM", "Content Manager.exe"), // 中文系统
+		}
+		possiblePaths = append(possiblePaths, desktopPaths...)
+	}
+
+	// 遍历所有可能的路径，检查文件是否存在
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			// 文件存在，返回目录路径（不包含文件名）
+			cmPath = filepath.Dir(path)
+			return true, cmPath, nil
+		}
+	}
+
+	// 所有路径都不存在
+	return false, "", nil
+}

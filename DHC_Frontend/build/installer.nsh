@@ -11,6 +11,13 @@ Function .onInit
     Abort
 FunctionEnd
 
+; 自定义欢迎页面（使用 HTML）
+!macro customWelcomePage
+  ; 注意：NSIS 原生不支持 HTML 页面，但可以通过插件实现
+  ; 这里我们使用标准的 NSIS 页面，但可以自定义文本
+  !insertmacro MUI_PAGE_WELCOME
+!macroend
+
 ; 安装完成后的操作
 Function .onInstSuccess
   MessageBox MB_YESNO|MB_ICONQUESTION "安装完成！是否立即启动 DHC AC Installer？" IDNO skip
