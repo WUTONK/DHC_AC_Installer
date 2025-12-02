@@ -74,6 +74,22 @@ const ServerCard: React.FC<ServerCardProps> = () => {
           >
             加入服务器
           </Button>
+          <Button
+            theme="solid"
+            type="primary"
+            onClick={handleJoinServer}
+            className="server-card-button"
+          >
+            加入服务器
+          </Button>
+          <Button
+            theme="solid"
+            type="primary"
+            onClick={handleJoinServer}
+            className="server-card-button"
+          >
+            加入服务器
+          </Button>
         </div>
       }
       footerLine={true}

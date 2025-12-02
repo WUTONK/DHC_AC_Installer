@@ -7,6 +7,7 @@ import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
+import CarPackInstaller from './CarPackInstaller';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 
 // const { Title, Text } = Typography
@@ -34,6 +35,8 @@ function App(): React.JSX.Element {
         return <NetDemo></NetDemo>
       case 'ComponentTest':
         return <ComponentTest></ComponentTest>
+      case 'CarPackInstaller':
+        return <CarPackInstaller />
       default:
         return <div>Not Found</div>
     }
@@ -120,7 +123,8 @@ function App(): React.JSX.Element {
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
                 { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
                 { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
-                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />}
+                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
+                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />}
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
