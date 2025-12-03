@@ -2,12 +2,15 @@
 import React from 'react'
 import { Layout,Nav, Button,Avatar} from '@douyinfe/semi-ui'
 import { useState } from 'react'
-import { IconHome, IconCart, IconBookmark, IconEdit } from '@douyinfe/semi-icons';
+import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload } from '@douyinfe/semi-icons';
 import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
 import CarPackInstaller from './CarPackInstaller';
+import ShaderInstaller from './ShaderInstaller';
+import ShaderInstallerV1 from './ShaderInstaller.v1';
+import OneClickInstaller from './OneClickInstaller';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 
 // const { Title, Text } = Typography
@@ -35,8 +38,14 @@ function App(): React.JSX.Element {
         return <NetDemo></NetDemo>
       case 'ComponentTest':
         return <ComponentTest></ComponentTest>
+      case 'ShaderInstaller':
+        return <ShaderInstaller />
+      case 'ShaderInstallerV1':
+        return <ShaderInstallerV1 />
       case 'CarPackInstaller':
         return <CarPackInstaller />
+      case 'OneClickInstaller':
+        return <OneClickInstaller />
       default:
         return <div>Not Found</div>
     }
@@ -120,11 +129,14 @@ function App(): React.JSX.Element {
               selectedKeys={[activeKey]}
               items={[
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
                 { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
                 { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
                 { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
-                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />}
+                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
+                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
+                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />}
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
