@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col } from '@douyinfe/semi-ui';
 import { 
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
-    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle
+    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle, IconInfoCircle
 } from '@douyinfe/semi-icons';
 
 // 模拟数据：磁盘情况
@@ -65,6 +65,39 @@ const INSTALL_MODES: InstallMode[] = [
 // 模拟本地已存在的资源
 const EXISTING_RESOURCES = ['extension', 'content/weather/sol'];
 
+// 模拟配置需求数据
+interface RequirementConfig {
+    title: string;
+    cpu: string;
+    gpu: string;
+    ram: string;
+    note: string;
+}
+
+const REQUIREMENTS_MAP: Record<string, RequirementConfig> = {
+    minimal: {
+        title: '入门级配置',
+        cpu: 'Intel Core i3-8100 或 AMD Ryzen 3 1200',
+        gpu: 'NVIDIA GTX 1050 Ti (4GB) 或同级显卡',
+        ram: '8 GB RAM',
+        note: '可流畅运行联机模式，低画质。'
+    },
+    standard: {
+        title: '推荐配置',
+        cpu: 'Intel Core i5-9600K 或 AMD Ryzen 5 3600',
+        gpu: 'NVIDIA GTX 1660 Super (6GB) 或 RTX 3050',
+        ram: '16 GB RAM',
+        note: '流畅运行首都高 + CSP 光影，中高画质。'
+    },
+    full: {
+        title: '极致配置',
+        cpu: 'Intel Core i7-10700K 或 AMD Ryzen 7 5800X',
+        gpu: 'NVIDIA RTX 3070 (8GB) 或更高',
+        ram: '32 GB RAM',
+        note: '开启 Pure 高级光影 + 4K 材质 + 极致画质 (2K/4K分辨率)。'
+    }
+};
+
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
@@ -72,7 +105,11 @@ interface OneClickInstallerProps {
     onNavigate?: (page: string) => void;
 }
 
-export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
+/**
+ * 一键式安装 - 方案二
+ * 基于原始代码，应用方案二的更新
+ */
+export default function OneClickInstallerPlan2({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
@@ -299,11 +336,21 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         const percentInstall = (currentMode.size / DISK_INFO.total) * 100;
         const isSpaceLow = (DISK_INFO.free < currentMode.size);
         
+        // 获取当前选中的配置要求
+        const req = REQUIREMENTS_MAP[selectedModeId] || REQUIREMENTS_MAP['standard'];
+        
+        // 定义配置数据
+        const specsData = [
+            { key: 'CPU', value: req.cpu, icon: <IconServer /> },
+            { key: '显卡', value: req.gpu, icon: <IconServer /> },
+            { key: '内存', value: req.ram, icon: <IconDownload /> },
+        ];
+        
         return (
             <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <div>
-                        <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装</Title>
+                        <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装 - 方案二</Title>
                         <Text style={{ color: '#888' }}>选择适合你的预设方案，全自动配置游戏环境</Text>
                     </div>
                     <Button 
@@ -316,8 +363,8 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     </Button>
                 </div>
 
-                {/* --- 1. 模式选择卡片 (修复可见度) --- */}
-                <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
+                {/* --- 1. 模式选择卡片 --- */}
+                <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
                     {INSTALL_MODES.map(item => {
                         const isSelected = selectedModeId === item.id;
                         return (
@@ -386,7 +433,38 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     })}
                 </Row>
 
-                {/* --- 2. 磁盘空间检测 (修复白底问题) --- */}
+                {/* --- [新增] 中间插入：动态配置需求条 --- */}
+                <div style={{ 
+                    backgroundColor: 'rgba(255,255,255,0.03)', 
+                    border: '1px solid #333', 
+                    borderRadius: 12, 
+                    padding: '16px 24px',
+                    marginBottom: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.3s'
+                }}>
+                    {/* 左侧：标题与备注 */}
+                    <div style={{ marginRight: 40, minWidth: 120 }}>
+                        <Text style={{ color: '#888', fontSize: 12, display: 'block', marginBottom: 4 }}>推荐配置</Text>
+                        <Text style={{ color: currentMode.color, fontWeight: 'bold', fontSize: 16 }}>{req.title}</Text>
+                    </div>
+
+                    {/* 右侧：具体的参数 */}
+                    <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', gap: 20 }}>
+                        {specsData.map((spec, idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div style={{ color: '#666' }}>{spec.icon}</div>
+                                <div>
+                                    <Text style={{ color: '#555', fontSize: 12, display: 'block', lineHeight: 1.2 }}>{spec.key}</Text>
+                                    <Text style={{ color: '#ddd', fontSize: 13, fontWeight: 500 }}>{spec.value}</Text>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* --- 2. 磁盘空间检测 --- */}
                 <Card 
                     // [修复]: 显式设置 backgroundColor: '#232326'，覆盖 Semi 默认的白色背景
                     style={{ backgroundColor: '#232326', borderRadius: 12, border: '1px solid #444', marginBottom: 20 }}

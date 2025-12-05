@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col } from '@douyinfe/semi-ui';
 import { 
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
-    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle
+    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle, IconInfoCircle
 } from '@douyinfe/semi-icons';
 
 // 模拟数据：磁盘情况
@@ -65,6 +65,39 @@ const INSTALL_MODES: InstallMode[] = [
 // 模拟本地已存在的资源
 const EXISTING_RESOURCES = ['extension', 'content/weather/sol'];
 
+// 模拟配置需求数据
+interface RequirementConfig {
+    title: string;
+    cpu: string;
+    gpu: string;
+    ram: string;
+    note: string;
+}
+
+const REQUIREMENTS_MAP: Record<string, RequirementConfig> = {
+    minimal: {
+        title: '入门级配置',
+        cpu: 'Intel Core i3-8100 或 AMD Ryzen 3 1200',
+        gpu: 'NVIDIA GTX 1050 Ti (4GB) 或同级显卡',
+        ram: '8 GB RAM',
+        note: '可流畅运行联机模式，低画质。'
+    },
+    standard: {
+        title: '推荐配置',
+        cpu: 'Intel Core i5-9600K 或 AMD Ryzen 5 3600',
+        gpu: 'NVIDIA GTX 1660 Super (6GB) 或 RTX 3050',
+        ram: '16 GB RAM',
+        note: '流畅运行首都高 + CSP 光影，中高画质。'
+    },
+    full: {
+        title: '极致配置',
+        cpu: 'Intel Core i7-10700K 或 AMD Ryzen 7 5800X',
+        gpu: 'NVIDIA RTX 3070 (8GB) 或更高',
+        ram: '32 GB RAM',
+        note: '开启 Pure 高级光影 + 4K 材质 + 极致画质 (2K/4K分辨率)。'
+    }
+};
+
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
@@ -72,7 +105,11 @@ interface OneClickInstallerProps {
     onNavigate?: (page: string) => void;
 }
 
-export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
+/**
+ * 一键式安装 - 方案一
+ * 基于原始代码，应用方案一的更新
+ */
+export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
@@ -299,11 +336,15 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         const percentInstall = (currentMode.size / DISK_INFO.total) * 100;
         const isSpaceLow = (DISK_INFO.free < currentMode.size);
         
+        // 获取当前选中的配置要求
+        const req = REQUIREMENTS_MAP[selectedModeId] || REQUIREMENTS_MAP['standard'];
+        
         return (
-            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px' }}>
+                {/* 顶部标题 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
                     <div>
-                        <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装</Title>
+                        <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装 - 方案一</Title>
                         <Text style={{ color: '#888' }}>选择适合你的预设方案，全自动配置游戏环境</Text>
                     </div>
                     <Button 
@@ -316,8 +357,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     </Button>
                 </div>
 
-                {/* --- 1. 模式选择卡片 (修复可见度) --- */}
-                <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
+                <Row gutter={40}>
+                    {/* --- 左侧：核心操作区 (占 16/24) --- */}
+                    <Col span={16}>
+                        {/* 1. 模式选择卡片 */}
+                        <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
                     {INSTALL_MODES.map(item => {
                         const isSelected = selectedModeId === item.id;
                         return (
@@ -384,10 +428,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                             </Col>
                         );
                     })}
-                </Row>
+                        </Row>
 
-                {/* --- 2. 磁盘空间检测 (修复白底问题) --- */}
-                <Card 
+                        {/* 2. 磁盘空间检测 */}
+                        <Card 
                     // [修复]: 显式设置 backgroundColor: '#232326'，覆盖 Semi 默认的白色背景
                     style={{ backgroundColor: '#232326', borderRadius: 12, border: '1px solid #444', marginBottom: 20 }}
                     // [修复]: 强制 Title 颜色为白色
@@ -429,10 +473,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                             剩余可用: {formatSize(DISK_INFO.free)}
                         </Text>
                     </div>
-                </Card>
+                        </Card>
 
-                {/* --- 3. 自定义模式引导入口 (修复文字看不清) --- */}
-                <div style={{ marginBottom: 40, padding: '0 5px' }}>
+                        {/* 3. 自定义模式引导入口 */}
+                        <div style={{ marginBottom: 40, padding: '0 5px' }}>
                     <Banner
                         type="info"
                         bordered
@@ -459,11 +503,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                 </Button>
                             </div>
                         }
-                    />
-                </div>
+                        />
+                        </div>
 
-                {/* --- 4. 底部安装按钮 --- */}
-                <div style={{ textAlign: 'center', paddingBottom: 40 }}>
+                        {/* 4. 底部安装按钮 */}
+                        <div style={{ textAlign: 'center', paddingBottom: 40 }}>
                     <Button 
                         theme="solid" 
                         size="large" 
@@ -484,7 +528,78 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     <Text style={{ display: 'block', marginTop: 16, color: '#666', fontSize: 12 }}>
                         点击安装即代表同意覆盖现有配置
                     </Text>
-                </div>
+                        </div>
+                    </Col>
+
+                    {/* --- 右侧：配置展示区 (占 8/24) --- */}
+                    <Col span={8}>
+                        <div style={{ 
+                            position: 'sticky', 
+                            top: 20, 
+                            backgroundColor: '#232326', 
+                            borderRadius: 12, 
+                            padding: 24,
+                            border: '1px solid #444'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                                <IconInfoCircle style={{ color: currentMode.color }} size="large" />
+                                <Title heading={5} style={{ color: '#fff', margin: 0 }}>系统需求参考</Title>
+                            </div>
+                            
+                            <div style={{ marginBottom: 20 }}>
+                                <Text style={{ color: currentMode.color, fontWeight: 'bold', fontSize: 16 }}>
+                                    {req.title}
+                                </Text>
+                                <Paragraph style={{ color: '#888', marginTop: 4, fontSize: 12 }}>
+                                    {req.note}
+                                </Paragraph>
+                            </div>
+
+                            {/* 配置列表 */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                {/* CPU */}
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <div style={{ width: 36, height: 36, background: '#333', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <IconServer style={{ color: '#ccc' }} />
+                                    </div>
+                                    <div>
+                                        <Text style={{ color: '#666', fontSize: 12, display: 'block' }}>处理器 (CPU)</Text>
+                                        <Text style={{ color: '#fff', fontSize: 13 }}>{req.cpu}</Text>
+                                    </div>
+                                </div>
+
+                                {/* GPU */}
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <div style={{ width: 36, height: 36, background: '#333', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <IconServer style={{ color: '#ccc' }} />
+                                    </div>
+                                    <div>
+                                        <Text style={{ color: '#666', fontSize: 12, display: 'block' }}>显卡 (GPU)</Text>
+                                        <Text style={{ color: '#fff', fontSize: 13 }}>{req.gpu}</Text>
+                                    </div>
+                                </div>
+
+                                {/* RAM */}
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    <div style={{ width: 36, height: 36, background: '#333', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <IconDownload style={{ color: '#ccc' }} />
+                                    </div>
+                                    <div>
+                                        <Text style={{ color: '#666', fontSize: 12, display: 'block' }}>内存 (RAM)</Text>
+                                        <Text style={{ color: '#fff', fontSize: 13 }}>{req.ram}</Text>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 装饰性分割线 */}
+                            <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #333' }}>
+                                <Text style={{ color: '#555', fontSize: 12 }}>
+                                    *如果不满足推荐配置，安装后可能会遇到帧数过低或显存溢出报错。
+                                </Text>
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
 
                 {/* 冲突确认 Modal */}
                 <Modal

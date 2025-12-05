@@ -2,7 +2,7 @@
 import React from 'react'
 import { Layout,Nav, Button,Avatar} from '@douyinfe/semi-ui'
 import { useState } from 'react'
-import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload } from '@douyinfe/semi-icons';
+import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconFile, IconFolder } from '@douyinfe/semi-icons';
 import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
@@ -11,6 +11,8 @@ import CarPackInstaller from './CarPackInstaller';
 import ShaderInstaller from './ShaderInstaller';
 import ShaderInstallerV1 from './ShaderInstaller.v1';
 import OneClickInstaller from './OneClickInstaller';
+import OneClickInstallerPlan1 from './OneClickInstallerPlan1';
+import OneClickInstallerPlan2 from './OneClickInstallerPlan2';
 import ResourceImportManager from './ResourceImportManager';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 
@@ -47,6 +49,10 @@ function App(): React.JSX.Element {
         return <CarPackInstaller />
       case 'OneClickInstaller':
         return <OneClickInstaller onNavigate={(page: string) => setActiveKey(page)} />
+      case 'OneClickInstallerPlan1':
+        return <OneClickInstallerPlan1 />
+      case 'OneClickInstallerPlan2':
+        return <OneClickInstallerPlan2 />
       case 'ResourceImportManager':
         return <ResourceImportManager />
       default:
@@ -133,6 +139,8 @@ function App(): React.JSX.Element {
               items={[
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
                 { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
+                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" /> },
+                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" /> },
                 { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
                 { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
