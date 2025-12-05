@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Divider } from '@douyinfe/semi-ui';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col } from '@douyinfe/semi-ui';
 import { 
-    IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle 
+    IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
+    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle
 } from '@douyinfe/semi-icons';
 
-// 模拟数据：磁盘和资源情况
+// 模拟数据：磁盘情况
 const GAME_PATH = "D:\\SteamLibrary\\steamapps\\common\\assettocorsa";
 
 interface DiskInfo {
@@ -21,19 +22,61 @@ const DISK_INFO: DiskInfo = {
     free: 424 * 1024 * 1024 * 1024    // 424GB Free
 };
 
-// 待安装的模组包总大小
-const INSTALL_SIZE = 15 * 1024 * 1024 * 1024; // 15GB
+// 定义安装模式接口
+interface InstallMode {
+    id: string;
+    name: string;
+    icon: React.ReactNode;
+    size: number;
+    desc: string;
+    color: string;
+    recommended?: boolean;
+}
 
-// 模拟本地已存在的资源 (用于冲突检测)
-const EXISTING_RESOURCES = ['extension', 'content/weather/sol', 'apps/python/sol_config'];
+// 定义三种安装模式
+const INSTALL_MODES: InstallMode[] = [
+    { 
+        id: 'minimal', 
+        name: '基础极速版', 
+        icon: <IconDownload size="extra-large" />,
+        size: 5.2 * 1024 * 1024 * 1024, 
+        desc: '仅包含 CSP + Sol + 基础联机车包。适合硬盘空间紧张或仅需最低联机要求的玩家。',
+        color: '#00b5ad' 
+    },
+    { 
+        id: 'standard', 
+        name: '标准推荐版', 
+        icon: <IconTickCircle size="extra-large" />,
+        size: 15.8 * 1024 * 1024 * 1024, 
+        desc: '包含首都高地图 + 常用车流 + 基础光影。最平衡的选择，推荐大多数玩家使用。',
+        color: '#6bc786',
+        recommended: true
+    },
+    { 
+        id: 'full', 
+        name: '豪华全享版', 
+        icon: <IconFile size="extra-large" />,
+        size: 28.5 * 1024 * 1024 * 1024, 
+        desc: '包含 Pure 高级光影 + 4K 材质包 + 全套车包。体验极致画质，需要较好显卡。',
+        color: '#a06cd5' 
+    }
+];
+
+// 模拟本地已存在的资源
+const EXISTING_RESOURCES = ['extension', 'content/weather/sol'];
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
-export default function OneClickInstaller(): React.JSX.Element {
+interface OneClickInstallerProps {
+    onNavigate?: (page: string) => void;
+}
+
+export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
+    const [selectedModeId, setSelectedModeId] = useState<string>('standard'); // 默认选中标准版
     
     // 纯净安装向导状态
     const [wizardStep, setWizardStep] = useState<number>(0); 
@@ -43,6 +86,9 @@ export default function OneClickInstaller(): React.JSX.Element {
     
     // 冲突检测状态
     const [conflictModalVisible, setConflictModalVisible] = useState<boolean>(false);
+
+    // 获取当前选中的模式对象
+    const currentMode = useMemo(() => INSTALL_MODES.find(m => m.id === selectedModeId) || INSTALL_MODES[1], [selectedModeId]);
     
     // --- 1. 启动时检测逻辑 ---
     useEffect(() => {
@@ -79,10 +125,13 @@ export default function OneClickInstaller(): React.JSX.Element {
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
 
     // --- 逻辑：处理一键安装点击 ---
-    const handleOneClickInstall = (): void => {
+    const handleInstallClick = (): void => {
         // 1. 检查磁盘空间
-        if (INSTALL_SIZE > DISK_INFO.free) {
-            Modal.error({ title: '磁盘空间不足', content: '所在磁盘空间不足，无法安装。' });
+        if (currentMode.size > DISK_INFO.free) {
+            Modal.error({ 
+                title: '空间不足', 
+                content: `所选模式需要 ${formatSize(currentMode.size)}，但磁盘仅剩 ${formatSize(DISK_INFO.free)}` 
+            });
             return;
         }
 
@@ -96,7 +145,7 @@ export default function OneClickInstaller(): React.JSX.Element {
 
     const startInstall = (): void => {
         setConflictModalVisible(false);
-        Toast.success('开始一键安装流程...');
+        Toast.success(`正在开始安装：${currentMode.name}`);
         // 这里对接真实的安装逻辑
     };
 
@@ -247,84 +296,180 @@ export default function OneClickInstaller(): React.JSX.Element {
     // --- 渲染：常规一键安装 (Mode: normal) ---
     const renderNormalInstaller = (): React.JSX.Element => {
         const percentUsed = (DISK_INFO.used / DISK_INFO.total) * 100;
-        const percentInstall = (INSTALL_SIZE / DISK_INFO.total) * 100;
-        const isSpaceLow = (DISK_INFO.free < INSTALL_SIZE);
+        const percentInstall = (currentMode.size / DISK_INFO.total) * 100;
+        const isSpaceLow = (DISK_INFO.free < currentMode.size);
         
         return (
-            <div style={{ maxWidth: 800, margin: '0 auto', padding: '20px' }}>
+            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <Title heading={3}>一键式安装</Title>
+                    <div>
+                        <Title heading={3} style={{ margin: 0 }}>一键式安装</Title>
+                        <Text type="tertiary">选择适合你的预设方案，全自动配置游戏环境</Text>
+                    </div>
                     <Button 
                         icon={<IconRefresh />} 
                         theme="borderless" 
                         style={{ color: '#ff9f43' }} 
                         onClick={() => setMode('clean_install')}
                     >
-                        遇到问题？切换到修复模式
+                        修复模式
                     </Button>
                 </div>
 
-                {/* 1. 磁盘空间检测卡片 */}
+                {/* --- 1. 模式选择卡片 (核心更新) --- */}
+                <Row gutter={[16, 16]} style={{ marginBottom: 30 }}>
+                    {INSTALL_MODES.map(item => {
+                        const isSelected = selectedModeId === item.id;
+                        return (
+                            <Col span={8} key={item.id}>
+                                <div 
+                                    onClick={() => setSelectedModeId(item.id)}
+                                    style={{
+                                        cursor: 'pointer',
+                                        position: 'relative',
+                                        backgroundColor: isSelected ? 'rgba(255,255,255,0.08)' : 'var(--semi-color-fill-0)',
+                                        border: `2px solid ${isSelected ? item.color : 'transparent'}`,
+                                        borderRadius: 12,
+                                        padding: 24,
+                                        height: '100%',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    {/* 推荐标签 */}
+                                    {item.recommended && (
+                                        <div style={{ 
+                                            position: 'absolute', top: 0, right: 0, 
+                                            background: item.color, color: '#fff', 
+                                            fontSize: 10, padding: '2px 8px', 
+                                            borderRadius: '0 8px 0 8px', fontWeight: 'bold' 
+                                        }}>
+                                            RECOMMENDED
+                                        </div>
+                                    )}
+                                    
+                                    <div style={{ 
+                                        color: item.color, 
+                                        marginBottom: 16,
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        padding: 12,
+                                        borderRadius: '50%'
+                                    }}>
+                                        {item.icon}
+                                    </div>
+                                    
+                                    <Title heading={5} style={{ marginBottom: 8 }}>{item.name}</Title>
+                                    <Text type="tertiary" style={{ fontSize: 13, marginBottom: 16, flex: 1 }}>{item.desc}</Text>
+                                    
+                                    <div style={{ marginTop: 'auto', borderTop: '1px solid var(--semi-color-border)', width: '100%', paddingTop: 12 }}>
+                                        <Text type="tertiary" style={{ fontSize: 12 }}>预计大小</Text>
+                                        <div style={{ color: item.color, fontWeight: 'bold', fontSize: 16 }}>{formatSize(item.size)}</div>
+                                    </div>
+                                    {/* 选中时的对勾 */}
+                                    {isSelected && (
+                                        <div style={{ position: 'absolute', top: 12, left: 12, color: item.color }}>
+                                            <IconTickCircle size="large" />
+                                        </div>
+                                    )}
+                                </div>
+                            </Col>
+                        );
+                    })}
+                </Row>
+
+                {/* --- 2. 磁盘空间检测 (动态响应) --- */}
                 <Card 
                     style={{ borderRadius: 12, marginBottom: 20 }}
                     title={
                         <div style={{display:'flex', alignItems:'center', gap: 8}}>
                             <IconServer /> 
-                            <span>目标位置: {DISK_INFO.label} 盘</span>
+                            <span>磁盘空间预估</span>
                         </div>
                     }
+                    bodyStyle={{ padding: '20px 24px' }}
                 >
-                    <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', color: 'var(--semi-color-text-2)', fontSize: 12 }}>
-                        <span>游戏路径: {GAME_PATH}</span>
-                        <span>{formatSize(DISK_INFO.free)} 可用 / {formatSize(DISK_INFO.total)} 总共</span>
+                    <div style={{ height: 24, backgroundColor: 'var(--semi-color-fill-1)', borderRadius: 12, overflow: 'hidden', display: 'flex', marginBottom: 12 }}>
+                        {/* 已用 */}
+                        <div style={{ width: `${percentUsed}%`, backgroundColor: 'var(--semi-color-border)', height: '100%' }} />
+                        {/* 预计新增 (带动画) */}
+                        <div style={{ 
+                            width: `${percentInstall}%`, 
+                            backgroundColor: isSpaceLow ? '#ff4d4f' : currentMode.color, // 跟随模式颜色
+                            height: '100%', 
+                            transition: 'width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+                        }} />
                     </div>
-                    {/* 叠加进度条：灰色底(总)，深灰(已用)，绿色(将要安装) */}
-                    <div style={{ height: 20, backgroundColor: 'var(--semi-color-fill-1)', borderRadius: 10, overflow: 'hidden', position: 'relative', display: 'flex' }}>
-                        {/* 已用空间 */}
-                        <div style={{ width: `${percentUsed}%`, backgroundColor: 'var(--semi-color-border)', height: '100%', transition: 'width 0.3s' }} />
-                        {/* 预计占用 */}
-                        <div style={{ width: `${percentInstall}%`, backgroundColor: isSpaceLow ? '#ff4d4f' : '#6bc786', height: '100%', transition: 'width 0.3s' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                        <div style={{ display: 'flex', gap: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--semi-color-border)' }}></div>
+                                <Text type="tertiary">已用: {formatSize(DISK_INFO.used)}</Text>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: currentMode.color }}></div>
+                                <Text style={{color: currentMode.color, fontWeight:'bold'}}>
+                                    {currentMode.name}: +{formatSize(currentMode.size)}
+                                </Text>
+                            </div>
+                        </div>
+                        <Text style={{color: isSpaceLow ? '#ff4d4f' : 'var(--semi-color-text-2)'}}>
+                            剩余可用: {formatSize(DISK_INFO.free)}
+                        </Text>
                     </div>
-                    <div style={{ marginTop: 8, display: 'flex', gap: 20, fontSize: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--semi-color-border)' }}></div>
-                            <Text type="tertiary">已用空间</Text>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: isSpaceLow ? '#ff4d4f' : '#6bc786' }}></div>
-                            <Text style={{color: isSpaceLow ? '#ff4d4f' : '#6bc786', fontWeight:'bold'}}>
-                                本次安装预计占用: {formatSize(INSTALL_SIZE)}
-                            </Text>
-                        </div>
-                    </div>
-                    {isSpaceLow && (
-                        <div style={{ marginTop: 12, color: '#ff4d4f', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <IconAlertTriangle /> 磁盘空间严重不足，请先清理磁盘！
-                        </div>
-                    )}
                 </Card>
 
-                {/* 2. 安装动作区 */}
-                <div style={{ textAlign: 'center', marginTop: 40 }}>
+                {/* --- 3. 自定义模式引导入口 (新增) --- */}
+                <div style={{ marginBottom: 40 }}>
+                    <Banner
+                        type="info"
+                        bordered
+                        icon={<IconSetting />}
+                        style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)', borderRadius: 8 }}
+                        description={
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                <div>
+                                    <Text strong>需要更个性化的选择？</Text>
+                                    <Text type="tertiary" style={{ marginLeft: 8 }}>
+                                        如果您只想安装特定的车包，或者想手动调整光影版本，请前往"模组安装"页面。
+                                    </Text>
+                                </div>
+                                <Button 
+                                    theme="borderless" 
+                                    type="primary" 
+                                    style={{ fontWeight: 'bold' }}
+                                    onClick={() => onNavigate && onNavigate('ModInstallPage')}
+                                >
+                                    去自定义安装 <IconArrowRight />
+                                </Button>
+                            </div>
+                        }
+                    />
+                </div>
+
+                {/* --- 4. 底部安装按钮 --- */}
+                <div style={{ textAlign: 'center', paddingBottom: 40 }}>
                     <Button 
                         theme="solid" 
                         size="large" 
                         style={{ 
-                            backgroundColor: isSpaceLow ? '#555' : '#6bc786', 
+                            backgroundColor: isSpaceLow ? '#555' : currentMode.color, // 按钮颜色随模式变
                             color: '#fff', 
-                            width: 300, 
-                            height: 60,
+                            width: 320, 
+                            height: 64,
                             fontSize: 18,
                             fontWeight: 'bold',
-                            boxShadow: '0 4px 15px rgba(107, 199, 134, 0.4)'
+                            boxShadow: `0 8px 20px -6px ${currentMode.color}80` // 阴影颜色也随模式变
                         }}
                         disabled={isSpaceLow}
-                        onClick={handleOneClickInstall}
+                        onClick={handleInstallClick}
                     >
-                        立即开始安装
+                        {isSpaceLow ? '磁盘空间不足' : `安装 ${currentMode.name}`}
                     </Button>
-                    <Text style={{ display: 'block', marginTop: 12, color: 'var(--semi-color-text-2)' }}>
-                        将自动安装 CSP, Sol, Pure, 车辆包及地图
+                    <Text type="tertiary" style={{ display: 'block', marginTop: 16, fontSize: 12 }}>
+                        点击安装即代表同意覆盖现有配置
                     </Text>
                 </div>
 
@@ -342,15 +487,12 @@ export default function OneClickInstaller(): React.JSX.Element {
                     <div style={{ textAlign: 'center', marginBottom: 20 }}>
                         <IconAlertTriangle size="extra-large" style={{ color: '#ff9f43', marginBottom: 10 }} />
                         <Paragraph style={{ fontSize: 16 }}>
-                            检测到您的游戏中已经存在模组资源。
+                            检测到您已安装部分模组。继续安装 <strong>{currentMode.name}</strong> 将会重置相关文件。
                         </Paragraph>
                     </div>
                     <div style={{ backgroundColor: '#fef2f2', border: '1px solid #ffccc7', padding: 12, borderRadius: 6, color: '#cf1322', fontSize: 13 }}>
-                        ⚠️ <strong>覆盖安装</strong> 将会替换您现有的 CSP、Sol 和相关配置。如果您之前手动修改过这些文件，修改将会丢失。
+                        ⚠️ 此操作不可撤销，建议先备份重要数据。
                     </div>
-                    <p style={{ marginTop: 12, color: 'var(--semi-color-text-2)' }}>
-                        建议：如果您现在的游戏运行正常，只是想更新，可以继续。如果游戏经常崩溃，建议点击右上角切换到"修复模式"。
-                    </p>
                 </Modal>
             </div>
         );
@@ -372,4 +514,3 @@ export default function OneClickInstaller(): React.JSX.Element {
         </Layout>
     );
 }
-
