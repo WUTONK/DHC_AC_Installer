@@ -5,10 +5,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ConfigProvider } from '@douyinfe/semi-ui'
 import App from './App'
+import { DevModeProvider } from './contexts/DevModeContext'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ConfigProvider>
-      <App />
+      <DevModeProvider>
+        <App />
+      </DevModeProvider>
     </ConfigProvider>
   </StrictMode>
 )

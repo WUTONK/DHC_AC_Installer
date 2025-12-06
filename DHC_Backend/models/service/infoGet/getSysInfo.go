@@ -34,10 +34,10 @@ func GetSysInfo() sysInfo {
 }
 
 // 计算传入路径所属的硬盘分区的剩余空间
-func GetDiskUsage(path string) error {
+func GetDiskUsage(path string) (int, error) {
 	di, err := disk.Usage(path)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	percentage := (float64(di.Total-di.Free) / float64(di.Total)) * 100
 	fmt.Printf("%s of %s disk space used (%0.2f%%)\n",
@@ -46,5 +46,6 @@ func GetDiskUsage(path string) error {
 		percentage,
 	)
 
-	return nil
+	// 返回MB
+	return int(di.Free / (1024 * 1024)), nil
 }

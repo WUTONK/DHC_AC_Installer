@@ -4,6 +4,7 @@ import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
     IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle
 } from '@douyinfe/semi-icons';
+import InstallProgressPage from './InstallProgressPage';
 
 // 模拟数据：磁盘情况
 const GAME_PATH = "D:\\SteamLibrary\\steamapps\\common\\assettocorsa";
@@ -77,6 +78,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
     const [selectedModeId, setSelectedModeId] = useState<string>('standard'); // 默认选中标准版
+    const [showProgressPage, setShowProgressPage] = useState<boolean>(false); // 是否显示安装进度页面
     
     // 纯净安装向导状态
     const [wizardStep, setWizardStep] = useState<number>(0); 
@@ -146,7 +148,14 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     const startInstall = (): void => {
         setConflictModalVisible(false);
         Toast.success(`正在开始安装：${currentMode.name}`);
-        // 这里对接真实的安装逻辑
+        // 切换到安装进度页面
+        setShowProgressPage(true);
+    };
+
+    const handleInstallComplete = (): void => {
+        setShowProgressPage(false);
+        Toast.success('安装完成！');
+        // 可以在这里添加其他完成后的逻辑，比如刷新页面或跳转
     };
 
     // --- 逻辑：备份与重装模拟 ---
@@ -510,6 +519,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
             </div>
         );
     };
+
+    // 如果显示安装进度页面，直接渲染进度页面
+    if (showProgressPage) {
+        return <InstallProgressPage onComplete={handleInstallComplete} />;
+    }
 
     if (isDiagnosing) {
         return (

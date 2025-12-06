@@ -1,8 +1,9 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button,Avatar} from '@douyinfe/semi-ui'
+import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
 import { useState } from 'react'
-import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconFile, IconFolder } from '@douyinfe/semi-icons';
+import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconFile, IconFolder, IconSetting } from '@douyinfe/semi-icons';
+import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
@@ -14,7 +15,9 @@ import OneClickInstaller from './OneClickInstaller';
 import OneClickInstallerPlan1 from './OneClickInstallerPlan1';
 import OneClickInstallerPlan2 from './OneClickInstallerPlan2';
 import ResourceImportManager from './ResourceImportManager';
+import SettingsPage from './SettingsPage';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
+import CustomInstallWizard from './CustomInstallWizard';
 
 // const { Title, Text } = Typography
 
@@ -23,16 +26,12 @@ function App(): React.JSX.Element {
 
   // const [gamePath, setGamePath] = useState('')
   const { Header, Footer, Sider, Content } = Layout;
-  const commonStyle = {
-      height: 64,
-      lineHeight: '64px',
-  };
 
   // 页面选择
   const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
       case 'Home':
-        return <div style={{ padding: '20px' }}>欢迎来到首页</div>
+        return <div className="p-5">欢迎来到首页</div>
       case 'ModInstallPage':
         return <ModInstallPage />
       case 'ShutokoWiki':
@@ -55,6 +54,10 @@ function App(): React.JSX.Element {
         return <OneClickInstallerPlan2 />
       case 'ResourceImportManager':
         return <ResourceImportManager />
+      case 'SettingsPage':
+        return <SettingsPage />
+      case 'CustomInstallWizard':
+        return <CustomInstallWizard />
       default:
         return <div>Not Found</div>
     }
@@ -62,6 +65,7 @@ function App(): React.JSX.Element {
 
   const [activeKey, setActiveKey] = useState<string>('Home')
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
+  const { isDevMode, toggleDevMode } = useDevMode()
 
   // 切换色彩模式
   const switchMode = (): void => {
@@ -90,65 +94,51 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <Layout style={{ border: '1px solid var(--semi-color-border)', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-    <Header style={{ ...commonStyle }}>
-          <div>
-            <Nav mode='horizontal' defaultSelectedKeys={['Home']} style={{ ...commonStyle }}>
-              <Nav.Header>
-                <img src={""} alt="Logo" style={{ height: '32px' }}></img>
-              </Nav.Header>
-              <span
-                style={{
-                  // backgroundColor: 'red',
-                  color: 'var(--semi-color-text-2)',
-                }}
-              >
-                <span
-                  style={{
-                    marginRight: '24px',
-                    color: 'var(--semi-color-text-0)',
-                    fontWeight: '600',
-                  }}
-                >
-                  ----
-                </span>
-                <span style={{ marginRight: '24px' }}>
-                  <Button onClick={switchMode}>切换色彩模式</Button>
-                </span>
-                <span style={{ marginRight: '24px' }}>
-                  <Button onClick={openSemiModal}>打开弹窗</Button>
-                </span>
-                <span style={{ marginRight: '24px' }}>
-                <Button onClick={openSemiModal}>打开官方弹窗</Button>
-                </span>
+    <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
+    <Header className="h-16 leading-[64px] px-4 flex items-center justify-between bg-dark-bg border-b border-dark-border">
+          <div className="flex items-center gap-4 shrink-0">
+            <img src={""} alt="Logo" className="h-8" />
+            <span className="text-text-light font-semibold">----</span>
+          </div>
+          <div className="flex items-center flex-nowrap gap-3 text-text-light shrink-0">
+            <Button size="small" onClick={switchMode} className="whitespace-nowrap">切换色彩模式</Button>
+            <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开弹窗</Button>
+            <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开官方弹窗</Button>
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Switch checked={isDevMode} onChange={toggleDevMode} size="small" />
+              <span className={`text-xs ${isDevMode ? 'text-accent-green' : 'text-text-muted'}`}>
+                开发者模式
               </span>
-              <Nav.Footer>
-                <Avatar size="small">
-                  WUTONK
-                </Avatar>
-              </Nav.Footer>
-            </Nav>
+            </div>
+            <Avatar size="small">
+              WUTONK
+            </Avatar>
           </div>
         </Header>
 
-        <Layout style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, height: 0 }}>
-          <Sider style={{ flexShrink: 0 }}>
+        <Layout className="flex-1 flex overflow-hidden min-h-0 h-0">
+          <Sider className="shrink-0 bg-dark-bg">
             <Nav
-              style={{ maxWidth: 200, height: '100%' }}
+              className="max-w-[200px] h-full bg-dark-bg text-text-light dark-nav"
+              theme="dark"
               selectedKeys={[activeKey]}
+              bodyStyle={{ backgroundColor: '#232326' }}
+              style={{ backgroundColor: '#232326', color: '#ccc' }}
               items={[
-                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
-                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
-                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" /> },
-                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" /> },
-                { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
-                { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
-                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
-                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
-                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
-                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
-                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
-                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />}
+                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" style={{ color: '#ccc' }} /> },
+                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" style={{ color: '#ccc' }} /> },
+                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
+                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
+                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
+                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
+                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
+                { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' style={{ color: '#ccc' }} />}
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
@@ -158,13 +148,13 @@ function App(): React.JSX.Element {
           </Sider>
 
           {/* 内容页面 */}
-          <Content style={{ overflow: 'auto', flex: 1, minHeight: 0, height: '100%' }}>
+          <Content className="overflow-auto flex-1 min-h-0 h-full">
             {renderPage(activeKey)}
           </Content>
 
         </Layout>
 
-    <Footer style={{ ...commonStyle, border: '1px solid var(--semi-color-border)', background: 'var(--semi-color-bg-0)' }}>Footer</Footer>
+    <Footer className="h-16 leading-[64px] border border-dark-border bg-dark-bg text-text-light">Footer</Footer>
 
     <JoinServerInstructionsModal
       visible={semiModalVisible}
