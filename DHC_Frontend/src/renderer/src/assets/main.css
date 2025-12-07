@@ -94,93 +94,48 @@
   font-size: 18px !important;
 }
 
-/* 暗色模式 Nav 样式 - 使用更具体的选择器 */
-.semi-layout-sider .dark-nav.semi-nav,
-.semi-layout-sider .dark-nav .semi-nav-wrapper,
-.semi-layout-sider .semi-nav {
+/* 只在暗色模式下应用自定义 Nav 样式 */
+body[theme-mode='dark'] .dark-nav.semi-nav,
+body[theme-mode='dark'] .dark-nav .semi-nav-wrapper {
   background-color: #232326;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item,
-.semi-layout-sider .semi-nav-item {
+body[theme-mode='dark'] .dark-nav .semi-nav-item .semi-nav-item-text {
   color: #ccc;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item .semi-nav-item-text,
-.semi-layout-sider .dark-nav .semi-nav-item-text,
-.semi-layout-sider .semi-nav-item .semi-nav-item-text,
-.semi-layout-sider .semi-nav-item-text {
-  color: #ccc;
-}
-
-.semi-layout-sider .dark-nav .semi-nav-item:hover,
-.semi-layout-sider .semi-nav-item:hover {
+body[theme-mode='dark'] .dark-nav .semi-nav-item:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item:hover .semi-nav-item-text,
-.semi-layout-sider .semi-nav-item:hover .semi-nav-item-text {
+body[theme-mode='dark'] .dark-nav .semi-nav-item:hover .semi-nav-item-text {
   color: #fff;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item-selected,
-.semi-layout-sider .semi-nav-item-selected {
+body[theme-mode='dark'] .dark-nav .semi-nav-item-selected {
   background-color: rgba(107, 199, 134, 0.1);
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item-selected .semi-nav-item-text,
-.semi-layout-sider .semi-nav-item-selected .semi-nav-item-text {
+body[theme-mode='dark'] .dark-nav .semi-nav-item-selected .semi-nav-item-text {
   color: #6bc786;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item-selected:hover,
-.semi-layout-sider .semi-nav-item-selected:hover {
+body[theme-mode='dark'] .dark-nav .semi-nav-item-selected:hover {
   background-color: rgba(107, 199, 134, 0.15);
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item-selected:hover .semi-nav-item-text,
-.semi-layout-sider .semi-nav-item-selected:hover .semi-nav-item-text {
+body[theme-mode='dark'] .dark-nav .semi-nav-item-selected:hover .semi-nav-item-text {
   color: #6bc786;
 }
 
-/* 确保图标颜色正确 */
-.semi-layout-sider .dark-nav .semi-nav-item .semi-icon,
-.semi-layout-sider .semi-nav-item .semi-icon {
+body[theme-mode='dark'] .dark-nav .semi-nav-item .semi-icon {
   color: #ccc;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item-selected .semi-icon,
-.semi-layout-sider .semi-nav-item-selected .semi-icon {
+body[theme-mode='dark'] .dark-nav .semi-nav-item-selected .semi-icon {
   color: #6bc786;
 }
 
-.semi-layout-sider .dark-nav .semi-nav-item:hover .semi-icon,
-.semi-layout-sider .semi-nav-item:hover .semi-icon {
+body[theme-mode='dark'] .dark-nav .semi-nav-item:hover .semi-icon {
   color: #fff;
-}
-
-/* Sider 暗色背景 */
-.semi-layout-sider {
-  background-color: #232326;
-}
-
-/* Footer 文字颜色 */
-.semi-layout-footer {
-  color: #ccc;
-}
-
-/* 确保 Nav 文字在所有状态下都可见 - 使用更具体的选择器 */
-.semi-layout-sider .dark-nav .semi-nav-item span,
-.semi-layout-sider .dark-nav .semi-nav-item > div,
-.semi-layout-sider .semi-nav-item span,
-.semi-layout-sider .semi-nav-item > div {
-  color: #ccc;
-}
-
-.semi-layout-sider .dark-nav .semi-nav-item-selected span,
-.semi-layout-sider .dark-nav .semi-nav-item-selected > div,
-.semi-layout-sider .semi-nav-item-selected span,
-.semi-layout-sider .semi-nav-item-selected > div {
-  color: #6bc786;
-  background-color: rgba(107, 199, 134, 0.1);
 }

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { 
-    Layout, Nav, Button, Typography, Tag, Tabs, TabPane, 
-    Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip
+import {
+    Layout, Nav, Button, Typography, Tag, Tabs, TabPane,
+    Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip, Toast
 } from '@douyinfe/semi-ui';
-import { 
-    IconHome, IconDownload, IconAlertTriangle, IconTickCircle, 
-    IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting
+import {
+    IconDownload, IconAlertTriangle, IconTickCircle,
+    IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete
 } from '@douyinfe/semi-icons';
 
 // --- 1. 模拟数据结构 ---
@@ -118,6 +118,7 @@ export default function ResourceImportManager(): React.JSX.Element {
     const [viewMode, setViewMode] = useState<'minimal' | 'full'>('minimal'); // 'minimal' | 'full'
     const [activeTab, setActiveTab] = useState<string>('map');
     const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
+    const [clearModalVisible, setClearModalVisible] = useState<boolean>(false);
 
     // --- 计算逻辑 ---
     // 1. 根据当前模式过滤资源
@@ -135,6 +136,13 @@ export default function ResourceImportManager(): React.JSX.Element {
         return filteredResources.filter(r => r.category === category && r.status === 'missing').length;
     };
 
+    // --- 处理清除逻辑 ---
+    const handleClearAll = (): void => {
+        // 这里对接真实的清除逻辑，目前仅做前端模拟
+        setClearModalVisible(false);
+        Toast.success('所有已导入资源记录已清除，请重新扫描');
+    };
+
     // 样式常量
     const BG_DARK = '#16161a';
     const THEME_GREEN = '#6bc786';
@@ -143,11 +151,17 @@ export default function ResourceImportManager(): React.JSX.Element {
     // --- 渲染辅助函数：文件状态条 ---
     const renderStatusTag = (status: string, fileName: string): React.ReactNode => {
         if (status === 'imported') {
-            return <Tag color="green" type="solid" icon={<IconTickCircle />}>已就绪</Tag>;
+            return (
+                <Tag color="green" type="solid">
+                    <IconTickCircle style={{ marginRight: 4 }} />
+                    已就绪
+                </Tag>
+            );
         }
         return (
             <Tooltip content={`请下载并拖入: ${fileName}`}>
-                <Tag color="red" type="solid" icon={<IconAlertTriangle />}>
+                <Tag color="red" type="solid">
+                    <IconAlertTriangle style={{ marginRight: 4 }} />
                     缺失: {fileName}
                 </Tag>
             </Tooltip>
@@ -158,6 +172,7 @@ export default function ResourceImportManager(): React.JSX.Element {
     const renderCarPack = (item: ResourceItem): React.ReactNode => (
         <Collapse.Panel
             key={item.id}
+            itemKey={item.id}
             header={
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingRight: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -194,11 +209,11 @@ export default function ResourceImportManager(): React.JSX.Element {
 
     // --- 渲染：普通资源列表 (List 模式) ---
     const renderNormalItem = (item: ResourceItem): React.ReactNode => (
-        <div 
+        <div
             key={item.id}
-            style={{ 
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                backgroundColor: '#232326', padding: '16px 24px', 
+            style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                backgroundColor: '#232326', padding: '16px 24px',
                 borderBottom: '1px solid #333',
                 marginBottom: 1 // 模拟列表分割
             }}
@@ -207,7 +222,7 @@ export default function ResourceImportManager(): React.JSX.Element {
                 {item.category === 'map' && <IconFolder size="large" style={{ color: '#4facfe' }} />}
                 {item.category === 'shader' && <IconFile size="large" style={{ color: '#a06cd5' }} />}
                 {item.category === 'dash' && <IconSetting size="large" style={{ color: '#ff9f43' }} />}
-                
+
                 <div>
                     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>{item.name}</Text>
                     <div style={{ fontSize: 12, color: '#666' }}>
@@ -239,24 +254,43 @@ export default function ResourceImportManager(): React.JSX.Element {
                             <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
                             <Text style={{ color: '#888' }}>拖入压缩包即可自动安装，请确保关键资源无缺失。</Text>
                         </div>
-                        {/* 资源获取指引按钮 */}
-                        <Button 
-                            icon={<IconHelpCircle />} 
-                            theme="solid" 
-                            style={{ backgroundColor: '#333', color: THEME_GREEN, border: `1px solid ${THEME_GREEN}` }}
-                            onClick={() => setHelpModalVisible(true)}
-                        >
-                            如何获取资源？
-                        </Button>
+
+                        {/* 右侧按钮组：清除按钮 + 帮助按钮 */}
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            {/* 一键清除按钮 */}
+                            <Button
+                                icon={<IconDelete />}
+                                type="danger"
+                                theme="light"
+                                style={{
+                                    backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                                    color: THEME_RED,
+                                    border: `1px solid ${THEME_RED}`
+                                }}
+                                onClick={() => setClearModalVisible(true)}
+                            >
+                                一键清除资源
+                            </Button>
+
+                            {/* 资源获取指引按钮 */}
+                            <Button
+                                icon={<IconHelpCircle />}
+                                theme="solid"
+                                style={{ backgroundColor: '#333', color: THEME_GREEN, border: `1px solid ${THEME_GREEN}` }}
+                                onClick={() => setHelpModalVisible(true)}
+                            >
+                                如何获取资源？
+                            </Button>
+                        </div>
                     </div>
                 </Header>
                 <Content style={{ padding: '20px 40px', overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     {/* 顶部工具栏：模式切换 */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                        <Radio.Group 
-                            type="button" 
+                        <Radio.Group
+                            type="button"
                             buttonSize="large"
-                            value={viewMode} 
+                            value={viewMode}
                             onChange={(e) => setViewMode(e.target.value as 'minimal' | 'full')}
                         >
                             <Radio value="minimal">最小包 (仅主图+联机车)</Radio>
@@ -274,9 +308,9 @@ export default function ResourceImportManager(): React.JSX.Element {
                         </div>
                     </div>
                     {/* 分类 Tabs */}
-                    <Tabs 
-                        type="card" 
-                        activeKey={activeTab} 
+                    <Tabs
+                        type="card"
+                        activeKey={activeTab}
                         onChange={setActiveTab}
                         style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}
                         contentStyle={{ flex: 1, overflowY: 'auto', backgroundColor: '#1b1b1f', borderRadius: '0 0 12px 12px' }}
@@ -289,22 +323,22 @@ export default function ResourceImportManager(): React.JSX.Element {
                         ].map(tab => {
                             const missingCount = getMissingCount(tab.key);
                             return (
-                                <TabPane 
+                                <TabPane
                                     tab={
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                             {tab.icon} {tab.label}
                                             {missingCount > 0 && <Badge count={missingCount} type='danger' style={{ marginLeft: 4 }} />}
                                         </div>
-                                    } 
+                                    }
                                     itemKey={tab.key}
                                     key={tab.key}
                                 >
                                     {/* 列表内容区域 */}
                                     <div style={{ minHeight: 300 }}>
                                         {currentTabResources.length === 0 ? (
-                                            <Empty 
-                                                image={<IconFolder style={{ fontSize: 48, color: '#333' }} />} 
-                                                description="当前模式下该分类无必需资源" 
+                                            <Empty
+                                                image={<IconFolder style={{ fontSize: 48, color: '#333' }} />}
+                                                description="当前模式下该分类无必需资源"
                                                 style={{ marginTop: 60 }}
                                             />
                                         ) : (
@@ -325,9 +359,9 @@ export default function ResourceImportManager(): React.JSX.Element {
                     </Tabs>
                 </Content>
                 {/* 底部：一键导入入口 */}
-                <Footer style={{ 
-                    padding: '16px 40px', 
-                    background: '#232326', 
+                <Footer style={{
+                    padding: '16px 40px',
+                    background: '#232326',
                     borderTop: '1px solid #333'
                 }}>
                     <Upload
@@ -352,12 +386,12 @@ export default function ResourceImportManager(): React.JSX.Element {
                     footer={null}
                     style={{ maxWidth: 500 }}
                 >
-                    <Banner 
-                        type="info" 
-                        description="为了保证联机版本一致，请务必使用官方提供的资源包。" 
+                    <Banner
+                        type="info"
+                        description="为了保证联机版本一致，请务必使用官方提供的资源包。"
                         style={{ marginBottom: 20 }}
                     />
-                    
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <Card style={{ cursor: 'pointer', borderColor: '#444' }} shadows="hover">
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -377,6 +411,29 @@ export default function ResourceImportManager(): React.JSX.Element {
                                 </div>
                             </div>
                         </Card>
+                    </div>
+                </Modal>
+
+                {/* 一键清除确认 Modal */}
+                <Modal
+                    title="确认清除所有资源？"
+                    visible={clearModalVisible}
+                    onOk={handleClearAll}
+                    onCancel={() => setClearModalVisible(false)}
+                    okButtonProps={{ type: 'danger', theme: 'solid' }}
+                    okText="确认清除"
+                    cancelText="取消"
+                    centered
+                    style={{ maxWidth: 400 }}
+                >
+                    <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                        <IconAlertTriangle size="extra-large" style={{ color: '#ff4d4f', marginBottom: 16, fontSize: 48 }} />
+                        <Text type="danger" style={{ display: 'block', fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>
+                            此操作将移除列表中所有已导入的资源记录。
+                        </Text>
+                        <Text style={{ color: '#666', display: 'block' }}>
+                            这不会删除您的原始压缩包文件，但您需要重新扫描或拖入才能再次安装。
+                        </Text>
                     </div>
                 </Modal>
             </Layout>

@@ -1,7 +1,7 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
 import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconFile, IconFolder, IconSetting } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
@@ -18,6 +18,7 @@ import ResourceImportManager from './ResourceImportManager';
 import SettingsPage from './SettingsPage';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 import CustomInstallWizard from './CustomInstallWizard';
+import WelcomePage from './WelcomePage';
 
 // const { Title, Text } = Typography
 
@@ -27,11 +28,26 @@ function App(): React.JSX.Element {
   // const [gamePath, setGamePath] = useState('')
   const { Header, Footer, Sider, Content } = Layout;
 
+  // 地区状态管理
+  const [region, setRegion] = useState<'zhCN' | 'enUS'>('zhCN')
+
+  // 自动检测地区（根据系统语言或浏览器语言）
+  useEffect(() => {
+    // 检测系统/浏览器语言
+    const systemLang = navigator.language || (navigator as any).userLanguage || 'en-US'
+    // 如果语言是中文相关，设置为 zhCN，否则设置为 enUS
+    if (systemLang.toLowerCase().includes('zh') || systemLang.toLowerCase().includes('cn')) {
+      setRegion('zhCN')
+    } else {
+      setRegion('enUS')
+    }
+  }, [])
+
   // 页面选择
   const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
       case 'Home':
-        return <div className="p-5">欢迎来到首页</div>
+        return <WelcomePage region={region} onNavigate={(page: string) => setActiveKey(page)} />
       case 'ModInstallPage':
         return <ModInstallPage />
       case 'ShutokoWiki':
@@ -95,12 +111,51 @@ function App(): React.JSX.Element {
 
   return (
     <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
-    <Header className="h-16 leading-[64px] px-4 flex items-center justify-between bg-dark-bg border-b border-dark-border">
+    <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
           <div className="flex items-center gap-4 shrink-0">
             <img src={""} alt="Logo" className="h-8" />
-            <span className="text-text-light font-semibold">----</span>
+            <span className="font-semibold">----</span>
           </div>
-          <div className="flex items-center flex-nowrap gap-3 text-text-light shrink-0">
+          <div className="flex items-center flex-nowrap gap-3 shrink-0">
+            {/* 地区切换按钮 */}
+            <div style={{
+              backgroundColor: 'var(--semi-color-fill-0)',
+              borderRadius: 20,
+              padding: 4,
+              display: 'flex',
+              border: '1px solid var(--semi-color-border)'
+            }}>
+              <div
+                onClick={() => setRegion('zhCN')}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 16,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  backgroundColor: region === 'zhCN' ? '#6bc786' : 'transparent',
+                  color: region === 'zhCN' ? '#fff' : 'var(--semi-color-text-2)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                中国 CN
+              </div>
+              <div
+                onClick={() => setRegion('enUS')}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 16,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  backgroundColor: region === 'enUS' ? '#0052cc' : 'transparent',
+                  color: region === 'enUS' ? '#fff' : 'var(--semi-color-text-2)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Global US
+              </div>
+            </div>
             <Button size="small" onClick={switchMode} className="whitespace-nowrap">切换色彩模式</Button>
             <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开弹窗</Button>
             <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开官方弹窗</Button>
@@ -117,28 +172,25 @@ function App(): React.JSX.Element {
         </Header>
 
         <Layout className="flex-1 flex overflow-hidden min-h-0 h-0">
-          <Sider className="shrink-0 bg-dark-bg">
+          <Sider className="shrink-0">
             <Nav
-              className="max-w-[200px] h-full bg-dark-bg text-text-light dark-nav"
-              theme="dark"
+              className="max-w-[200px] h-full dark-nav"
               selectedKeys={[activeKey]}
-              bodyStyle={{ backgroundColor: '#232326' }}
-              style={{ backgroundColor: '#232326', color: '#ccc' }}
               items={[
-                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" style={{ color: '#ccc' }} /> },
-                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" style={{ color: '#ccc' }} /> },
-                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
-                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
-                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
-                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
-                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' style={{ color: '#ccc' }} />},
-                { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' style={{ color: '#ccc' }} />}
+                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
+                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" /> },
+                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" /> },
+                { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
+                { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
+                { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
+                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
+                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
+                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
+                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
+                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
+                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />},
+                { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />}
               ]}
               onSelect={(data) => setActiveKey(String(data.itemKey))}
               footer={{
@@ -154,7 +206,7 @@ function App(): React.JSX.Element {
 
         </Layout>
 
-    <Footer className="h-16 leading-[64px] border border-dark-border bg-dark-bg text-text-light">Footer</Footer>
+    <Footer className="h-16 leading-[64px] border border-[var(--semi-color-border)]">Footer</Footer>
 
     <JoinServerInstructionsModal
       visible={semiModalVisible}
