@@ -475,36 +475,6 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                     </div>
                         </Card>
 
-                        {/* 3. 自定义模式引导入口 */}
-                        <div style={{ marginBottom: 40, padding: '0 5px' }}>
-                    <Banner
-                        type="info"
-                        bordered
-                        icon={<IconSetting style={{color: '#fff'}} />}
-                        // [修复]: Banner 背景设为深色半透明
-                        style={{ backgroundColor: 'rgba(35, 35, 38, 0.8)', borderColor: '#444', borderRadius: 8 }}
-                        description={
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                <div>
-                                    {/* [修复]: 强制 Title 和 Text 颜色 */}
-                                    <Text strong style={{ color: '#fff', fontSize: 15 }}>需要更个性化的选择？</Text>
-                                    <div style={{ marginTop: 4 }}>
-                                        <Text style={{ color: '#ccc', fontSize: 13 }}>
-                                            如果您只想安装特定的车包，或者想手动调整光影版本，请前往"模组安装"页面。
-                                        </Text>
-                                    </div>
-                                </div>
-                                <Button 
-                                    theme="borderless" 
-                                    style={{ fontWeight: 'bold', color: '#00b5ad' }}
-                                    onClick={() => onNavigate && onNavigate('ModInstallPage')}
-                                >
-                                    去自定义安装 <IconArrowRight />
-                                </Button>
-                            </div>
-                        }
-                        />
-                        </div>
 
                         {/* 4. 底部安装按钮 */}
                         <div style={{ textAlign: 'center', paddingBottom: 40 }}>

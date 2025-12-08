@@ -815,17 +815,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                     <Text strong style={{ color: '#fff', fontSize: 15 }}>需要更个性化的选择？</Text>
                                     <div style={{ marginTop: 4 }}>
                                         <Text style={{ color: '#ccc', fontSize: 13 }}>
-                                            如果您只想安装特定的车包，或者想手动调整光影版本，请前往「模组安装」页面。
+                                            如果您只想安装特定的车包，或者想手动调整光影版本，请使用其他安装方式。
                                         </Text>
                                     </div>
                                 </div>
-                                <Button
-                                    theme="borderless"
-                                    style={{ fontWeight: 'bold', color: '#00b5ad' }}
-                                    onClick={() => onNavigate && onNavigate('ModInstallPage')}
-                                >
-                                    去自定义安装 <IconArrowRight />
-                                </Button>
                             </div>
                         }
                     />

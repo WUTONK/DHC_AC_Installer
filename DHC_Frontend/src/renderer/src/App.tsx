@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
-import ModInstallPage from './ModInstallPage';
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
 import CarPackInstaller from './CarPackInstaller';
@@ -47,8 +46,6 @@ function App(): React.JSX.Element {
     switch (key) {
       case 'Home':
         return <WelcomePage region={region} onNavigate={(page: string) => setActiveKey(page)} />
-      case 'ModInstallPage':
-        return <ModInstallPage />
       case 'ShutokoWiki':
         return <ShutokoWiki />
       case 'NetDemo':
@@ -176,7 +173,6 @@ function App(): React.JSX.Element {
                 { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
                 { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
                 { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
-                { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
                 { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
                 { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
                 { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
