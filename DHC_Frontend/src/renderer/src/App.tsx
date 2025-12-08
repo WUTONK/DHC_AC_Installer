@@ -2,7 +2,7 @@
 import React from 'react'
 import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
-import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconFile, IconFolder, IconSetting } from '@douyinfe/semi-icons';
+import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
 import ModInstallPage from './ModInstallPage';
@@ -12,8 +12,6 @@ import CarPackInstaller from './CarPackInstaller';
 import ShaderInstaller from './ShaderInstaller';
 import ShaderInstallerV1 from './ShaderInstaller.v1';
 import OneClickInstaller from './OneClickInstaller';
-import OneClickInstallerPlan1 from './OneClickInstallerPlan1';
-import OneClickInstallerPlan2 from './OneClickInstallerPlan2';
 import ResourceImportManager from './ResourceImportManager';
 import SettingsPage from './SettingsPage';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
@@ -34,7 +32,8 @@ function App(): React.JSX.Element {
   // 自动检测地区（根据系统语言或浏览器语言）
   useEffect(() => {
     // 检测系统/浏览器语言
-    const systemLang = navigator.language || (navigator as any).userLanguage || 'en-US'
+    const navWithUserLang = navigator as Navigator & { userLanguage?: string }
+    const systemLang = navWithUserLang.language || navWithUserLang.userLanguage || 'en-US'
     // 如果语言是中文相关，设置为 zhCN，否则设置为 enUS
     if (systemLang.toLowerCase().includes('zh') || systemLang.toLowerCase().includes('cn')) {
       setRegion('zhCN')
@@ -64,10 +63,6 @@ function App(): React.JSX.Element {
         return <CarPackInstaller />
       case 'OneClickInstaller':
         return <OneClickInstaller onNavigate={(page: string) => setActiveKey(page)} />
-      case 'OneClickInstallerPlan1':
-        return <OneClickInstallerPlan1 />
-      case 'OneClickInstallerPlan2':
-        return <OneClickInstallerPlan2 />
       case 'ResourceImportManager':
         return <ResourceImportManager />
       case 'SettingsPage':
@@ -179,8 +174,6 @@ function App(): React.JSX.Element {
               items={[
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
                 { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
-                { itemKey: 'OneClickInstallerPlan1', text: '一键安装-方案一', icon: <IconFile size="large" /> },
-                { itemKey: 'OneClickInstallerPlan2', text: '一键安装-方案二', icon: <IconFolder size="large" /> },
                 { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
                 { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
                 { itemKey: 'ModInstallPage', text: 'ModinstallPage', icon: <IconCart size="large" /> },
