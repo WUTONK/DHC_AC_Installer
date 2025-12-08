@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-    Layout, Button, Card, Row, Col, Typography,
-    Tag, Checkbox, Toast, Input, Switch, Popover, Badge, Empty
+    Layout, Button, Row, Col, Typography,
+    Tag, Checkbox, Toast, Input, Switch, Popover, Empty
 } from '@douyinfe/semi-ui';
 import {
-    IconBolt, IconSetting,
+    IconSetting,
     IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
-    IconCode, IconFile, IconCart, IconArrowLeft, IconList
+    IconCode, IconArrowLeft, IconList
 } from '@douyinfe/semi-icons';
 
 // =================================================================
@@ -115,16 +115,26 @@ export default function CustomInstallWizard(): JSX.Element {
     };
 
     return (
-        <Layout style={{ height: '100vh', background: THEME.bg, color: 'white' }} className="semi-always-dark">
+        <Layout style={{
+            height: '100vh',
+            background: THEME.bg,
+            color: 'white',
+            // [修复1] 强制使用 Flex 纵向布局，并隐藏 body 级滚动条
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+        }} className="semi-always-dark">
             {/* Header: 完全重写的顶部导航栏，参考图1 */}
             <Header style={{
                 height: 60,
+                flexShrink: 0, // [修复2] 固定高度
                 background: THEME.bg,
                 borderBottom: `1px solid ${THEME.border}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 24px'
+                padding: '0 24px',
+                zIndex: 10
             }}>
                 {/* 左侧：返回/标题 */}
                 <div style={{ width: 120, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -172,14 +182,28 @@ export default function CustomInstallWizard(): JSX.Element {
             </Header>
 
             {/* Main Content */}
-            <Content style={{ padding: '24px 40px', overflowY: 'auto' }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <Content style={{
+                flex: 1,           // [修复3] 自动占据剩余空间
+                minHeight: 0,      // [修复6] 允许 flex 子元素正确收缩
+                overflowY: 'auto', // [修复4] 只有中间区域滚动
+                padding: '24px 40px',
+                position: 'relative',
+                display: 'flex',   // [修复7] 使用 flex 布局让内容区域自适应
+                flexDirection: 'column'
+            }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', flex: '0 0 auto' }}>
                     {renderContent()}
                 </div>
             </Content>
 
             {/* Footer */}
-            <Footer style={{ padding: '16px 40px', background: THEME.cardBg, borderTop: `1px solid ${THEME.border}` }}>
+            <Footer style={{
+                flexShrink: 0,     // [修复5] 防止被压缩
+                padding: '16px 40px',
+                background: THEME.cardBg,
+                borderTop: `1px solid ${THEME.border}`,
+                zIndex: 10
+            }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <Text style={{ color: THEME.textSub }}>

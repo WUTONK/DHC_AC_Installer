@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import {
     Layout,
-    Nav,
     Button,
     Row,
     Col,
@@ -54,7 +53,7 @@ const WEATHER_MODS: { sol: WeatherModState; pure: WeatherModState } = {
     pure: { installed: false, version: null, latest: '0.238' }, // Pure 未安装
 };
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 const { Text, Title, Paragraph } = Typography;
 
 export default function ShaderInstallerV1(): React.JSX.Element {
@@ -137,27 +136,7 @@ export default function ShaderInstallerV1(): React.JSX.Element {
 
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            {/* 侧边栏保持一致 */}
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
-                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 32, height: 32, background: '#333', borderRadius: '50%' }}></div>
-                    <Title heading={4} style={{ color: '#fff', margin: 0 }}>
-                        东濠涌
-                    </Title>
-                </div>
-                <Nav
-                    defaultSelectedKeys={['Shaders']}
-                    style={{ backgroundColor: 'transparent' }}
-                    items={[
-                        { itemKey: 'Install', text: '模组安装', icon: <IconHome /> },
-                        { itemKey: 'Import', text: '资源导入', icon: <IconDownload /> },
-                    ]}
-                    footer={{ collapseButton: true }}
-                />
-            </Sider>
-
-            <Layout>
-                <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
                     <div
                         style={{
                             display: 'flex',
@@ -433,7 +412,6 @@ export default function ShaderInstallerV1(): React.JSX.Element {
                         />
                     </div>
                 </Content>
-            </Layout>
         </Layout>
     );
 }

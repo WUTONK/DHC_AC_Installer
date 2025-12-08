@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Layout, Nav, Button, Typography, Card, Row, Col, Breadcrumb, Tag } from '@douyinfe/semi-ui';
-import { 
-    IconHome, IconDownload, IconArrowLeft, IconFile, IconFolder, IconTickCircle
+import { Layout, Button, Typography, Row, Col, Breadcrumb, Tag } from '@douyinfe/semi-ui';
+import {
+    IconHome, IconArrowLeft
 } from '@douyinfe/semi-icons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -117,7 +117,7 @@ const WIKI_DATA: WikiArticle[] = [
     }
 ];
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 // 模拟地图 SVG 路径 (为了视觉效果)
@@ -143,27 +143,11 @@ export default function ShutokoWiki(): React.JSX.Element {
 
     // 样式常量
     const BG_DARK = '#16161a';
-    const CARD_BG = '#232326';
     const THEME_ACCENT = '#00f2fe'; // 赛博青
 
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
-                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 32, height: 32, background: '#333', borderRadius: '50%' }}></div>
-                    <Title heading={4} style={{ color: '#fff', margin: 0 }}>东濠涌</Title>
-                </div>
-                <Nav
-                    defaultSelectedKeys={['Wiki']}
-                    items={[
-                        { itemKey: 'Install', text: '模组安装', icon: <IconDownload /> },
-                        { itemKey: 'Wiki', text: '首都高百科', icon: <IconFile /> },
-                    ]}
-                />
-            </Sider>
-
-            <Layout>
-                <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
                     <Breadcrumb>
                         <Breadcrumb.Item icon={<IconHome />} onClick={goBack} style={{cursor:'pointer'}}>首页</Breadcrumb.Item>
                         <Breadcrumb.Item onClick={goBack} style={{cursor:'pointer'}}>首都高百科</Breadcrumb.Item>
@@ -183,7 +167,7 @@ export default function ShutokoWiki(): React.JSX.Element {
                             <Row gutter={[24, 24]}>
                                 {WIKI_DATA.map(item => (
                                     <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
-                                        <div 
+                                        <div
                                             className="wiki-card"
                                             onClick={() => openArticle(item)}
                                             style={{
@@ -197,7 +181,7 @@ export default function ShutokoWiki(): React.JSX.Element {
                                             }}
                                         >
                                             {/* 背景图 */}
-                                            <div 
+                                            <div
                                                 className="card-bg"
                                                 style={{
                                                     backgroundImage: `url(${item.cover})`,
@@ -209,7 +193,7 @@ export default function ShutokoWiki(): React.JSX.Element {
                                                     filter: 'brightness(0.6)'
                                                 }}
                                             />
-                                            
+
                                             {/* 内容层 */}
                                             <div style={{
                                                 position: 'absolute',
@@ -243,11 +227,11 @@ export default function ShutokoWiki(): React.JSX.Element {
                     {view === 'detail' && activeArticle && (
                         <div className="wiki-detail-container animate-slide-up" style={{ maxWidth: 900, margin: '0 auto' }}>
                             {/* 详情页头部 Hero */}
-                            <div style={{ 
-                                height: 200, 
-                                borderRadius: 16, 
-                                overflow: 'hidden', 
-                                position: 'relative', 
+                            <div style={{
+                                height: 200,
+                                borderRadius: 16,
+                                overflow: 'hidden',
+                                position: 'relative',
                                 marginBottom: 30,
                                 border: '1px solid #333'
                             }}>
@@ -261,9 +245,9 @@ export default function ShutokoWiki(): React.JSX.Element {
                                     <Title heading={1} style={{ color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{activeArticle.title}</Title>
                                     <Text style={{ color: '#ccc', fontSize: 16 }}>{activeArticle.subtitle}</Text>
                                 </div>
-                                <Button 
-                                    icon={<IconArrowLeft />} 
-                                    theme="solid" 
+                                <Button
+                                    icon={<IconArrowLeft />}
+                                    theme="solid"
                                     style={{ position: 'absolute', top: 20, left: 20, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', color: 'white' }}
                                     onClick={goBack}
                                 >
@@ -272,23 +256,22 @@ export default function ShutokoWiki(): React.JSX.Element {
                             </div>
 
                             {/* Markdown 内容区 */}
-                            <div style={{ 
-                                padding: '0 20px', 
-                                color: '#e0e0e0', 
-                                lineHeight: 1.8 
+                            <div style={{
+                                padding: '0 20px',
+                                color: '#e0e0e0',
+                                lineHeight: 1.8
                             }} className="markdown-body">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {activeArticle.content}
                                 </ReactMarkdown>
                             </div>
-                            
+
                             <div style={{ marginTop: 60, paddingTop: 20, borderTop: '1px solid #333', textAlign: 'center', color: '#666' }}>
                                 <Text>本文档由社区维护，最后更新于 2023-10-24</Text>
                             </div>
                         </div>
                     )}
                 </Content>
-            </Layout>
 
             {/* --- 全局 CSS --- */}
             <style>{`
@@ -310,7 +293,7 @@ export default function ShutokoWiki(): React.JSX.Element {
                 /* 简单的进场动画 */
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-                
+
                 .animate-fade-in { animation: fadeIn 0.4s ease-out; }
                 .animate-slide-up { animation: slideUp 0.4s ease-out; }
 
@@ -321,10 +304,10 @@ export default function ShutokoWiki(): React.JSX.Element {
                 .markdown-body strong { color: #fff; }
                 .markdown-body ul { padding-left: 20px; }
                 .markdown-body li { margin-bottom: 8px; }
-                .markdown-body blockquote { 
-                    border-left: 4px solid ${THEME_ACCENT}; 
-                    padding-left: 16px; 
-                    color: #999; 
+                .markdown-body blockquote {
+                    border-left: 4px solid ${THEME_ACCENT};
+                    padding-left: 16px;
+                    color: #999;
                     background: rgba(255,255,255,0.05);
                     padding: 10px 16px;
                     border-radius: 4px;

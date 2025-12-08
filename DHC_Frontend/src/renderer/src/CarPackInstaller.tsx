@@ -1,121 +1,119 @@
 import React, { useState, useMemo } from 'react';
 
-import { Layout, Nav, Button, Row, Col, Typography, Checkbox, Space, Progress, Tag, Tooltip, Input, Switch, Empty, SideSheet, List, Avatar } from '@douyinfe/semi-ui';
+import { Layout, Button, Row, Col, Typography, Checkbox, Space, Progress, Tag, Tooltip, Input, Switch, Empty, SideSheet, List, Avatar } from '@douyinfe/semi-ui';
 
-import { 
+import {
 
-    IconHome, IconDownload, IconFile, IconServer, IconInfoCircle, 
-
-    IconHelpCircle, IconSetting, IconSidebar, IconSearch, IconAlertTriangle, IconTickCircle, IconList
+  IconFile, IconInfoCircle, IconSearch, IconAlertTriangle, IconTickCircle, IconList
 
 } from '@douyinfe/semi-icons';
 
 // 定义车辆类型
 interface Car {
-    name: string;
-    class: string;
+  name: string;
+  class: string;
 }
 
 // 定义车包类型
 interface CarPack {
-    id: number;
-    name: string;
-    sizeStr: string;
-    sizeByte: number;
-    thumbnail: string;
-    isImported: boolean;
-    cars: Car[];
+  id: number;
+  name: string;
+  sizeStr: string;
+  sizeByte: number;
+  thumbnail: string;
+  isImported: boolean;
+  cars: Car[];
 }
 
 // 1. 模拟数据：增加了 isImported 状态、sizeByte 和 cars 数组
 const MOCK_CAR_PACKS: CarPack[] = [
 
-    { 
-        id: 1, 
-        name: 'SRP JDM Pack Vol.1', 
-        sizeStr: '1.2 GB', 
-        sizeByte: 1288490188, 
-        thumbnail: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=400&q=80', 
-        isImported: true,
-        cars: [
-            { name: 'Nissan Skyline GT-R R34 V-Spec II', class: 'JDM' },
-            { name: 'Toyota Supra MK4 Tuned', class: 'JDM' },
-            { name: 'Mazda RX-7 Spirit R', class: 'JDM' },
-            { name: 'Honda NSX-R', class: 'JDM' }
-        ]
-    },
+  {
+    id: 1,
+    name: 'SRP JDM Pack Vol.1',
+    sizeStr: '1.2 GB',
+    sizeByte: 1288490188,
+    thumbnail: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=400&q=80',
+    isImported: true,
+    cars: [
+      { name: 'Nissan Skyline GT-R R34 V-Spec II', class: 'JDM' },
+      { name: 'Toyota Supra MK4 Tuned', class: 'JDM' },
+      { name: 'Mazda RX-7 Spirit R', class: 'JDM' },
+      { name: 'Honda NSX-R', class: 'JDM' }
+    ]
+  },
 
-    { 
-        id: 2, 
-        name: 'SRP Euro Pack', 
-        sizeStr: '850 MB', 
-        sizeByte: 891289600, 
-        thumbnail: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=400&q=80', 
-        isImported: false,
-        cars: [
-            { name: 'BMW M3 E92', class: 'Street' },
-            { name: 'Porsche 911 GT3 RS', class: 'Track' }
-        ]
-    },
+  {
+    id: 2,
+    name: 'SRP Euro Pack',
+    sizeStr: '850 MB',
+    sizeByte: 891289600,
+    thumbnail: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=400&q=80',
+    isImported: false,
+    cars: [
+      { name: 'BMW M3 E92', class: 'Street' },
+      { name: 'Porsche 911 GT3 RS', class: 'Track' }
+    ]
+  },
 
-    { 
-        id: 3, 
-        name: 'Traffic Cars Pack', 
-        sizeStr: '2.1 GB', 
-        sizeByte: 2254857830, 
-        thumbnail: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80', 
-        isImported: true,
-        cars: [
-            { name: 'Toyota Prius (Traffic)', class: 'AI' },
-            { name: 'Toyota Crown Taxi', class: 'AI' },
-            { name: 'Isuzu Elf Truck', class: 'AI' },
-            { name: 'Honda Fit', class: 'AI' },
-            { name: 'Nissan Vanette', class: 'AI' }
-        ]
-    },
+  {
+    id: 3,
+    name: 'Traffic Cars Pack',
+    sizeStr: '2.1 GB',
+    sizeByte: 2254857830,
+    thumbnail: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=400&q=80',
+    isImported: true,
+    cars: [
+      { name: 'Toyota Prius (Traffic)', class: 'AI' },
+      { name: 'Toyota Crown Taxi', class: 'AI' },
+      { name: 'Isuzu Elf Truck', class: 'AI' },
+      { name: 'Honda Fit', class: 'AI' },
+      { name: 'Nissan Vanette', class: 'AI' }
+    ]
+  },
 
-    { 
-        id: 4, 
-        name: 'Shutoko Revival Project Beta', 
-        sizeStr: '3.4 GB', 
-        sizeByte: 3650722201, 
-        thumbnail: 'https://images.unsplash.com/photo-1503376763036-066120622c74?auto=format&fit=crop&w=400&q=80', 
-        isImported: true,
-        cars: [
-            { name: 'Nissan Skyline GT-R R32', class: 'JDM' },
-            { name: 'Toyota Chaser JZX100', class: 'JDM' },
-            { name: 'Mazda RX-7 FD3S', class: 'JDM' }
-        ]
-    },
+  {
+    id: 4,
+    name: 'Shutoko Revival Project Beta',
+    sizeStr: '3.4 GB',
+    sizeByte: 3650722201,
+    thumbnail: 'https://images.unsplash.com/photo-1503376763036-066120622c74?auto=format&fit=crop&w=400&q=80',
+    isImported: true,
+    cars: [
+      { name: 'Nissan Skyline GT-R R32', class: 'JDM' },
+      { name: 'Toyota Chaser JZX100', class: 'JDM' },
+      { name: 'Mazda RX-7 FD3S', class: 'JDM' }
+    ]
+  },
 
-    { 
-        id: 5, 
-        name: 'Tatsumi PA Addon', 
-        sizeStr: '120 MB', 
-        sizeByte: 125829120, 
-        thumbnail: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80', 
-        isImported: false,
-        cars: [
-            { name: 'Tatsumi Parking Area Props', class: 'Map' }
-        ]
-    },
+  {
+    id: 5,
+    name: 'Tatsumi PA Addon',
+    sizeStr: '120 MB',
+    sizeByte: 125829120,
+    thumbnail: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80',
+    isImported: false,
+    cars: [
+      { name: 'Tatsumi Parking Area Props', class: 'Map' }
+    ]
+  },
 
-    { 
-        id: 6, 
-        name: 'C1 Loop Texture Mod', 
-        sizeStr: '500 MB', 
-        sizeByte: 524288000, 
-        thumbnail: 'https://images.unsplash.com/photo-1580273916550-e323be2ed5d6?auto=format&fit=crop&w=400&q=80', 
-        isImported: true,
-        cars: [
-            { name: 'C1 Loop Road Textures', class: 'Texture' },
-            { name: 'C1 Loop Signage', class: 'Texture' }
-        ]
-    },
+  {
+    id: 6,
+    name: 'C1 Loop Texture Mod',
+    sizeStr: '500 MB',
+    sizeByte: 524288000,
+    thumbnail: 'https://images.unsplash.com/photo-1580273916550-e323be2ed5d6?auto=format&fit=crop&w=400&q=80',
+    isImported: true,
+    cars: [
+      { name: 'C1 Loop Road Textures', class: 'Texture' },
+      { name: 'C1 Loop Signage', class: 'Texture' }
+    ]
+  },
 
 ];
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 
 const { Text, Title } = Typography;
 
@@ -123,690 +121,654 @@ const { Text, Title } = Typography;
 
 const formatBytes = (bytes: number): string => {
 
-    if (bytes === 0) return '0 B';
+  if (bytes === 0) return '0 B';
 
-    const k = 1024;
+  const k = 1024;
 
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 
 };
 
 export default function CarPackInstaller() {
 
-    // 状态管理
+  // 状态管理
 
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-    const [searchText, setSearchText] = useState<string>('');
+  const [searchText, setSearchText] = useState<string>('');
 
-    const [hideMissing, setHideMissing] = useState<boolean>(false);
+  const [hideMissing, setHideMissing] = useState<boolean>(false);
 
-    const [activePack, setActivePack] = useState<CarPack | null>(null); // 当前正在查看详情的车包对象
+  const [activePack, setActivePack] = useState<CarPack | null>(null); // 当前正在查看详情的车包对象
 
-    // 计算逻辑
+  // 计算逻辑
 
-    
 
-    // 1. 过滤后的列表（用于渲染）
 
-    const displayedPacks = useMemo(() => {
+  // 1. 过滤后的列表（用于渲染）
 
-        return MOCK_CAR_PACKS.filter(pack => {
+  const displayedPacks = useMemo(() => {
 
-            const matchSearch = pack.name.toLowerCase().includes(searchText.toLowerCase());
+    return MOCK_CAR_PACKS.filter(pack => {
 
-            const matchImport = hideMissing ? pack.isImported : true;
+      const matchSearch = pack.name.toLowerCase().includes(searchText.toLowerCase());
 
-            return matchSearch && matchImport;
+      const matchImport = hideMissing ? pack.isImported : true;
 
-        });
+      return matchSearch && matchImport;
 
-    }, [searchText, hideMissing]);
+    });
 
-    // 2. 统计所有"可安装"的车包ID
+  }, [searchText, hideMissing]);
 
-    const installableIds = useMemo(() => 
+  // 2. 统计所有"可安装"的车包ID
 
-        MOCK_CAR_PACKS.filter(p => p.isImported).map(p => p.id), 
+  const installableIds = useMemo(() =>
+
+    MOCK_CAR_PACKS.filter(p => p.isImported).map(p => p.id),
 
     []);
 
-    // 3. 计算已选总大小
+  // 3. 计算已选总大小
 
-    const totalSelectedSize = useMemo(() => {
+  const totalSelectedSize = useMemo(() => {
 
-        const total = MOCK_CAR_PACKS
+    const total = MOCK_CAR_PACKS
 
-            .filter(p => selectedIds.includes(p.id))
+      .filter(p => selectedIds.includes(p.id))
 
-            .reduce((acc, curr) => acc + curr.sizeByte, 0);
+      .reduce((acc, curr) => acc + curr.sizeByte, 0);
 
-        return formatBytes(total);
+    return formatBytes(total);
 
-    }, [selectedIds]);
+  }, [selectedIds]);
 
-    // 操作逻辑
+  // 操作逻辑
 
-    const toggleSelect = (id: number, isImported: boolean) => {
+  const toggleSelect = (id: number, isImported: boolean) => {
 
-        if (!isImported) return; // 未导入不可选
+    if (!isImported) return; // 未导入不可选
 
-        if (selectedIds.includes(id)) {
+    if (selectedIds.includes(id)) {
 
-            setSelectedIds(selectedIds.filter(item => item !== id));
+      setSelectedIds(selectedIds.filter(item => item !== id));
 
-        } else {
+    } else {
 
-            setSelectedIds([...selectedIds, id]);
+      setSelectedIds([...selectedIds, id]);
 
-        }
+    }
 
-    };
+  };
 
-    // 打开侧边栏 (阻止冒泡，防止触发选中)
+  // 打开侧边栏 (阻止冒泡，防止触发选中)
 
-    const openDetail = (e: React.MouseEvent, pack: CarPack) => {
+  const openDetail = (e: React.MouseEvent, pack: CarPack) => {
 
-        e.stopPropagation(); 
+    e.stopPropagation();
 
-        setActivePack(pack);
+    setActivePack(pack);
 
-    };
+  };
 
-    // 智能全选：只选那些 isImported 为 true 的
+  // 智能全选：只选那些 isImported 为 true 的
 
-    const handleSelectAll = () => {
+  const handleSelectAll = () => {
 
-        // 如果当前已经选了所有可选项，则反选清空
+    // 如果当前已经选了所有可选项，则反选清空
 
-        // 这里的逻辑是：只要当前选中的数量等于可选项的数量，就视为"已全选"
+    // 这里的逻辑是：只要当前选中的数量等于可选项的数量，就视为"已全选"
 
-        const allInstallableSelected = installableIds.every(id => selectedIds.includes(id));
+    const allInstallableSelected = installableIds.every(id => selectedIds.includes(id));
 
-        
 
-        if (allInstallableSelected && selectedIds.length > 0) {
 
-            setSelectedIds([]);
+    if (allInstallableSelected && selectedIds.length > 0) {
 
-        } else {
+      setSelectedIds([]);
 
-            setSelectedIds(installableIds);
+    } else {
 
-        }
+      setSelectedIds(installableIds);
 
-    };
+    }
 
-    // 样式常量
+  };
 
-    const THEME_GREEN = '#6bc786'; 
+  // 样式常量
 
-    const THEME_RED = '#ff4d4f';
+  const THEME_GREEN = '#6bc786';
 
-    const BG_DARK = '#16161a';
+  const THEME_RED = '#ff4d4f';
 
-    const CARD_BG = '#232326';
+  const BG_DARK = '#16161a';
 
-    const CARD_DISABLED = '#1f1f22';
+  const CARD_BG = '#232326';
 
-    return (
+  const CARD_DISABLED = '#1f1f22';
 
-        <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
+  return (
 
-            {/* 侧边栏保持不变 */}
+    <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
 
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
+      <Header style={{ padding: '20px 40px', background: BG_DARK }}>
 
-                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center' }}>
 
-                    <div style={{ width: 32, height: 32, background: '#333', borderRadius: '50%' }}></div>
+            <span>管理器安装</span>
 
-                    <Title heading={4} style={{ color: '#fff', margin: 0 }}>东濠涌</Title>
+            <span>地图安装</span>
 
-                </div>
+            <span style={{ color: THEME_GREEN, borderBottom: `2px solid ${THEME_GREEN}`, paddingBottom: 4 }}>车包安装</span>
 
-                <Nav
+            <span>光影安装</span>
 
-                    defaultSelectedKeys={['Install']}
+          </div>
 
-                    style={{ backgroundColor: 'transparent' }}
+        </Header>
 
-                    items={[
+        <Content style={{ padding: '0 40px', overflowY: 'auto', position: 'relative' }}>
 
-                        { itemKey: 'Install', text: '模组安装', icon: <IconHome /> },
+          {/* 警告 Banner */}
 
-                        { itemKey: 'Import', text: '资源导入', icon: <IconDownload /> }, // 用户应该去这里解决资源缺失问题
+          <div style={{ background: '#2a2a2e', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: 10 }}>
 
-                    ]}
+            <IconInfoCircle style={{ color: THEME_GREEN }} />
 
-                    footer={{ collapseButton: true }}
+            <Text style={{ color: '#ccc', fontSize: 13 }}>
 
-                />
+              请先确保你有全DLC。带 <IconAlertTriangle style={{ color: THEME_RED, fontSize: 12 }} /> 标记的项目表示本地未检测到压缩包，请先前往"资源导入"页面添加。
 
-            </Sider>
+            </Text>
 
-            <Layout>
+          </div>
 
-                <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+          {/* 工具栏：全选、搜索、筛选 */}
 
-                    <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
 
-                        <span>管理器安装</span>
+            <Space>
 
-                        <span>地图安装</span>
+              <Button
 
-                        <span style={{ color: THEME_GREEN, borderBottom: `2px solid ${THEME_GREEN}`, paddingBottom: 4 }}>车包安装</span>
+                theme='solid'
 
-                        <span>光影安装</span>
+                style={{
 
-                    </div>
+                  backgroundColor: (selectedIds.length > 0 && installableIds.every(id => selectedIds.includes(id))) ? THEME_GREEN : '#333',
 
-                </Header>
+                  color: '#fff'
 
-                <Content style={{ padding: '0 40px', overflowY: 'auto', position: 'relative' }}>
+                }}
 
-                    {/* 警告 Banner */}
+                onClick={handleSelectAll}
 
-                    <div style={{ background: '#2a2a2e', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #333', display: 'flex', alignItems: 'center', gap: 10 }}>
+              >
 
-                         <IconInfoCircle style={{ color: THEME_GREEN }} />
+                全选可用 ({installableIds.length})
 
-                        <Text style={{ color: '#ccc', fontSize: 13 }}>
+              </Button>
 
-                            请先确保你有全DLC。带 <IconAlertTriangle style={{color: THEME_RED, fontSize: 12}} /> 标记的项目表示本地未检测到压缩包，请先前往"资源导入"页面添加。
+              <Button
 
-                        </Text>
+                theme='solid'
 
-                    </div>
+                style={{ backgroundColor: selectedIds.length === 0 ? '#444' : '#333', color: '#fff' }}
 
-                    {/* 工具栏：全选、搜索、筛选 */}
+                onClick={() => setSelectedIds([])}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                disabled={selectedIds.length === 0}
 
-                        <Space>
+              >
 
-                            <Button 
+                清空
 
-                                theme='solid' 
+              </Button>
 
-                                style={{ 
+            </Space>
 
-                                    backgroundColor: (selectedIds.length > 0 && installableIds.every(id => selectedIds.includes(id))) ? THEME_GREEN : '#333', 
 
-                                    color: '#fff' 
 
-                                }}
+            <Space>
 
-                                onClick={handleSelectAll}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#999', fontSize: 13, cursor: 'pointer' }} onClick={() => setHideMissing(!hideMissing)}>
 
-                            >
+                <Switch checked={hideMissing} size="small" />
 
-                                全选可用 ({installableIds.length})
+                <span>仅显示可安装</span>
 
-                            </Button>
+              </div>
 
-                            <Button 
+              <Input
 
-                                theme='solid' 
+                prefix={<IconSearch />}
 
-                                style={{ backgroundColor: selectedIds.length === 0 ? '#444' : '#333', color: '#fff' }}
+                placeholder="搜索车包..."
 
-                                onClick={() => setSelectedIds([])}
+                style={{ width: 200, backgroundColor: '#232326' }}
 
-                                disabled={selectedIds.length === 0}
+                value={searchText}
 
-                            >
+                onChange={(value) => setSearchText(value)}
 
-                                清空
+              />
 
-                            </Button>
+            </Space>
 
-                        </Space>
+          </div>
 
-                        
+          {/* 车包网格 */}
 
-                        <Space>
+          {displayedPacks.length === 0 ? (
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#999', fontSize: 13, cursor: 'pointer' }} onClick={() => setHideMissing(!hideMissing)}>
+            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
 
-                                <Switch checked={hideMissing} size="small" />
+              <Empty image={<IconFile style={{ fontSize: 48, color: '#444' }} />} description="没有找到匹配的车包" />
 
-                                <span>仅显示可安装</span>
+            </div>
 
-                            </div>
+          ) : (
 
-                            <Input 
+            <Row gutter={[16, 16]} style={{ paddingBottom: 100 }}>
 
-                                prefix={<IconSearch />} 
+              {displayedPacks.map(pack => {
 
-                                placeholder="搜索车包..." 
+                const isSelected = selectedIds.includes(pack.id);
 
-                                style={{ width: 200, backgroundColor: '#232326' }}
+                const isDisabled = !pack.isImported;
 
-                                value={searchText}
+                return (
 
-                                onChange={(value) => setSearchText(value)}
+                  <Col span={8} key={pack.id} style={{ minWidth: 260 }}>
 
-                            />
+                    <div
 
-                        </Space>
+                      onClick={() => toggleSelect(pack.id, pack.isImported)}
 
-                    </div>
+                      style={{
 
-                    {/* 车包网格 */}
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
 
-                    {displayedPacks.length === 0 ? (
+                        position: 'relative',
 
-                        <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+                        transition: 'all 0.2s',
 
-                            <Empty image={<IconFile style={{ fontSize: 48, color: '#444' }} />} description="没有找到匹配的车包" />
+                        border: `2px solid ${isSelected ? THEME_GREEN : 'transparent'}`,
 
-                        </div>
+                        borderRadius: '12px',
 
-                    ) : (
+                        overflow: 'hidden',
 
-                        <Row gutter={[16, 16]} style={{ paddingBottom: 100 }}>
+                        backgroundColor: isDisabled ? CARD_DISABLED : CARD_BG,
 
-                            {displayedPacks.map(pack => {
+                        opacity: isDisabled ? 0.6 : 1,
 
-                                const isSelected = selectedIds.includes(pack.id);
+                        filter: isDisabled ? 'grayscale(0.8)' : 'none'
 
-                                const isDisabled = !pack.isImported;
+                      }}
 
-                                return (
+                    >
 
-                                    <Col span={8} key={pack.id} style={{ minWidth: 260 }}>
+                      {/* 状态标签 (右上角) */}
 
-                                        <div 
+                      <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
 
-                                            onClick={() => toggleSelect(pack.id, pack.isImported)}
+                        {isDisabled ? (
 
-                                            style={{
+                          <Tooltip content="本地未找到资源文件，无法安装">
 
-                                                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            <Tag color="red" type="solid" style={{ borderRadius: 4 }}>
 
-                                                position: 'relative',
+                              <IconAlertTriangle /> 资源缺失
 
-                                                transition: 'all 0.2s',
+                            </Tag>
 
-                                                border: `2px solid ${isSelected ? THEME_GREEN : 'transparent'}`,
+                          </Tooltip>
 
-                                                borderRadius: '12px',
+                        ) : (
 
-                                                overflow: 'hidden',
+                          isSelected && (
 
-                                                backgroundColor: isDisabled ? CARD_DISABLED : CARD_BG,
+                            <Tag color="green" type="solid" style={{ backgroundColor: THEME_GREEN }}>
 
-                                                opacity: isDisabled ? 0.6 : 1,
+                              <IconTickCircle /> 已选择
 
-                                                filter: isDisabled ? 'grayscale(0.8)' : 'none'
+                            </Tag>
 
-                                            }}
+                          )
 
-                                        >
+                        )}
 
-                                            {/* 状态标签 (右上角) */}
+                      </div>
 
-                                            <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
+                      {/* 图片 */}
 
-                                                {isDisabled ? (
+                      <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
 
-                                                    <Tooltip content="本地未找到资源文件，无法安装">
+                        <img
 
-                                                        <Tag color="red" type="solid" style={{ borderRadius: 4 }}>
+                          src={pack.thumbnail}
 
-                                                            <IconAlertTriangle /> 资源缺失
+                          alt={pack.name}
 
-                                                        </Tag>
-
-                                                    </Tooltip>
-
-                                                ) : (
-
-                                                    isSelected && (
-
-                                                        <Tag color="green" type="solid" style={{ backgroundColor: THEME_GREEN }}>
-
-                                                            <IconTickCircle /> 已选择
-
-                                                        </Tag>
-
-                                                    )
-
-                                                )}
-
-                                            </div>
-
-                                            {/* 图片 */}
-
-                                            <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
-
-                                                <img 
-
-                                                    src={pack.thumbnail} 
-
-                                                    alt={pack.name}
-
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-
-                                                />
-
-                                                {/* 选中时的绿色蒙层 */}
-
-                                                {isSelected && !isDisabled && (
-
-                                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(107, 199, 134, 0.15)' }} />
-
-                                                )}
-
-                                                {/* 详情按钮 (悬浮在图片右下角) */}
-
-                                                <div style={{ position: 'absolute', bottom: 8, right: 8, zIndex: 5 }}>
-
-                                                    <Button 
-
-                                                        theme="solid" 
-
-                                                        type="tertiary" 
-
-                                                        style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', backdropFilter: 'blur(4px)' }}
-
-                                                        size="small"
-
-                                                        icon={<IconList />}
-
-                                                        onClick={(e) => openDetail(e, pack)}
-
-                                                    >
-
-                                                        包含 {pack.cars.length} 辆
-
-                                                    </Button>
-
-                                                </div>
-
-                                            </div>
-
-                                            
-
-                                            {/* 内容 */}
-
-                                            <div style={{ padding: '12px', display: 'flex', justifyContent: 'space-between' }}>
-
-                                                <div>
-
-                                                    <Title heading={6} style={{ color: isDisabled ? '#777' : '#eee', marginBottom: 4 }}>{pack.name}</Title>
-
-                                                    <Text type="tertiary" size="small">{pack.sizeStr}</Text>
-
-                                                </div>
-
-                                                <Checkbox 
-
-                                                    checked={isSelected} 
-
-                                                    disabled={isDisabled}
-
-                                                    style={{ pointerEvents: 'none' }} 
-
-                                                />
-
-                                            </div>
-
-                                        </div>
-
-                                    </Col>
-
-                                );
-
-                            })}
-
-                        </Row>
-
-                    )}
-
-                </Content>
-
-                {/* 底部浮动栏 */}
-
-                <Footer style={{ 
-
-                    padding: '16px 40px', 
-
-                    background: '#232326', 
-
-                    borderTop: '1px solid #333',
-
-                    display: 'flex',
-
-                    flexDirection: 'column',
-
-                    gap: 12
-
-                }}>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-
-                        {/* 左侧：信息汇总 */}
-
-                        <div>
-
-                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
-
-                                已选车包: <span style={{ color: THEME_GREEN }}>{selectedIds.length}</span> 个
-
-                            </Text>
-
-                            <div style={{ marginTop: 4 }}>
-
-                                <Text type="tertiary" size="small">预计占用空间: {totalSelectedSize}</Text>
-
-                            </div>
-
-                        </div>
-
-                        {/* 右侧：按钮 */}
-
-                        <div style={{ display: 'flex', gap: 12 }}>
-
-                            <Button 
-
-                                style={{ backgroundColor: '#444', color: '#fff' }} theme="solid" size="large"
-
-                            >
-
-                                上一步
-
-                            </Button>
-
-                            <Button 
-
-                                style={{ 
-
-                                    backgroundColor: selectedIds.length === 0 ? '#444' : THEME_GREEN, 
-
-                                    color: selectedIds.length === 0 ? '#999' : '#fff',
-
-                                    width: 140
-
-                                }} 
-
-                                theme="solid"
-
-                                size="large"
-
-                                disabled={selectedIds.length === 0}
-
-                            >
-
-                                开始安装
-
-                            </Button>
-
-                        </div>
-
-                    </div>
-
-                    {/* 进度条 (仅在安装时显示，这里作为静态展示) */}
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-
-                         {/* 模拟一个未开始的进度条，或者显示磁盘空间 */}
-
-                        <Progress percent={0} stroke={THEME_GREEN} style={{ flex: 1 }} aria-label="install progress" />
-
-                        <Text size="small" type="tertiary">等待开始...</Text>
-
-                    </div>
-
-                </Footer>
-
-            </Layout>
-
-            {/* --- 侧边抽屉：显示具体车辆列表 --- */}
-
-            <SideSheet
-
-                title={<Title heading={5} style={{color: '#fff'}}>{activePack?.name}</Title>}
-
-                visible={!!activePack}
-
-                onCancel={() => setActivePack(null)}
-
-                width={400}
-
-                style={{ backgroundColor: '#1f1f22', borderLeft: '1px solid #333' }}
-
-                maskStyle={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-
-                headerStyle={{ borderBottom: '1px solid #333' }}
-
-                bodyStyle={{ padding: 0 }}
-
-            >
-
-                <div style={{ padding: 20 }}>
-
-                    <div style={{ marginBottom: 20, display: 'flex', gap: 16 }}>
-
-                        <img 
-
-                            src={activePack?.thumbnail} 
-
-                            alt={activePack?.name}
-
-                            style={{ width: 100, height: 60, objectFit: 'cover', borderRadius: 6 }} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
 
                         />
 
-                        <div>
+                        {/* 选中时的绿色蒙层 */}
 
-                            <Text style={{ display: 'block', color: '#999', fontSize: 12 }}>文件大小</Text>
+                        {isSelected && !isDisabled && (
 
-                            <Text style={{ color: '#fff', fontWeight: 'bold' }}>{activePack?.sizeStr}</Text>
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(107, 199, 134, 0.15)' }} />
 
-                            <div style={{ marginTop: 8 }}>
+                        )}
 
-                                <Tag color={activePack?.isImported ? 'green' : 'red'}>
+                        {/* 详情按钮 (悬浮在图片右下角) */}
 
-                                    {activePack?.isImported ? '资源就绪' : '资源缺失'}
+                        <div style={{ position: 'absolute', bottom: 8, right: 8, zIndex: 5 }}>
 
-                                </Tag>
+                          <Button
 
-                            </div>
+                            theme="solid"
+
+                            type="tertiary"
+
+                            style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', backdropFilter: 'blur(4px)' }}
+
+                            size="small"
+
+                            icon={<IconList />}
+
+                            onClick={(e) => openDetail(e, pack)}
+
+                          >
+
+                            包含 {pack.cars.length} 辆
+
+                          </Button>
 
                         </div>
 
-                    </div>
+                      </div>
 
 
 
-                    <Title heading={6} style={{ color: '#ccc', marginBottom: 12 }}>
+                      {/* 内容 */}
 
-                        包含车辆 ({activePack?.cars?.length || 0})
+                      <div style={{ padding: '12px', display: 'flex', justifyContent: 'space-between' }}>
 
-                    </Title>
+                        <div>
 
+                          <Title heading={6} style={{ color: isDisabled ? '#777' : '#eee', marginBottom: 4 }}>{pack.name}</Title>
 
+                          <Text type="tertiary" size="small">{pack.sizeStr}</Text>
 
-                    {/* 车辆列表 */}
+                        </div>
 
-                    {activePack?.cars && activePack.cars.length > 0 ? (
+                        <Checkbox
 
-                        <List
+                          checked={isSelected}
 
-                            dataSource={activePack.cars}
+                          disabled={isDisabled}
 
-                            split={false}
-
-                            renderItem={(car: Car) => (
-
-                                <List.Item 
-
-                                    style={{ 
-
-                                        padding: '12px', 
-
-                                        borderBottom: '1px solid #333',
-
-                                        borderRadius: 8,
-
-                                        marginBottom: 8,
-
-                                        backgroundColor: '#2a2a2e'
-
-                                    }}
-
-                                >
-
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-
-                                        <Avatar 
-
-                                            shape="square" 
-
-                                            size="default" 
-
-                                            style={{ backgroundColor: '#444', flexShrink: 0 }}
-
-                                        >
-
-                                            <IconFile />
-
-                                        </Avatar>
-
-                                        <div style={{ flex: 1 }}>
-
-                                            <Text style={{ color: '#fff', display: 'block', marginBottom: 4 }}>{car.name}</Text>
-
-                                            <Text style={{ color: '#777', fontSize: 12 }}>类别: {car.class}</Text>
-
-                                        </div>
-
-                                    </div>
-
-                                </List.Item>
-
-                            )}
+                          style={{ pointerEvents: 'none' }}
 
                         />
 
-                    ) : (
+                      </div>
 
-                        <Empty description="暂无车辆信息" />
+                    </div>
 
-                    )}
+                  </Col>
 
-                </div>
+                );
 
-            </SideSheet>
+              })}
 
-        </Layout>
+            </Row>
 
-    );
+          )}
+
+        </Content>
+
+        {/* 底部浮动栏 */}
+
+        <Footer style={{
+
+          padding: '16px 40px',
+
+          background: '#232326',
+
+          borderTop: '1px solid #333',
+
+          display: 'flex',
+
+          flexDirection: 'column',
+
+          gap: 12
+
+        }}>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+            {/* 左侧：信息汇总 */}
+
+            <div>
+
+              <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
+
+                已选车包: <span style={{ color: THEME_GREEN }}>{selectedIds.length}</span> 个
+
+              </Text>
+
+              <div style={{ marginTop: 4 }}>
+
+                <Text type="tertiary" size="small">预计占用空间: {totalSelectedSize}</Text>
+
+              </div>
+
+            </div>
+
+            {/* 右侧：按钮 */}
+
+            <div style={{ display: 'flex', gap: 12 }}>
+
+              <Button
+
+                style={{ backgroundColor: '#444', color: '#fff' }} theme="solid" size="large"
+
+              >
+
+                上一步
+
+              </Button>
+
+              <Button
+
+                style={{
+
+                  backgroundColor: selectedIds.length === 0 ? '#444' : THEME_GREEN,
+
+                  color: selectedIds.length === 0 ? '#999' : '#fff',
+
+                  width: 140
+
+                }}
+
+                theme="solid"
+
+                size="large"
+
+                disabled={selectedIds.length === 0}
+
+              >
+
+                开始安装
+
+              </Button>
+
+            </div>
+
+          </div>
+
+          {/* 进度条 (仅在安装时显示，这里作为静态展示) */}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
+            {/* 模拟一个未开始的进度条，或者显示磁盘空间 */}
+
+            <Progress percent={0} stroke={THEME_GREEN} style={{ flex: 1 }} aria-label="install progress" />
+
+            <Text size="small" type="tertiary">等待开始...</Text>
+
+          </div>
+
+        </Footer>
+
+      {/* --- 侧边抽屉：显示具体车辆列表 --- */}
+
+      <SideSheet
+
+        title={<Title heading={5} style={{ color: '#fff' }}>{activePack?.name}</Title>}
+
+        visible={!!activePack}
+
+        onCancel={() => setActivePack(null)}
+
+        width={400}
+
+        style={{ backgroundColor: '#1f1f22', borderLeft: '1px solid #333' }}
+
+        maskStyle={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+
+        headerStyle={{ borderBottom: '1px solid #333' }}
+
+        bodyStyle={{ padding: 0 }}
+
+      >
+
+        <div style={{ padding: 20 }}>
+
+          <div style={{ marginBottom: 20, display: 'flex', gap: 16 }}>
+
+            <img
+
+              src={activePack?.thumbnail}
+
+              alt={activePack?.name}
+
+              style={{ width: 100, height: 60, objectFit: 'cover', borderRadius: 6 }}
+
+            />
+
+            <div>
+
+              <Text style={{ display: 'block', color: '#999', fontSize: 12 }}>文件大小</Text>
+
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>{activePack?.sizeStr}</Text>
+
+              <div style={{ marginTop: 8 }}>
+
+                <Tag color={activePack?.isImported ? 'green' : 'red'}>
+
+                  {activePack?.isImported ? '资源就绪' : '资源缺失'}
+
+                </Tag>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <Title heading={6} style={{ color: '#ccc', marginBottom: 12 }}>
+
+            包含车辆 ({activePack?.cars?.length || 0})
+
+          </Title>
+
+
+
+          {/* 车辆列表 */}
+
+          {activePack?.cars && activePack.cars.length > 0 ? (
+
+            <List
+
+              dataSource={activePack.cars}
+
+              split={false}
+
+              renderItem={(car: Car) => (
+
+                <List.Item
+
+                  style={{
+
+                    padding: '12px',
+
+                    borderBottom: '1px solid #333',
+
+                    borderRadius: 8,
+
+                    marginBottom: 8,
+
+                    backgroundColor: '#2a2a2e'
+
+                  }}
+
+                >
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
+                    <Avatar
+
+                      shape="square"
+
+                      size="default"
+
+                      style={{ backgroundColor: '#444', flexShrink: 0 }}
+
+                    >
+
+                      <IconFile />
+
+                    </Avatar>
+
+                    <div style={{ flex: 1 }}>
+
+                      <Text style={{ color: '#fff', display: 'block', marginBottom: 4 }}>{car.name}</Text>
+
+                      <Text style={{ color: '#777', fontSize: 12 }}>类别: {car.class}</Text>
+
+                    </div>
+
+                  </div>
+
+                </List.Item>
+
+              )}
+
+            />
+
+          ) : (
+
+            <Empty description="暂无车辆信息" />
+
+          )}
+
+        </div>
+
+      </SideSheet>
+
+    </Layout>
+
+  );
 
 }

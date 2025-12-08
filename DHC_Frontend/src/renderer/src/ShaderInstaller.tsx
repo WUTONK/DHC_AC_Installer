@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { Layout, Nav, Button, Row, Col, Typography, Tag, Space, Progress, Card, List, Toast, Banner, Modal, Descriptions } from '@douyinfe/semi-ui';
+import { Layout, Button, Row, Col, Typography, Tag, Space, Progress, Card, List, Toast, Banner, Modal, Descriptions } from '@douyinfe/semi-ui';
 
-import { 
+import {
 
-    IconHome, IconDownload, IconRefresh, IconTickCircle, IconFolder, IconAlertTriangle, IconArrowRight, IconPlay 
+    IconHome, IconDownload, IconRefresh, IconTickCircle, IconFolder, IconAlertTriangle, IconArrowRight, IconPlay
 
 } from '@douyinfe/semi-icons';
 
@@ -53,7 +53,7 @@ const LOCAL_STATE_MOCK: Record<string, LocalState> = {
 
 };
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -65,7 +65,7 @@ export default function ShaderInstaller() {
 
     const [installProgress, setInstallProgress] = useState<number>(0);
 
-    
+
 
     // 冲突弹窗控制
 
@@ -79,7 +79,7 @@ export default function ShaderInstaller() {
 
         const detectedConflicts: ConflictItem[] = [];
 
-        
+
 
         // 遍历我们要安装的目标
 
@@ -139,7 +139,7 @@ export default function ShaderInstaller() {
 
         setInstallProgress(0);
 
-        
+
 
         // 模拟进度条
 
@@ -153,7 +153,7 @@ export default function ShaderInstaller() {
 
             setInstallProgress(p);
 
-            
+
 
             if (p >= 100) {
 
@@ -175,7 +175,7 @@ export default function ShaderInstaller() {
 
     // 样式常量
 
-    const THEME_GREEN = '#6bc786'; 
+    const THEME_GREEN = '#6bc786';
 
     const BG_DARK = '#16161a';
 
@@ -185,19 +185,7 @@ export default function ShaderInstaller() {
 
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
 
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
-
-                {/* 侧边栏省略... */}
-
-                <div style={{ padding: 20 }}><Title heading={4} style={{color:'white'}}>东濠涌</Title></div>
-
-                <Nav items={[{ itemKey: 'Install', text: '模组安装', icon: <IconHome /> }]} />
-
-            </Sider>
-
-            <Layout>
-
-                <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
 
                     {/* 顶部导航省略... */}
 
@@ -207,7 +195,7 @@ export default function ShaderInstaller() {
 
                 <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
 
-                    
+
 
                     {/* --- 一键安装区域 --- */}
 
@@ -253,11 +241,11 @@ export default function ShaderInstaller() {
 
                                             ) : (
 
-                                                <Button 
+                                                <Button
 
-                                                    theme="solid" 
+                                                    theme="solid"
 
-                                                    size="large" 
+                                                    size="large"
 
                                                     style={{ backgroundColor: THEME_GREEN, color: '#fff', width: '100%', fontWeight: 'bold' }}
 
@@ -325,8 +313,6 @@ export default function ShaderInstaller() {
 
                 </Content>
 
-            </Layout>
-
             {/* --- 核心：冲突解决 Modal --- */}
 
             <Modal
@@ -357,11 +343,11 @@ export default function ShaderInstaller() {
 
                         </Button>
 
-                        <Button 
+                        <Button
 
-                            onClick={startInstallProcess} 
+                            onClick={startInstallProcess}
 
-                            theme="solid" 
+                            theme="solid"
 
                             style={{ backgroundColor: '#ff9f43', color: 'white' }} // 橙色按钮表示警示/覆盖
 
@@ -397,13 +383,13 @@ export default function ShaderInstaller() {
 
                         renderItem={(item: ConflictItem) => (
 
-                            <List.Item style={{ 
+                            <List.Item style={{
 
-                                backgroundColor: '#16161a', 
+                                backgroundColor: '#16161a',
 
-                                borderRadius: 8, 
+                                borderRadius: 8,
 
-                                marginBottom: 8, 
+                                marginBottom: 8,
 
                                 padding: '12px',
 
@@ -421,7 +407,7 @@ export default function ShaderInstaller() {
 
                                     <Text style={{ color: '#fff', fontWeight: 'bold', width: 60 }}>{item.name}</Text>
 
-                                    
+
 
                                     {/* 版本对比区 */}
 
@@ -435,11 +421,11 @@ export default function ShaderInstaller() {
 
                                         </div>
 
-                                        
+
 
                                         <IconArrowRight style={{ color: '#666' }} />
 
-                                        
+
 
                                         <div style={{ textAlign: 'center' }}>
 
@@ -471,7 +457,7 @@ export default function ShaderInstaller() {
 
                     />
 
-                    
+
 
                     {/* 提示 Pure 这种未安装的会被直接安装 */}
 

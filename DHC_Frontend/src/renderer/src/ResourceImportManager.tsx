@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Layout, Nav, Button, Typography, Tag, Tabs, TabPane,
+    Layout, Button, Typography, Tag, Tabs, TabPane,
     Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip, Toast
 } from '@douyinfe/semi-ui';
 import {
-    IconDownload, IconAlertTriangle, IconTickCircle,
+    IconAlertTriangle, IconTickCircle,
     IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete
 } from '@douyinfe/semi-icons';
 
@@ -110,7 +110,7 @@ const RESOURCES_DB: ResourceItem[] = [
     }
 ];
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 
 export default function ResourceImportManager(): React.JSX.Element {
@@ -236,19 +236,7 @@ export default function ResourceImportManager(): React.JSX.Element {
 
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            {/* 侧边栏保持一致 */}
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
-                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 32, height: 32, background: '#333', borderRadius: '50%' }}></div>
-                    <Title heading={4} style={{ color: '#fff', margin: 0 }}>东濠涌</Title>
-                </div>
-                <Nav
-                    defaultSelectedKeys={['Import']}
-                    items={[{ itemKey: 'Import', text: '资源导入', icon: <IconDownload /> }]}
-                />
-            </Sider>
-            <Layout>
-                <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326' }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                             <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
@@ -436,7 +424,6 @@ export default function ResourceImportManager(): React.JSX.Element {
                         </Text>
                     </div>
                 </Modal>
-            </Layout>
         </Layout>
     );
 }

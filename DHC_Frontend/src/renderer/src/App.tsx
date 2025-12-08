@@ -2,7 +2,7 @@
 import React from 'react'
 import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
-import { IconHome, IconCart, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting } from '@douyinfe/semi-icons';
+import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
 import ShutokoWiki from './ShutokoWiki';
@@ -23,7 +23,7 @@ function App(): React.JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   // const [gamePath, setGamePath] = useState('')
-  const { Header, Footer, Sider, Content } = Layout;
+  const { Header, Sider, Content } = Layout;
 
   // 地区状态管理
   const [region, setRegion] = useState<'zhCN' | 'enUS'>('zhCN')
@@ -75,6 +75,25 @@ function App(): React.JSX.Element {
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
   const { isDevMode, toggleDevMode } = useDevMode()
 
+  // 地区切换按钮容器样式
+  const regionToggleContainerStyle: React.CSSProperties = {
+    backgroundColor: 'var(--semi-color-fill-0)',
+    borderRadius: 20,
+    padding: 4,
+    display: 'flex',
+    border: '1px solid var(--semi-color-border)'
+  };
+
+  // 地区切换按钮基础样式
+  const regionToggleButtonBaseStyle: React.CSSProperties = {
+    padding: '4px 12px',
+    borderRadius: 16,
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 'bold',
+    transition: 'all 0.2s'
+  };
+
   // 切换色彩模式
   const switchMode = (): void => {
     const body = document.body;
@@ -109,25 +128,14 @@ function App(): React.JSX.Element {
             <span className="font-semibold">----</span>
           </div>
           <div className="flex items-center flex-nowrap gap-3 shrink-0">
-            {/* 地区切换按钮 */}
-            <div style={{
-              backgroundColor: 'var(--semi-color-fill-0)',
-              borderRadius: 20,
-              padding: 4,
-              display: 'flex',
-              border: '1px solid var(--semi-color-border)'
-            }}>
+            {/* 地区切换按钮 - 使用内联样式以支持动态状态 */}
+            <div style={regionToggleContainerStyle}>
               <div
                 onClick={() => setRegion('zhCN')}
                 style={{
-                  padding: '4px 12px',
-                  borderRadius: 16,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 'bold',
+                  ...regionToggleButtonBaseStyle,
                   backgroundColor: region === 'zhCN' ? '#6bc786' : 'transparent',
-                  color: region === 'zhCN' ? '#fff' : 'var(--semi-color-text-2)',
-                  transition: 'all 0.2s'
+                  color: region === 'zhCN' ? '#fff' : 'var(--semi-color-text-2)'
                 }}
               >
                 中国 CN
@@ -135,14 +143,9 @@ function App(): React.JSX.Element {
               <div
                 onClick={() => setRegion('enUS')}
                 style={{
-                  padding: '4px 12px',
-                  borderRadius: 16,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 'bold',
+                  ...regionToggleButtonBaseStyle,
                   backgroundColor: region === 'enUS' ? '#0052cc' : 'transparent',
-                  color: region === 'enUS' ? '#fff' : 'var(--semi-color-text-2)',
-                  transition: 'all 0.2s'
+                  color: region === 'enUS' ? '#fff' : 'var(--semi-color-text-2)'
                 }}
               >
                 Global US
@@ -194,8 +197,6 @@ function App(): React.JSX.Element {
           </Content>
 
         </Layout>
-
-    <Footer className="h-16 leading-[64px] border border-[var(--semi-color-border)]">Footer</Footer>
 
     <JoinServerInstructionsModal
       visible={semiModalVisible}

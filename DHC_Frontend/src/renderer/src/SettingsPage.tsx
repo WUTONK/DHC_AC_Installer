@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { Layout, Nav, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Divider, Row, Col, Input, Banner } from '@douyinfe/semi-ui';
-import { 
-    IconSetting, IconFolder, IconHelpCircle, 
+import { Layout, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Divider, Row, Col, Input, Banner } from '@douyinfe/semi-ui';
+import {
+    IconSetting, IconFolder, IconHelpCircle,
     IconFile, IconHome, IconDownload, IconServer, IconTickCircle, IconAlertTriangle
 } from '@douyinfe/semi-icons';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 export default function SettingsPage(): React.JSX.Element {
     // --- 状态管理 ---
-    
+
     // 1. 语言设置 (模拟系统语言检测)
-    const systemLang = 'zh_CN'; 
+    const systemLang = 'zh_CN';
     const [language, setLanguage] = useState<string>('zh_CN');
-    
+
     // 2. 存储设置
     const [storageMode, setStorageMode] = useState<'simple' | 'advanced'>('simple'); // 'simple' | 'advanced'
     const [selectedDrive, setSelectedDrive] = useState<string>('D'); // 简易模式下的选择
@@ -22,7 +22,7 @@ export default function SettingsPage(): React.JSX.Element {
         resource: 'D:\\SteamLibrary\\steamapps\\common\\assettocorsa',
         cache: 'D:\\DHC_Launcher\\Cache'
     });
-    
+
     // 3. 模拟磁盘数据
     interface DriveInfo {
         label: string;
@@ -32,59 +32,43 @@ export default function SettingsPage(): React.JSX.Element {
         percent: number;
         color: string;
     }
-    
+
     const drives: DriveInfo[] = [
         { label: 'C:', name: '系统盘', free: '50 GB', total: '500 GB', percent: 90, color: '#ff4d4f' },
         { label: 'D:', name: '游戏盘', free: '400 GB', total: '1000 GB', percent: 60, color: '#6bc786' },
         { label: 'E:', name: '仓库盘', free: '800 GB', total: '2000 GB', percent: 20, color: '#6bc786' },
     ];
-    
+
     // --- 交互逻辑 ---
     const handleExportLog = (): void => {
         const loadingToast = Toast.info({ content: '正在打包日志文件...', duration: 0 });
         setTimeout(() => {
             Toast.close(loadingToast.id);
-            Toast.success({ 
+            Toast.success({
                 content: '导出成功！已保存至桌面 "DHC_ERROR_LOG" 文件夹',
                 duration: 4000
             });
         }, 1500);
     };
-    
+
     const handleSaveStorage = (): void => {
         Toast.success('存储路径配置已更新');
     };
-    
+
     // 样式常量
     const BG_DARK = '#16161a';
     const CARD_BG = '#232326';
     const THEME_GREEN = '#6bc786';
-    
+
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            {/* 侧边栏 */}
-            <Sider style={{ backgroundColor: '#232326', width: 240 }}>
-                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 32, height: 32, background: '#333', borderRadius: '50%' }}></div>
-                    <Title heading={4} style={{ color: '#fff', margin: 0 }}>东濠涌</Title>
-                </div>
-                <Nav
-                    defaultSelectedKeys={['Settings']}
-                    items={[
-                        { itemKey: 'Home', text: '模组安装', icon: <IconHome /> },
-                        { itemKey: 'Download', text: '资源导入', icon: <IconDownload /> },
-                        { itemKey: 'Settings', text: '设置', icon: <IconSetting /> },
-                    ]}
-                />
-            </Sider>
-            <Layout>
-                <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
                     <Title heading={3} style={{ color: '#fff' }}>设置</Title>
                 </Header>
                 <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
-                    
+
                     {/* --- 1. 通用设置 (语言) --- */}
-                    <Card 
+                    <Card
                         title={<div style={{display:'flex', alignItems:'center', gap:8}}><IconSetting /> 通用设置</div>}
                         style={{ backgroundColor: CARD_BG, borderRadius: 12, border: 'none', marginBottom: 20 }}
                         headerStyle={{ borderBottom: '1px solid #333' }}
@@ -96,9 +80,9 @@ export default function SettingsPage(): React.JSX.Element {
                                     <Text style={{ color: '#888', fontSize: 12 }}>更改启动器的显示语言</Text>
                                 </div>
                             </div>
-                            <Select 
-                                value={language} 
-                                onChange={(value) => setLanguage(value as string)} 
+                            <Select
+                                value={language}
+                                onChange={(value) => setLanguage(value as string)}
                                 style={{ width: 250, backgroundColor: '#333' }}
                             >
                                 <Select.Option value="zh_CN">
@@ -116,18 +100,18 @@ export default function SettingsPage(): React.JSX.Element {
                             </Select>
                         </div>
                     </Card>
-                    
+
                     {/* --- 2. 存储管理 (简易/详细) --- */}
-                    <Card 
+                    <Card
                         title={
                             <div style={{display:'flex', alignItems:'center', justifyContent: 'space-between', width: '100%'}}>
                                 <div style={{display:'flex', alignItems:'center', gap:8}}>
                                     <IconServer /> 存储管理
                                 </div>
-                                <Radio.Group 
-                                    type="button" 
-                                    buttonSize="small" 
-                                    value={storageMode} 
+                                <Radio.Group
+                                    type="button"
+                                    buttonSize="small"
+                                    value={storageMode}
                                     onChange={(e) => setStorageMode(e.target.value as 'simple' | 'advanced')}
                                 >
                                     <Radio value="simple">简易模式</Radio>
@@ -149,7 +133,7 @@ export default function SettingsPage(): React.JSX.Element {
                                         const isSelected = selectedDrive === drive.label.replace(':', '');
                                         return (
                                             <Col span={8} key={drive.label}>
-                                                <div 
+                                                <div
                                                     onClick={() => setSelectedDrive(drive.label.replace(':', ''))}
                                                     style={{
                                                         border: `2px solid ${isSelected ? THEME_GREEN : '#444'}`,
@@ -198,23 +182,23 @@ export default function SettingsPage(): React.JSX.Element {
                             </div>
                         )}
                     </Card>
-                    
+
                     {/* --- 3. 故障排查 (小白向导) --- */}
-                    <Card 
+                    <Card
                         title={<div style={{display:'flex', alignItems:'center', gap:8}}><IconAlertTriangle style={{color: '#ff9f43'}} /> 故障排查与反馈</div>}
                         style={{ backgroundColor: CARD_BG, borderRadius: 12, border: 'none' }}
                         headerStyle={{ borderBottom: '1px solid #333' }}
                     >
-                        <Banner 
-                            type="warning" 
-                            bordered 
+                        <Banner
+                            type="warning"
+                            bordered
                             description="如果您在使用过程中遇到安装失败、闪退或黑屏，请按照以下步骤反馈给管理员。"
                             style={{ marginBottom: 24, borderRadius: 8, backgroundColor: 'rgba(255, 159, 67, 0.1)', borderColor: '#ff9f43' }}
                         />
                         <div style={{ padding: '0 20px' }}>
                             <Steps current={-1} status="process" style={{ color: '#fff' }}>
-                                <Steps.Step 
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第一步：导出日志</Text>} 
+                                <Steps.Step
+                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第一步：导出日志</Text>}
                                     description={
                                         <div style={{ marginTop: 12, padding: '12px 0' }}>
                                             <div style={{ color: '#ccc', marginBottom: 12, fontSize: 13, lineHeight: 1.6 }}>
@@ -222,14 +206,14 @@ export default function SettingsPage(): React.JSX.Element {
                                                 <br/>
                                                 文件将生成在桌面的 <Text code style={{color: '#6bc786'}}>DHC_ERROR_LOG</Text> 文件夹中。
                                             </div>
-                                            <Button 
-                                                icon={<IconFile />} 
-                                                onClick={handleExportLog} 
-                                                theme="solid" 
+                                            <Button
+                                                icon={<IconFile />}
+                                                onClick={handleExportLog}
+                                                theme="solid"
                                                 size="large"
                                                 block={false}
-                                                style={{ 
-                                                    backgroundColor: '#6bc786', 
+                                                style={{
+                                                    backgroundColor: '#6bc786',
                                                     color: '#fff',
                                                     fontWeight: 'bold',
                                                     border: 'none',
@@ -239,11 +223,11 @@ export default function SettingsPage(): React.JSX.Element {
                                                 一键导出错误日志
                                             </Button>
                                         </div>
-                                    } 
+                                    }
                                     icon={<IconFile style={{color: '#fff'}} />}
                                 />
-                                <Steps.Step 
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第二步：截图保留</Text>} 
+                                <Steps.Step
+                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第二步：截图保留</Text>}
                                     description={
                                         <div style={{ marginTop: 8, color: '#ccc', fontSize: 13 }}>
                                             请对报错弹窗或异常画面进行截图。
@@ -253,8 +237,8 @@ export default function SettingsPage(): React.JSX.Element {
                                     }
                                     icon={<IconFile style={{color: '#fff'}} />}
                                 />
-                                <Steps.Step 
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第三步：联系我们</Text>} 
+                                <Steps.Step
+                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第三步：联系我们</Text>}
                                     description={
                                         <div style={{ marginTop: 8, color: '#ccc', fontSize: 13 }}>
                                             将 <strong>日志文件夹</strong> 和 <strong>截图</strong> 发送给群管理员或技术支持。
@@ -268,7 +252,6 @@ export default function SettingsPage(): React.JSX.Element {
                         </div>
                     </Card>
                 </Content>
-            </Layout>
         </Layout>
     );
 }
