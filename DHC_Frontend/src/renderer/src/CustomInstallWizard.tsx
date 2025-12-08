@@ -1,259 +1,205 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Button, Steps, Card, Row, Col, Typography, Banner, Tag, Checkbox, Toast, Progress } from '@douyinfe/semi-ui';
-import { 
-    IconHome, IconFolder, IconFile, IconBolt, IconTickCircle, IconAlertTriangle, IconArrowRight, IconSetting
+import { useState } from 'react';
+import {
+    Layout, Button, Card, Row, Col, Typography,
+    Tag, Checkbox, Toast, Input, Switch, Popover, Badge, Empty
+} from '@douyinfe/semi-ui';
+import {
+    IconBolt, IconSetting,
+    IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
+    IconCode, IconFile, IconCart, IconArrowLeft, IconList
 } from '@douyinfe/semi-icons';
 
 // =================================================================
-// 数据配置层 (对接后端时替换为真实 IPC 调用)
+// 1. 样式与配置 (CONFIG)
 // =================================================================
 
-const STEPS = [
-    { key: 'manager', title: '管理器', icon: <IconSetting /> },
-    { key: 'maps', title: '地图', icon: <IconFolder /> },
-    { key: 'cars', title: '车包', icon: <IconFile /> },
-    { key: 'shaders', title: '光影', icon: <IconBolt /> },
-];
-
-// 模拟本地检测状态 (true=已安装)
-const LOCAL_STATE_MOCK: Record<string, boolean> = {
-    'cm_app': false,          // Content Manager
-    'map_srp_main': true,     // 首都高主图 (已安装)
-    'map_c1': false,          // C1环线
-    'car_jdm_pack': false,    // JDM车包
-    'car_traffic': true,      // 流量车 (已安装)
-    'shader_csp': true,       // CSP (已安装)
-    'shader_sol': false,      // Sol
-    'shader_pure': false      // Pure
+const THEME = {
+    bg: '#16161a',       // 全局深色背景
+    cardBg: '#232326',   // 卡片背景
+    green: '#6bc786',    // 主题绿 (参考图1/图3)
+    textMain: '#ffffff', // 主文字
+    textSub: '#888888',  // 次要文字
+    border: '#333333'    // 边框颜色
 };
 
-// 资源配置表
+// 定义步骤配置
+const TABS = [
+    { id: 'manager', title: '管理器安装' },
+    { id: 'map', title: '地图安装' },
+    { id: 'car', title: '车包安装' },
+    { id: 'shader', title: '光影安装' },
+];
+
+// 模拟资源数据
 const RESOURCES = {
     manager: [
-        { id: 'cm_app', name: 'Content Manager (完整版)', desc: '神力科莎核心第三方启动器，必装组件。', size: '10MB', required: true }
+        { id: 'cm', name: 'Content Manager', desc: '神力科莎核心启动器 (必装组件)', size: '10MB' }
     ],
     maps: [
-        { id: 'map_srp_main', name: '首都高地图-全图', version: 'v0.9.3', img: 'https://images.unsplash.com/photo-1542259682-95996872d380?w=400&q=80', desc: '包含全线道路' },
-        { id: 'map_c1', name: 'C1 环线竞技版', version: 'v0.9.3', img: 'https://images.unsplash.com/photo-1565672056637-d0d5b6e76839?w=400&q=80', desc: '仅包含C1内环' }
+        { id: 'srp_main', name: '首都高全图 (SRP)', version: 'v0.9.3', img: 'https://images.unsplash.com/photo-1542259682-95996872d380?w=500&q=80', desc: '包含C1、湾岸线、横羽线等' },
+        { id: 'c1_loop', name: 'C1 环状线竞技版', version: 'v0.9.3', img: 'https://images.unsplash.com/photo-1565672056637-d0d5b6e76839?w=500&q=80', desc: '轻量化，仅包含内环' }
     ],
     cars: [
-        { id: 'car_jdm_pack', name: 'JDM 街车包', count: '12 辆', size: '1.2GB', img: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80' },
-        { id: 'car_traffic', name: 'Traffic 慢车流', count: '8 辆', size: '500MB', img: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=80' }
+        { id: 'car_jdm', name: 'SRP JDM Pack Vol.1', count: 4, size: '1.2GB', img: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=400&q=80' },
+        { id: 'car_euro', name: 'SRP Euro Pack', count: 2, size: '850MB', img: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&q=80' },
+        { id: 'car_traffic', name: 'Traffic Cars Pack', count: 8, size: '2.1GB', img: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=80' },
+        { id: 'car_shmc', name: 'SHMC 联机车包', count: 12, size: '3.4GB', img: 'https://images.unsplash.com/photo-1503376763036-066120622c74?w=400&q=80' },
+        { id: 'car_wangan', name: 'Wangan Midnight Pack', count: 6, size: '1.8GB', img: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80' },
     ],
     shaders: [
-        { id: 'shader_csp', name: 'CSP 0.1.79', type: 'Patch', desc: '核心物理与光影补丁' },
-        { id: 'shader_sol', name: 'Sol 2.2.9', type: 'Weather', desc: '经典天气系统' },
-        { id: 'shader_pure', name: 'Pure 0.238', type: 'Weather', desc: '新一代天气系统 (需CSP支持)' }
+        { id: 'csp', name: 'CSP 0.1.79', type: 'Patch', desc: '物理与光影补丁' },
+        { id: 'sol', name: 'Sol 2.2.9', type: 'Weather', desc: '经典天气控制器' },
+        { id: 'pure', name: 'Pure 0.238', type: 'Weather', desc: '新一代天气系统' }
     ]
 };
 
-// 样式常量
-const THEME_GREEN = '#6bc786';
-const THEME_BG = '#16161a';
-const THEME_CARD_BG = '#232326';
+// 初始调试状态
+const INITIAL_DEBUG_STATE: Record<string, boolean> = {
+    cm: false,
+    srp_main: true,
+    c1_loop: false,
+    car_jdm: false,
+    car_euro: true, // 模拟缺失资源
+    car_traffic: true,
+    car_shmc: false,
+    csp: true,
+    sol: false,
+    pure: false,
+    _missing_car_euro: true
+};
 
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 
 // =================================================================
-// 主组件
+// 2. 主页面容器 (CustomInstallPage)
 // =================================================================
 
-export default function CustomInstallWizard() {
+export default function CustomInstallWizard(): JSX.Element {
     const [currentStep, setCurrentStep] = useState(0);
-    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-    const [isInstalling, setIsInstalling] = useState(false);
+    const [selections, setSelections] = useState<Set<string>>(new Set(['cm']));
+    const [localState, setLocalState] = useState<Record<string, boolean>>(INITIAL_DEBUG_STATE);
 
-    // 初始化默认选中 (必装且未安装的自动选)
-    useEffect(() => {
-        const initialSet = new Set<string>();
-        if (!LOCAL_STATE_MOCK['cm_app']) initialSet.add('cm_app');
-        setSelectedItems(initialSet);
-    }, []);
-
-    // 切换选中状态
-    const toggleItem = (id: string) => {
-        const newSet = new Set(selectedItems);
-        if (newSet.has(id)) newSet.delete(id);
-        else newSet.add(id);
-        setSelectedItems(newSet);
+    // --- Actions ---
+    const toggleSelection = (id: string): void => {
+        const next = new Set(selections);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setSelections(next);
     };
 
-    // 检查当前步骤是否全部已安装
-    const isStepAllInstalled = (stepKey: keyof typeof RESOURCES): boolean => {
-        const items = RESOURCES[stepKey];
-        return items.every(item => LOCAL_STATE_MOCK[item.id]);
+    const toggleLocalState = (key: string): void => {
+        setLocalState(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
-    // 检查当前步骤是否有部分已安装
-    const hasStepPartialInstalled = (stepKey: keyof typeof RESOURCES): boolean => {
-        const items = RESOURCES[stepKey];
-        const installedCount = items.filter(item => LOCAL_STATE_MOCK[item.id]).length;
-        return installedCount > 0 && installedCount < items.length;
+    const handleNext = (): void => {
+        if (currentStep < TABS.length - 1) setCurrentStep(prev => prev + 1);
+        else Toast.success('开始安装流程...');
     };
 
-    // 检查当前步骤是否有已安装且被选中的项（需要覆盖提示）
-    const hasStepOverwriteWarning = (stepKey: keyof typeof RESOURCES): boolean => {
-        const items = RESOURCES[stepKey];
-        return items.some(item => LOCAL_STATE_MOCK[item.id] && selectedItems.has(item.id));
+    const handleTabClick = (index: number): void => {
+        // 允许直接点击 Tab 切换
+        setCurrentStep(index);
     };
 
-    // 计算当前步骤是否有选中的项目
-    const hasSelectionInCurrentStep = useMemo(() => {
-        const stepKey = STEPS[currentStep].key;
-        const currentStepItems = RESOURCES[stepKey as keyof typeof RESOURCES];
-        if (!currentStepItems) return false;
-        return currentStepItems.some(item => selectedItems.has(item.id));
-    }, [currentStep, selectedItems]);
-
-    // 计算当前步骤是否全部本地已安装
-    const isCurrentStepAllInstalled = useMemo(() => {
-        const stepKey = STEPS[currentStep].key;
-        const currentStepItems = RESOURCES[stepKey as keyof typeof RESOURCES];
-        return currentStepItems.every(item => LOCAL_STATE_MOCK[item.id]);
-    }, [currentStep]);
-
-    // 下一步/开始安装
-    const handleNext = () => {
-        if (currentStep < 3) {
-            setCurrentStep(currentStep + 1);
-        } else {
-            handleStartInstall();
-        }
-    };
-
-    const handleStartInstall = () => {
-        if (selectedItems.size === 0) {
-            Toast.warning('您没有选择任何项目，安装结束');
-            return;
-        }
-        setIsInstalling(true);
-        Toast.success(`开始安装 ${selectedItems.size} 个项目...`);
-    };
-
-    // 页面分发
-    const renderStepContent = () => {
+    // --- Render Switch ---
+    const renderContent = (): JSX.Element | null => {
+        const props = { selections, toggleSelection, localState };
         switch (currentStep) {
-            case 0: return <StepManagerInstall selected={selectedItems} toggle={toggleItem} />;
-            case 1: return <StepMapInstall selected={selectedItems} toggle={toggleItem} />;
-            case 2: return <StepCarPackInstall selected={selectedItems} toggle={toggleItem} />;
-            case 3: return <StepShaderInstall selected={selectedItems} toggle={toggleItem} />;
+            case 0: return <ManagerStep {...props} />;
+            case 1: return <MapStep {...props} />;
+            case 2: return <CarStep {...props} />;
+            case 3: return <ShaderStep {...props} />;
             default: return null;
         }
     };
 
-    // 获取当前步骤的key
-    const getCurrentStepKey = (): keyof typeof RESOURCES => {
-        const keys: (keyof typeof RESOURCES)[] = ['manager', 'maps', 'cars', 'shaders'];
-        return keys[currentStep];
-    };
-
-    const currentStepKey = getCurrentStepKey();
-    const allInstalled = isStepAllInstalled(currentStepKey);
-    const partialInstalled = hasStepPartialInstalled(currentStepKey);
-    const hasOverwrite = hasStepOverwriteWarning(currentStepKey);
-
     return (
-        <Layout style={{ height: '100vh', background: THEME_BG, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
-            {/* 顶部导航 */}
-            <Header style={{ padding: '20px 40px', background: THEME_BG, borderBottom: '1px solid #333', flexShrink: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Steps 
-                        current={currentStep} 
-                        style={{ width: 600, cursor: 'pointer' }}
-                        onChange={(i) => setCurrentStep(i)}
-                    >
-                        {STEPS.map(s => <Steps.Step key={s.title} title={s.title} icon={s.icon} />)}
-                    </Steps>
+        <Layout style={{ height: '100vh', background: THEME.bg, color: 'white' }} className="semi-always-dark">
+            {/* Header: 完全重写的顶部导航栏，参考图1 */}
+            <Header style={{
+                height: 60,
+                background: THEME.bg,
+                borderBottom: `1px solid ${THEME.border}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 24px'
+            }}>
+                {/* 左侧：返回/标题 */}
+                <div style={{ width: 120, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Button icon={<IconArrowLeft />} theme="borderless" style={{ color: '#ccc' }} />
+                </div>
+
+                {/* 中间：图1 风格的 Tab Bar */}
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', height: '100%' }}>
+                    {TABS.map((tab, index) => {
+                        const isActive = currentStep === index;
+                        return (
+                            <div
+                                key={tab.id}
+                                onClick={() => handleTabClick(index)}
+                                style={{
+                                    height: '100%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    padding: '0 24px',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    color: isActive ? THEME.green : THEME.textSub,
+                                    fontWeight: isActive ? 600 : 400,
+                                    fontSize: 14,
+                                    transition: 'color 0.2s'
+                                }}
+                            >
+                                {tab.title}
+                                {/* 底部高亮线 */}
+                                {isActive && (
+                                    <div style={{
+                                        position: 'absolute', bottom: 0, left: 24, right: 24,
+                                        height: 2, background: THEME.green,
+                                        boxShadow: `0 -2px 6px ${THEME.green}66` // 一点点光晕
+                                    }} />
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* 右侧：调试面板 */}
+                <div style={{ width: 120, display: 'flex', justifyContent: 'flex-end' }}>
+                    <DebugController localState={localState} onToggle={toggleLocalState} />
                 </div>
             </Header>
 
-            {/* 主内容区 */}
-            <Content style={{ padding: '20px 40px', overflowY: 'auto', flex: 1 }}>
-                {/* 智能提示 Banner */}
-                {isCurrentStepAllInstalled && (
-                    <Banner 
-                        type="success" 
-                        fullMode={false}
-                        icon={<IconTickCircle />}
-                        closeIcon={null}
-                        description={
-                            <div style={{display:'flex', justifyContent:'space-between', width:'100%'}}>
-                                <span>检测到此页面的资源已全部安装。</span>
-                                <span style={{fontWeight:'bold', cursor:'pointer'}} onClick={handleNext}>直接跳过 →</span>
-                            </div>
-                        }
-                        style={{ marginBottom: 20, backgroundColor: 'rgba(107, 199, 134, 0.1)', borderColor: THEME_GREEN }}
-                    />
-                )}
-                {partialInstalled && !allInstalled && (
-                    <Banner 
-                        type="warning" 
-                        bordered 
-                        icon={<IconAlertTriangle />}
-                        description="检测到部分资源已安装。如果选择已安装的资源，将会覆盖现有版本。"
-                        style={{ marginBottom: 20, backgroundColor: 'rgba(255, 159, 67, 0.1)', borderColor: '#ff9f43' }}
-                    />
-                )}
-                {hasOverwrite && (
-                    <Banner 
-                        type="warning" 
-                        bordered 
-                        icon={<IconAlertTriangle />}
-                        description="您已选择部分已安装的资源，安装将覆盖现有版本。"
-                        style={{ marginBottom: 20, backgroundColor: 'rgba(255, 159, 67, 0.1)', borderColor: '#ff9f43' }}
-                    />
-                )}
-
-                {renderStepContent()}
+            {/* Main Content */}
+            <Content style={{ padding: '24px 40px', overflowY: 'auto' }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    {renderContent()}
+                </div>
             </Content>
 
-            {/* 底部 Footer */}
-            <Footer style={{ 
-                padding: '16px 40px', 
-                background: THEME_CARD_BG, 
-                borderTop: '1px solid #333',
-                flexShrink: 0,
-                zIndex: 10
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <Text style={{ color: '#888' }}>
-                        总计已选: <span style={{ color: THEME_GREEN, fontWeight: 'bold' }}>{selectedItems.size}</span> 项
-                    </Text>
+            {/* Footer */}
+            <Footer style={{ padding: '16px 40px', background: THEME.cardBg, borderTop: `1px solid ${THEME.border}` }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ color: THEME.textSub }}>
+                            已选项目: <span style={{ color: THEME.green, fontWeight: 'bold', fontSize: 16 }}>{selections.size}</span>
+                        </Text>
+                        <div style={{ width: 1, height: 16, background: '#444' }}></div>
+                        <Text style={{ color: '#666', fontSize: 12 }}>预计占用: -- GB</Text>
+                    </div>
+
                     <div style={{ display: 'flex', gap: 12 }}>
                         {currentStep > 0 && (
-                            <Button onClick={() => setCurrentStep(currentStep - 1)} theme="borderless" style={{ color: '#999' }}>
-                                上一步
-                            </Button>
+                            <Button onClick={() => setCurrentStep(c => c - 1)} theme="solid" type="tertiary" style={{ backgroundColor: '#333', color: '#ccc' }}>上一步</Button>
                         )}
-                        {/* 动态按钮逻辑 */}
-                        <Button 
-                            theme={hasSelectionInCurrentStep ? 'solid' : 'light'}
-                            size="large"
-                            onClick={handleNext}
-                            style={{ 
-                                backgroundColor: hasSelectionInCurrentStep ? THEME_GREEN : 'transparent', 
-                                border: hasSelectionInCurrentStep ? 'none' : '1px solid #555',
-                                color: hasSelectionInCurrentStep ? '#fff' : '#ccc', 
-                                width: 140, 
-                                fontWeight: 'bold'
-                            }}
+                        <Button
+                            theme="solid" size="large" onClick={handleNext}
+                            style={{ backgroundColor: THEME.green, color: '#fff', width: 140, fontWeight: 'bold' }}
                         >
-                            {currentStep === 3 
-                                ? '开始安装' 
-                                : (hasSelectionInCurrentStep ? '下一步' : '跳过此页')
-                            }
+                            {currentStep === 3 ? '开始安装' : '下一步'}
                         </Button>
                     </div>
-                </div>
-                {/* 进度条 */}
-                <div style={{ height: 4, background: '#333', borderRadius: 2, overflow:'hidden' }}>
-                    <div style={{ 
-                        width: isInstalling ? '100%' : `${((currentStep + 1) / 4) * 100}%`, 
-                        height: '100%', 
-                        background: THEME_GREEN, 
-                        transition: 'all 0.3s ease' 
-                    }}></div>
                 </div>
             </Footer>
         </Layout>
@@ -261,54 +207,103 @@ export default function CustomInstallWizard() {
 }
 
 // =================================================================
-// 子组件：各步骤页面
+// 3. 调试控制器 (Debug Controller)
 // =================================================================
 
-// 步骤 1: 管理器安装
-const StepManagerInstall = ({ selected, toggle }: { selected: Set<string>, toggle: (id: string) => void }) => {
-    const isInstalled = LOCAL_STATE_MOCK['cm_app'];
-    const isSelected = selected.has('cm_app');
+interface DebugControllerProps {
+    localState: Record<string, boolean>;
+    onToggle: (key: string) => void;
+}
+
+const DebugController = ({ localState, onToggle }: DebugControllerProps): JSX.Element => {
+    return (
+        <Popover
+            trigger="click"
+            position="bottomRight"
+            showArrow
+            style={{ backgroundColor: '#1f1f22', border: '1px solid #444' }}
+            content={
+                <div style={{ padding: 12, width: 280, maxHeight: 400, overflowY: 'auto' }}>
+                    <div style={{ marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #333' }}>
+                        <Text strong style={{ color: '#fff' }}>🔧 模拟本地环境 (Dev)</Text>
+                    </div>
+                    {Object.keys(localState).map(key => (
+                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' }}>
+                            <Text style={{ color: '#ccc', fontSize: 12, fontFamily: 'monospace' }}>{key}</Text>
+                            <Switch size="small" checked={localState[key]} onChange={() => onToggle(key)} />
+                        </div>
+                    ))}
+                </div>
+            }
+        >
+            <Button icon={<IconCode />} theme="borderless" style={{ color: '#666' }} />
+        </Popover>
+    );
+};
+
+// =================================================================
+// 4. 组件一：管理器安装 (ManagerStep)
+// =================================================================
+
+interface StepProps {
+    selections: Set<string>;
+    toggleSelection: (id: string) => void;
+    localState: Record<string, boolean>;
+}
+
+const ManagerStep = ({ selections, toggleSelection, localState }: StepProps): JSX.Element => {
     const item = RESOURCES.manager[0];
+    const isInstalled = localState[item.id];
+    const isSelected = selections.has(item.id);
 
     return (
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-            <div style={{ marginTop: 40, display: 'flex', gap: 40, alignItems: 'center' }}>
-                <div style={{ 
-                    width: 200, height: 200, 
-                    background: 'linear-gradient(135deg, #ff4d4f 0%, #a8071a 100%)', 
-                    borderRadius: 24, 
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 40 }}>
+            <div style={{
+                width: '100%', maxWidth: 800,
+                background: THEME.cardBg, borderRadius: 16, padding: 40,
+                border: `1px solid ${isSelected ? THEME.green : THEME.border}`,
+                display: 'flex', gap: 40, alignItems: 'center',
+                boxShadow: isSelected ? `0 0 30px ${THEME.green}15` : 'none',
+                transition: 'all 0.3s'
+            }}>
+                {/* 左侧图标 */}
+                <div style={{
+                    width: 140, height: 140, borderRadius: 24,
+                    background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 10px 30px rgba(255, 77, 79, 0.3)'
+                    boxShadow: '0 12px 24px rgba(255, 77, 79, 0.2)'
                 }}>
-                    <IconSetting style={{ fontSize: 80, color: '#fff' }} />
+                    <IconSetting style={{ fontSize: 60, color: '#fff' }} />
                 </div>
+
+                {/* 右侧内容 */}
                 <div style={{ flex: 1 }}>
-                    <Title heading={2} style={{ color: '#fff' }}>{item.name}</Title>
-                    <Text style={{ color: '#ccc', fontSize: 16, marginTop: 10, display: 'block', lineHeight: 1.6 }}>
-                        {item.desc}
-                        <br/>
-                        体积小巧 (约{item.size})，不产生垃圾文件。
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <Title heading={3} style={{ color: '#fff' }}>{item.name}</Title>
+                        {isInstalled && (
+                            <Tag style={{ backgroundColor: 'rgba(107, 199, 134, 0.1)', color: THEME.green, border: `1px solid ${THEME.green}` }}>
+                                <IconTickCircle style={{ marginRight: 4 }} /> 本地已安装
+                            </Tag>
+                        )}
+                    </div>
+
+                    <Text style={{ color: '#999', lineHeight: 1.6, fontSize: 15 }}>
+                        神力科莎必装的第三方启动器。提供更现代的界面、更高效的模组管理以及 CSP 补丁支持。
+                        <br />如果您已安装，可以选择跳过。
                     </Text>
-                    <div style={{ marginTop: 30 }}>
-                        <Button 
-                            theme="solid" 
-                            size="large"
-                            onClick={() => toggle('cm_app')}
-                            style={{ 
-                                backgroundColor: isSelected ? THEME_GREEN : '#333', 
-                                color: '#fff',
-                                width: 180,
-                                height: 50,
-                                fontSize: 16
+
+                    <div style={{ marginTop: 32 }}>
+                        <Button
+                            theme="solid" size="large"
+                            onClick={() => toggleSelection(item.id)}
+                            style={{
+                                backgroundColor: isSelected ? THEME.green : '#333',
+                                color: isSelected ? '#fff' : '#ccc',
+                                width: 180, fontWeight: 'bold'
                             }}
                         >
-                            {isInstalled ? (isSelected ? '覆盖安装' : '已安装 (点击重装)') : (isSelected ? '已选择' : '点击安装')}
+                            {isSelected ? (isInstalled ? '覆盖安装' : '已选择') : '点击安装'}
                         </Button>
-                        {isInstalled && isSelected && (
-                            <Text style={{ display: 'block', marginTop: 8, color: '#ff9f43' }}>
-                                <IconAlertTriangle /> 注意：将覆盖现有版本
-                            </Text>
-                        )}
                     </div>
                 </div>
             </div>
@@ -316,53 +311,34 @@ const StepManagerInstall = ({ selected, toggle }: { selected: Set<string>, toggl
     );
 };
 
-// 步骤 2: 地图安装
-const StepMapInstall = ({ selected, toggle }: { selected: Set<string>, toggle: (id: string) => void }) => {
+// =================================================================
+// 5. 组件二：地图安装 (MapStep)
+// =================================================================
+
+const MapStep = ({ selections, toggleSelection, localState }: StepProps): JSX.Element => {
     return (
         <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: THEME_GREEN }}></div>
-                <Title heading={4} style={{ color: '#fff', margin: 0 }}>主地图选择</Title>
-                <Text style={{ color: '#666', fontSize: 12 }}>点击卡片勾选</Text>
+            {/* 简单的标题提示 */}
+            <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 4, height: 16, background: THEME.green, borderRadius: 2 }} />
+                    <Title heading={5} style={{ color: '#fff' }}>地图选择</Title>
+                </div>
             </div>
+
             <Row gutter={[24, 24]}>
                 {RESOURCES.maps.map(map => {
-                    const isInstalled = LOCAL_STATE_MOCK[map.id];
-                    const isSelected = selected.has(map.id);
-                    
+                    const isInstalled = localState[map.id];
+                    const isSelected = selections.has(map.id);
                     return (
                         <Col span={12} key={map.id}>
-                            <div 
-                                onClick={() => toggle(map.id)}
-                                style={{
-                                    position: 'relative',
-                                    borderRadius: 16,
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    border: `2px solid ${isSelected ? THEME_GREEN : 'transparent'}`,
-                                    transition: 'all 0.2s',
-                                    height: 240
-                                }}
-                            >
-                                <img src={map.img} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.6)' }} alt={map.name} />
-                                <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                                    {isInstalled ? (
-                                        <Tag color="green" type="solid">本地已安装</Tag>
-                                    ) : (
-                                        !isSelected && <Tag color="red" type="ghost">资源未导入</Tag>
-                                    )}
-                                </div>
-                                {isInstalled && isSelected && (
-                                    <div style={{ position: 'absolute', top: 12, left: 12 }}>
-                                        <Tag color="orange" type="solid" icon={<IconAlertTriangle />}>将覆盖安装</Tag>
-                                    </div>
-                                )}
-                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                                    <Title heading={3} style={{ color: '#fff' }}>{map.name}</Title>
-                                    <Text style={{ color: '#ccc' }}>版本: {map.version}</Text>
-                                    {isSelected && <IconTickCircle style={{ color: THEME_GREEN, fontSize: 30, position: 'absolute', right: 20, bottom: 20 }} />}
-                                </div>
-                            </div>
+                            <ResourceCard
+                                data={map}
+                                isInstalled={isInstalled}
+                                isSelected={isSelected}
+                                onToggle={() => toggleSelection(map.id)}
+                                type="map"
+                            />
                         </Col>
                     );
                 })}
@@ -371,139 +347,150 @@ const StepMapInstall = ({ selected, toggle }: { selected: Set<string>, toggle: (
     );
 };
 
-// 步骤 3: 车包安装
-const StepCarPackInstall = ({ selected, toggle }: { selected: Set<string>, toggle: (id: string) => void }) => {
-    const allCarIds = RESOURCES.cars.map(c => c.id);
-    const isAllSelected = allCarIds.every(id => selected.has(id));
-    
-    const handleSelectAll = () => {
-        if (isAllSelected) {
-            allCarIds.forEach(id => { if(selected.has(id)) toggle(id); });
-        } else {
-            allCarIds.forEach(id => { if(!selected.has(id)) toggle(id); });
-        }
+// =================================================================
+// 6. 组件三：车包安装 (CarStep - 参考图1，带工具栏)
+// =================================================================
+
+const CarStep = ({ selections, toggleSelection, localState }: StepProps): JSX.Element => {
+    const [filterInstallable, setFilterInstallable] = useState(false);
+    const [search, setSearch] = useState('');
+
+    const filteredCars = RESOURCES.cars.filter(car => {
+        const matchSearch = car.name.toLowerCase().includes(search.toLowerCase());
+        const isMissingFile = localState[`_missing_${car.id}`];
+        if (filterInstallable && isMissingFile) return false;
+        return matchSearch;
+    });
+
+    const handleSelectAll = (): void => {
+        filteredCars.forEach(c => {
+            if (!localState[`_missing_${c.id}`]) toggleSelection(c.id);
+        });
+    };
+
+    const handleClear = (): void => {
+        filteredCars.forEach(c => {
+            if (selections.has(c.id)) toggleSelection(c.id);
+        });
     };
 
     return (
         <div>
-            <Banner 
-                fullMode={false}
-                type="danger"
-                description="在安装车包前，请先确保你有全DLC，否则某些车包可能无法使用。"
-                style={{ marginBottom: 20, backgroundColor: 'rgba(255, 77, 79, 0.1)', borderColor: '#ff4d4f' }}
-            />
-            <div style={{ marginBottom: 20 }}>
-                <Button 
-                    theme={isAllSelected ? 'solid' : 'light'}
-                    style={{ 
-                        backgroundColor: isAllSelected ? THEME_GREEN : '#333', 
-                        color: '#fff' 
-                    }}
-                    onClick={handleSelectAll}
-                >
-                    {isAllSelected ? '取消全选' : '全选所有车包'}
-                </Button>
+            {/* 顶部工具栏 (图1风格) */}
+            <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                marginBottom: 20, background: '#1f1f22', padding: '12px 20px', borderRadius: 8
+            }}>
+                {/* 左侧操作 */}
+                <div style={{ display: 'flex', gap: 12 }}>
+                    <Button onClick={handleSelectAll} theme="solid" type="tertiary" style={{ backgroundColor: '#333', color: '#fff' }}>全选当前</Button>
+                    <Button onClick={handleClear} theme="borderless" style={{ color: '#888' }}>清空</Button>
+                </div>
+
+                {/* 右侧筛选 */}
+                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setFilterInstallable(!filterInstallable)}>
+                        <Switch size="small" checked={filterInstallable} />
+                        <Text style={{ color: filterInstallable ? '#fff' : '#888', fontSize: 13 }}>仅显示资源就绪</Text>
+                    </div>
+                    <Input
+                        prefix={<IconSearch style={{ color: '#666' }} />}
+                        placeholder="搜索车包..."
+                        style={{ width: 220, backgroundColor: '#16161a', border: '1px solid #333' }}
+                        value={search}
+                        onChange={setSearch}
+                    />
+                </div>
             </div>
-            <Row gutter={[16, 16]}>
-                {RESOURCES.cars.map(car => {
-                    const isInstalled = LOCAL_STATE_MOCK[car.id];
-                    const isSelected = selected.has(car.id);
-                    return (
-                        <Col span={8} key={car.id}>
-                            <div 
-                                onClick={() => toggle(car.id)}
-                                style={{
-                                    backgroundColor: THEME_CARD_BG,
-                                    borderRadius: 12,
-                                    overflow: 'hidden',
-                                    border: `2px solid ${isSelected ? THEME_GREEN : 'transparent'}`,
-                                    cursor: 'pointer',
-                                    position: 'relative'
-                                }}
-                            >
-                                <div style={{ height: 120, overflow: 'hidden' }}>
-                                    <img src={car.img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={car.name} />
-                                </div>
-                                <div style={{ padding: 12 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>{car.name}</Text>
-                                        <Checkbox checked={isSelected} style={{ pointerEvents: 'none' }} />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <Tag size="small" style={{ backgroundColor: '#333', color: '#ccc' }}>{car.count}</Tag>
-                                        {isInstalled ? (
-                                            <Tag size="small" color="green">已安装</Tag>
-                                        ) : (
-                                            <Tag size="small" color="blue">新资源</Tag>
-                                        )}
-                                    </div>
-                                    {isInstalled && isSelected && (
-                                        <Text style={{ display: 'block', marginTop: 4, color: '#ff9f43', fontSize: 12 }}>
-                                            <IconAlertTriangle /> 将覆盖
-                                        </Text>
-                                    )}
-                                </div>
-                                {isSelected && !isInstalled && (
-                                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(107, 199, 134, 0.1)' }} />
-                                )}
-                            </div>
-                        </Col>
-                    );
-                })}
-            </Row>
+
+            {/* 内容网格 */}
+            {filteredCars.length === 0 ? (
+                <Empty image={<IconFilter style={{ fontSize: 48, color: '#333' }} />} description="未找到匹配的车包" />
+            ) : (
+                <Row gutter={[16, 16]}>
+                    {filteredCars.map(car => {
+                        const isInstalled = localState[car.id];
+                        const isSelected = selections.has(car.id);
+                        const isMissingFile = localState[`_missing_${car.id}`];
+
+                        return (
+                            <Col span={8} xl={6} key={car.id}>
+                                <ResourceCard
+                                    data={car}
+                                    isInstalled={isInstalled}
+                                    isSelected={isSelected}
+                                    isMissingResource={isMissingFile}
+                                    onToggle={() => toggleSelection(car.id)}
+                                    type="car"
+                                />
+                            </Col>
+                        );
+                    })}
+                </Row>
+            )}
         </div>
     );
 };
 
-// 步骤 4: 光影安装
-const StepShaderInstall = ({ selected, toggle }: { selected: Set<string>, toggle: (id: string) => void }) => {
+// =================================================================
+// 7. 组件四：光影安装 (ShaderStep - 列表式)
+// =================================================================
+
+const ShaderStep = ({ selections, toggleSelection, localState }: StepProps): JSX.Element => {
     return (
-        <div>
-            <Banner 
-                icon={<IconBolt />}
-                description="光影模组存在依赖关系，Pure 需要 CSP 支持。建议全部勾选以获得最佳体验。"
-                style={{ marginBottom: 20, backgroundColor: '#232326', border: '1px solid #444' }}
-            />
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+            <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 4, height: 16, background: '#ff9f43', borderRadius: 2 }} />
+                <Title heading={5} style={{ color: '#fff' }}>光影组件</Title>
+                <Text style={{ color: '#666', fontSize: 12, marginLeft: 8 }}>组件间存在依赖关系，建议保持默认选择</Text>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {RESOURCES.shaders.map(shader => {
-                    const isInstalled = LOCAL_STATE_MOCK[shader.id];
-                    const isSelected = selected.has(shader.id);
+                    const isInstalled = localState[shader.id];
+                    const isSelected = selections.has(shader.id);
                     return (
-                        <div 
+                        <div
                             key={shader.id}
-                            onClick={() => toggle(shader.id)}
+                            onClick={() => toggleSelection(shader.id)}
                             style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                backgroundColor: THEME_CARD_BG,
-                                padding: '16px 24px',
-                                borderRadius: 8,
-                                border: `1px solid ${isSelected ? THEME_GREEN : '#333'}`,
-                                cursor: 'pointer'
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                backgroundColor: THEME.cardBg,
+                                padding: '16px 24px', borderRadius: 12,
+                                border: `1px solid ${isSelected ? THEME.green : THEME.border}`,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16, position: 'relative', zIndex: 1 }}>
                                 <Checkbox checked={isSelected} style={{ pointerEvents: 'none' }} />
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{shader.name}</Text>
-                                        <Tag size="small" style={{ backgroundColor: '#444', color: '#ccc' }}>{shader.type}</Tag>
+                                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>{shader.name}</Text>
+                                        <Tag size="small" style={{ backgroundColor: '#333', color: '#888', border: 'none' }}>{shader.type}</Tag>
                                     </div>
-                                    <Text style={{ color: '#888', fontSize: 12 }}>{shader.desc}</Text>
+                                    <Text style={{ color: '#666', fontSize: 12, display: 'block', marginTop: 4 }}>{shader.desc}</Text>
                                 </div>
                             </div>
-                            <div>
+
+                            <div style={{ position: 'relative', zIndex: 1 }}>
                                 {isInstalled ? (
-                                    isSelected ? (
-                                        <span style={{ color: '#ff9f43', fontSize: 12 }}>将覆盖当前版本</span>
-                                    ) : (
-                                        <span style={{ color: THEME_GREEN, fontSize: 12 }}>当前已安装</span>
-                                    )
+                                    <Tag style={{ backgroundColor: 'rgba(107, 199, 134, 0.1)', color: THEME.green }}>本地已安装</Tag>
                                 ) : (
-                                    <span style={{ color: '#666', fontSize: 12 }}>未安装</span>
+                                    <Text style={{ color: '#444', fontSize: 12 }}>未安装</Text>
                                 )}
                             </div>
+
+                            {/* 选中高亮背景 */}
+                            {isSelected && (
+                                <div style={{
+                                    position: 'absolute', inset: 0,
+                                    background: `linear-gradient(90deg, ${THEME.green}08 0%, transparent 100%)`,
+                                    pointerEvents: 'none'
+                                }} />
+                            )}
                         </div>
                     );
                 })}
@@ -512,3 +499,102 @@ const StepShaderInstall = ({ selected, toggle }: { selected: Set<string>, toggle
     );
 };
 
+// =================================================================
+// 8. 统一卡片组件 (ResourceCard)
+// =================================================================
+
+interface ResourceData {
+    id: string;
+    name: string;
+    version?: string;
+    img?: string;
+    desc?: string;
+    count?: number;
+    size?: string;
+}
+
+interface ResourceCardProps {
+    data: ResourceData;
+    isInstalled: boolean;
+    isSelected: boolean;
+    isMissingResource?: boolean;
+    onToggle: () => void;
+    type: 'map' | 'car';
+}
+
+const ResourceCard = ({ data, isInstalled, isSelected, isMissingResource, onToggle, type }: ResourceCardProps): JSX.Element => {
+    const isDisabled = isMissingResource;
+
+    return (
+        <div
+            onClick={!isDisabled ? onToggle : undefined}
+            style={{
+                backgroundColor: THEME.cardBg,
+                borderRadius: 12,
+                overflow: 'hidden',
+                border: `2px solid ${isSelected ? THEME.green : 'transparent'}`,
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                position: 'relative',
+                transition: 'all 0.2s',
+                opacity: isDisabled ? 0.6 : 1,
+                boxShadow: isSelected ? `0 4px 20px ${THEME.green}15` : 'none'
+            }}
+        >
+            {/* 1. 图片区 (参考图3的大图占比) */}
+            <div style={{ height: type === 'map' ? 180 : 140, overflow: 'hidden', position: 'relative' }}>
+                {data.img && <img src={data.img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={data.name} />}
+
+                {/* 渐变遮罩 */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)' }} />
+
+                {/* 状态标签 (右上角，参考图1的Tag) */}
+                <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                    {isMissingResource && <Tag color="red" type="solid">资源缺失</Tag>}
+                    {isInstalled && <Tag style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: THEME.green, border: `1px solid ${THEME.green}`, backdropFilter: 'blur(4px)' }}>已安装</Tag>}
+                </div>
+
+                {/* 选中时的覆盖层 + 居中对勾 */}
+                {isSelected && !isDisabled && (
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        backgroundColor: 'rgba(107, 199, 134, 0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'grayscale(0.5)'
+                    }}>
+                        <div style={{
+                            width: 40, height: 40, borderRadius: '50%',
+                            background: THEME.green, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+                        }}>
+                            <IconTickCircle style={{ color: '#fff', fontSize: 24 }} />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* 2. 信息区 (参考图1的布局) */}
+            <div style={{ padding: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <Text ellipsis={{ showTooltip: true }} style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>{data.name}</Text>
+                    {/* 小小的包含数量 */}
+                    {data.count && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#666', fontSize: 12 }}>
+                            <IconList size="small" /> {data.count}
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ color: '#666', fontSize: 12 }}>{data.size}</Text>
+
+                    {/* 覆盖提示 */}
+                    {isInstalled && isSelected && !isDisabled && (
+                        <Text style={{ color: '#e6a23c', fontSize: 12, display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <IconAlertTriangle size="small" /> 覆盖
+                        </Text>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};

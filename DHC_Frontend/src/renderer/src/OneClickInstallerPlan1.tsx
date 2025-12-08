@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col } from '@douyinfe/semi-ui';
-import { 
+import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
     IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle, IconInfoCircle
 } from '@douyinfe/semi-icons';
@@ -15,8 +15,8 @@ interface DiskInfo {
     free: number;  // bytes
 }
 
-const DISK_INFO: DiskInfo = { 
-    label: 'D:', 
+const DISK_INFO: DiskInfo = {
+    label: 'D:',
     total: 1024 * 1024 * 1024 * 1024, // 1TB
     used: 600 * 1024 * 1024 * 1024,   // 600GB Used
     free: 424 * 1024 * 1024 * 1024    // 424GB Free
@@ -35,30 +35,30 @@ interface InstallMode {
 
 // 定义三种安装模式
 const INSTALL_MODES: InstallMode[] = [
-    { 
-        id: 'minimal', 
-        name: '基础极速版', 
+    {
+        id: 'minimal',
+        name: '基础极速版',
         icon: <IconDownload size="extra-large" />,
-        size: 5.2 * 1024 * 1024 * 1024, 
+        size: 5.2 * 1024 * 1024 * 1024,
         desc: '仅包含 CSP + Sol + 基础联机车包。适合硬盘空间紧张或仅需最低联机要求的玩家。',
-        color: '#00b5ad' 
+        color: '#00b5ad'
     },
-    { 
-        id: 'standard', 
-        name: '标准推荐版', 
+    {
+        id: 'standard',
+        name: '标准推荐版',
         icon: <IconTickCircle size="extra-large" />,
-        size: 15.8 * 1024 * 1024 * 1024, 
+        size: 15.8 * 1024 * 1024 * 1024,
         desc: '包含首都高地图 + 常用车流 + 基础光影。最平衡的选择，推荐大多数玩家使用。',
         color: '#6bc786',
         recommended: true
     },
-    { 
-        id: 'full', 
-        name: '豪华全享版', 
+    {
+        id: 'full',
+        name: '豪华全享版',
         icon: <IconFile size="extra-large" />,
-        size: 28.5 * 1024 * 1024 * 1024, 
+        size: 28.5 * 1024 * 1024 * 1024,
         desc: '包含 Pure 高级光影 + 4K 材质包 + 全套车包。体验极致画质，需要较好显卡。',
-        color: '#a06cd5' 
+        color: '#a06cd5'
     }
 ];
 
@@ -114,23 +114,23 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
     const [selectedModeId, setSelectedModeId] = useState<string>('standard'); // 默认选中标准版
-    
+
     // 纯净安装向导状态
-    const [wizardStep, setWizardStep] = useState<number>(0); 
+    const [wizardStep, setWizardStep] = useState<number>(0);
     const [backupItems, setBackupItems] = useState<string[]>(['cars', 'tracks', 'dashes']);
     const [backupProgress, setBackupProgress] = useState<number>(0);
     const [isBackingUp, setIsBackingUp] = useState<boolean>(false);
-    
+
     // 冲突检测状态
     const [conflictModalVisible, setConflictModalVisible] = useState<boolean>(false);
 
     // 获取当前选中的模式对象
     const currentMode = useMemo(() => INSTALL_MODES.find(m => m.id === selectedModeId) || INSTALL_MODES[1], [selectedModeId]);
-    
+
     // --- 1. 启动时检测逻辑 ---
     useEffect(() => {
         // 模拟：检测到本地已经安装了 CSP 或 Sol
-        const hasExistingShaders = true; 
+        const hasExistingShaders = true;
         if (hasExistingShaders) {
             Modal.confirm({
                 title: '检测到已安装光影模组',
@@ -165,9 +165,9 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
     const handleInstallClick = (): void => {
         // 1. 检查磁盘空间
         if (currentMode.size > DISK_INFO.free) {
-            Modal.error({ 
-                title: '空间不足', 
-                content: `所选模式需要 ${formatSize(currentMode.size)}，但磁盘仅剩 ${formatSize(DISK_INFO.free)}` 
+            Modal.error({
+                title: '空间不足',
+                content: `所选模式需要 ${formatSize(currentMode.size)}，但磁盘仅剩 ${formatSize(DISK_INFO.free)}`
             });
             return;
         }
@@ -216,10 +216,10 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
     const renderCleanInstallWizard = (): React.JSX.Element => (
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '20px' }}>
             <div style={{ marginBottom: 30 }}>
-                <Button 
-                    icon={<IconArrowRight style={{transform: 'rotate(180deg)'}}/>} 
-                    onClick={() => setMode('normal')} 
-                    theme="borderless" 
+                <Button
+                    icon={<IconArrowRight style={{transform: 'rotate(180deg)'}}/>}
+                    onClick={() => setMode('normal')}
+                    theme="borderless"
                     style={{color:'#999', marginBottom: 10}}
                 >
                     返回常规模式
@@ -235,8 +235,8 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                 {wizardStep === 0 && (
                     <>
                         <Title heading={5}>1. 选择要备份的内容</Title>
-                        <Banner 
-                            type="warning" 
+                        <Banner
+                            type="warning"
                             style={{ margin: '16px 0', borderRadius: 8 }}
                             description={
                                 <div>
@@ -247,17 +247,17 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         <div style={{ backgroundColor: 'var(--semi-color-fill-0)', padding: 16, borderRadius: 8 }}>
                             <Checkbox.Group value={backupItems} onChange={(values) => setBackupItems(values as string[])} style={{ width: '100%' }}>
                                 <List>
-                                    <List.Item 
+                                    <List.Item
                                         style={{ padding: 10, borderBottom: '1px solid var(--semi-color-border)' }}
                                         header={<Checkbox value="cars">车辆 (content/cars)</Checkbox>}
                                         main={<Text type="tertiary" style={{ fontSize:12, marginLeft: 24 }}>保留所有已安装的第三方车辆模组</Text>}
                                     />
-                                    <List.Item 
+                                    <List.Item
                                         style={{ padding: 10, borderBottom: '1px solid var(--semi-color-border)' }}
                                         header={<Checkbox value="tracks">赛道 (content/tracks)</Checkbox>}
                                         main={<Text type="tertiary" style={{ fontSize:12, marginLeft: 24 }}>保留所有已安装的第三方地图/赛道</Text>}
                                     />
-                                    <List.Item 
+                                    <List.Item
                                         style={{ padding: 10 }}
                                         header={<Checkbox value="dashes">仪表盘 (apps/python)</Checkbox>}
                                         main={<Text type="tertiary" style={{ fontSize:12, marginLeft: 24 }}>保留 SimHub 或其他仪表盘插件配置</Text>}
@@ -272,10 +272,10 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                                     <Progress percent={backupProgress} style={{marginTop: 8}} stroke="#6bc786" />
                                 </div>
                             ) : (
-                                <Button 
-                                    theme="solid" 
-                                    icon={<IconSave />} 
-                                    style={{ backgroundColor: '#6bc786', color: '#fff' }} 
+                                <Button
+                                    theme="solid"
+                                    icon={<IconSave />}
+                                    style={{ backgroundColor: '#6bc786', color: '#fff' }}
                                     onClick={startBackup}
                                 >
                                     开始备份
@@ -315,10 +315,10 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         {isBackingUp ? (
                              <Progress percent={66} stroke="#6bc786" aria-label="restoring" />
                         ) : (
-                            <Button 
-                                theme="solid" 
-                                size="large" 
-                                style={{ backgroundColor: '#6bc786', color: '#fff' }} 
+                            <Button
+                                theme="solid"
+                                size="large"
+                                style={{ backgroundColor: '#6bc786', color: '#fff' }}
                                 onClick={restoreBackup}
                             >
                                 恢复备份并进入安装页面
@@ -335,10 +335,10 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
         const percentUsed = (DISK_INFO.used / DISK_INFO.total) * 100;
         const percentInstall = (currentMode.size / DISK_INFO.total) * 100;
         const isSpaceLow = (DISK_INFO.free < currentMode.size);
-        
+
         // 获取当前选中的配置要求
         const req = REQUIREMENTS_MAP[selectedModeId] || REQUIREMENTS_MAP['standard'];
-        
+
         return (
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px' }}>
                 {/* 顶部标题 */}
@@ -347,10 +347,10 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装 - 方案一</Title>
                         <Text style={{ color: '#888' }}>选择适合你的预设方案，全自动配置游戏环境</Text>
                     </div>
-                    <Button 
-                        icon={<IconRefresh />} 
-                        theme="borderless" 
-                        style={{ color: '#ff9f43' }} 
+                    <Button
+                        icon={<IconRefresh />}
+                        theme="borderless"
+                        style={{ color: '#ff9f43' }}
                         onClick={() => setMode('clean_install')}
                     >
                         修复模式
@@ -366,7 +366,7 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         const isSelected = selectedModeId === item.id;
                         return (
                             <Col span={8} key={item.id}>
-                                <div 
+                                <div
                                     onClick={() => setSelectedModeId(item.id)}
                                     style={{
                                         cursor: 'pointer',
@@ -387,18 +387,18 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                                 >
                                     {/* 推荐标签 */}
                                     {item.recommended && (
-                                        <div style={{ 
-                                            position: 'absolute', top: 0, right: 0, 
-                                            background: item.color, color: '#fff', 
-                                            fontSize: 10, padding: '2px 8px', 
-                                            borderRadius: '0 8px 0 8px', fontWeight: 'bold' 
+                                        <div style={{
+                                            position: 'absolute', top: 0, right: 0,
+                                            background: item.color, color: '#fff',
+                                            fontSize: 10, padding: '2px 8px',
+                                            borderRadius: '0 8px 0 8px', fontWeight: 'bold'
                                         }}>
                                             RECOMMENDED
                                         </div>
                                     )}
-                                    
-                                    <div style={{ 
-                                        color: item.color, 
+
+                                    <div style={{
+                                        color: item.color,
                                         marginBottom: 16,
                                         backgroundColor: 'rgba(255,255,255,0.05)',
                                         padding: 12,
@@ -406,14 +406,14 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                                     }}>
                                         {item.icon}
                                     </div>
-                                    
+
                                     <Title heading={5} style={{ color: '#fff', marginBottom: 8 }}>{item.name}</Title>
-                                    
+
                                     {/* [修复]: 强制指定文字颜色为浅灰，防止在深色背景下看不清 */}
                                     <Text style={{ color: '#ccc', fontSize: 13, marginBottom: 16, flex: 1, lineHeight: 1.5 }}>
                                         {item.desc}
                                     </Text>
-                                    
+
                                     <div style={{ marginTop: 'auto', borderTop: '1px solid #333', width: '100%', paddingTop: 12 }}>
                                         <Text style={{ color: '#666', fontSize: 12 }}>预计大小</Text>
                                         <div style={{ color: item.color, fontWeight: 'bold', fontSize: 16 }}>{formatSize(item.size)}</div>
@@ -431,13 +431,13 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         </Row>
 
                         {/* 2. 磁盘空间检测 */}
-                        <Card 
+                        <Card
                     // [修复]: 显式设置 backgroundColor: '#232326'，覆盖 Semi 默认的白色背景
                     style={{ backgroundColor: '#232326', borderRadius: 12, border: '1px solid #444', marginBottom: 20 }}
                     // [修复]: 强制 Title 颜色为白色
                     title={
                         <div style={{display:'flex', alignItems:'center', gap: 8}}>
-                            <IconServer style={{color:'#fff'}} /> 
+                            <IconServer style={{color:'#fff'}} />
                             <span style={{color:'#fff'}}>磁盘空间预估</span>
                         </div>
                     }
@@ -447,11 +447,11 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                         {/* 已用 */}
                         <div style={{ width: `${percentUsed}%`, backgroundColor: '#555', height: '100%' }} />
                         {/* 预计新增 (带动画) */}
-                        <div style={{ 
-                            width: `${percentInstall}%`, 
+                        <div style={{
+                            width: `${percentInstall}%`,
                             backgroundColor: isSpaceLow ? '#ff4d4f' : currentMode.color, // 跟随模式颜色
-                            height: '100%', 
-                            transition: 'width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+                            height: '100%',
+                            transition: 'width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
                         }} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
@@ -478,13 +478,13 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
 
                         {/* 4. 底部安装按钮 */}
                         <div style={{ textAlign: 'center', paddingBottom: 40 }}>
-                    <Button 
-                        theme="solid" 
-                        size="large" 
-                        style={{ 
+                    <Button
+                        theme="solid"
+                        size="large"
+                        style={{
                             backgroundColor: isSpaceLow ? '#555' : currentMode.color, // 按钮颜色随模式变
-                            color: '#fff', 
-                            width: 320, 
+                            color: '#fff',
+                            width: 320,
                             height: 64,
                             fontSize: 18,
                             fontWeight: 'bold',
@@ -503,11 +503,11 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
 
                     {/* --- 右侧：配置展示区 (占 8/24) --- */}
                     <Col span={8}>
-                        <div style={{ 
-                            position: 'sticky', 
-                            top: 20, 
-                            backgroundColor: '#232326', 
-                            borderRadius: 12, 
+                        <div style={{
+                            position: 'sticky',
+                            top: 20,
+                            backgroundColor: '#232326',
+                            borderRadius: 12,
                             padding: 24,
                             border: '1px solid #444'
                         }}>
@@ -515,7 +515,7 @@ export default function OneClickInstallerPlan1({ onNavigate }: OneClickInstaller
                                 <IconInfoCircle style={{ color: currentMode.color }} size="large" />
                                 <Title heading={5} style={{ color: '#fff', margin: 0 }}>系统需求参考</Title>
                             </div>
-                            
+
                             <div style={{ marginBottom: 20 }}>
                                 <Text style={{ color: currentMode.color, fontWeight: 'bold', fontSize: 16 }}>
                                     {req.title}
