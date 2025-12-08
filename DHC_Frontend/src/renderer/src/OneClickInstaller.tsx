@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col } from '@douyinfe/semi-ui';
+import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
-    IconDownload, IconPlay, IconFile, IconSetting, IconHelpCircle
+    IconDownload, IconFile, IconSetting, IconHelpCircle
 } from '@douyinfe/semi-icons';
 import InstallProgressPage from './InstallProgressPage';
 
@@ -99,19 +99,45 @@ const REQUIREMENTS_MAP: Record<string, RequirementConfig> = {
     }
 };
 
-const { Header, Content } = Layout;
+// Markdown 教程内容占位
+const MD_CM_CONFIG = `# Content Manager 配置指南
+
+1. 打开 Settings -> Content Manager。
+2. 勾选 Custom Shaders Patch 并完成登录。
+3. 重启游戏后测试光影是否正常。`;
+
+const MD_CDKEY_USAGE = `# Steam CDKey 激活教程
+
+1. 打开 Steam 客户端左下角「添加游戏」。
+2. 选择「在 Steam 上激活产品」。
+3. 输入购买的 CDKey 并确认激活。`;
+
+const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 interface OneClickInstallerProps {
     onNavigate?: (page: string) => void;
 }
 
+// 安装步骤路由
+type InstallStep = 'SELECT_MODE' | 'PRE_CHECK' | 'INSTALLING' | 'POST_INSTALL';
+
 export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
     const [selectedModeId, setSelectedModeId] = useState<string>('standard'); // 默认选中标准版
-    const [showProgressPage, setShowProgressPage] = useState<boolean>(false); // 是否显示安装进度页面
+    const [currentStep, setCurrentStep] = useState<InstallStep>('SELECT_MODE'); // 安装步骤
+
+    // 开发者调试：地区
+    const [devRegionCN, setDevRegionCN] = useState<boolean>(true);
+
+    // 预检查状态
+    const [cmInstalled, setCmInstalled] = useState<boolean>(false);
+    const [hasAllDLC, setHasAllDLC] = useState<boolean>(true);
+    const [cmTutorialVisible, setCmTutorialVisible] = useState<boolean>(false);
+    const [keyTutorialVisible, setKeyTutorialVisible] = useState<boolean>(false);
+    const [checkingEnv, setCheckingEnv] = useState<boolean>(false);
 
     // 纯净安装向导状态
     const [wizardStep, setWizardStep] = useState<number>(0);
@@ -156,6 +182,18 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         }
     }, []);
 
+    // 进入预检查后自动检测 CM 与 DLC 状态（可替换为后端接口）
+    useEffect(() => {
+        if (currentStep !== 'PRE_CHECK') return;
+        setCheckingEnv(true);
+        const timer = setTimeout(() => {
+            setCmInstalled(false); // TODO: 替换为后端返回
+            setHasAllDLC(false);   // TODO: 替换为后端返回
+            setCheckingEnv(false);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [currentStep]);
+
     // --- 辅助函数：格式化大小 ---
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
 
@@ -171,22 +209,15 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         }
 
         // 2. 检查资源冲突
-        if (EXISTING_RESOURCES.length > 0) {
+        if (EXISTING_RESOURCES.length > 0 && mode !== 'clean_install') {
             setConflictModalVisible(true);
         } else {
-            startInstall();
+            setCurrentStep('PRE_CHECK');
         }
     };
 
-    const startInstall = (): void => {
-        setConflictModalVisible(false);
-        Toast.success(`正在开始安装：${currentMode.name}`);
-        // 切换到安装进度页面
-        setShowProgressPage(true);
-    };
-
     const handleInstallComplete = (): void => {
-        setShowProgressPage(false);
+        setCurrentStep('POST_INSTALL');
         Toast.success('安装完成！');
         // 可以在这里添加其他完成后的逻辑，比如刷新页面或跳转
     };
@@ -213,8 +244,263 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         setTimeout(() => {
             setIsBackingUp(false);
             setMode('normal'); // 还原完成后回到普通安装模式
+            setCurrentStep('SELECT_MODE');
             Toast.success('备份已还原，环境已重置，可以开始安装了');
         }, 2000);
+    };
+
+    const startRealInstall = (): void => {
+        setCurrentStep('INSTALLING');
+        Toast.info('开始安装，一切准备就绪');
+    };
+
+    const renderMarkdownModal = (
+        visible: boolean,
+        setVisible: React.Dispatch<React.SetStateAction<boolean>>,
+        title: string,
+        content: string
+    ): React.JSX.Element => (
+        <Modal
+            title={title}
+            visible={visible}
+            onCancel={() => setVisible(false)}
+            footer={<Button onClick={() => setVisible(false)}>关闭</Button>}
+            style={{ maxWidth: 620 }}
+            bodyStyle={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+        >
+            {content}
+        </Modal>
+    );
+
+    const renderPreCheckPage = (): React.JSX.Element => {
+        return (
+            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
+                <Button
+                    icon={<IconArrowRight style={{ transform: 'rotate(180deg)' }} />}
+                    onClick={() => setCurrentStep('SELECT_MODE')}
+                    theme="borderless"
+                    style={{ color: '#999', marginBottom: 10 }}
+                >
+                    返回模式选择
+                </Button>
+
+                <Title heading={3} style={{ color: 'var(--semi-color-text-0)', marginBottom: 12 }}>环境检查与准备</Title>
+                <Text type="tertiary">确保 Content Manager 与所需 DLC 就绪，再开始安装。</Text>
+
+                <Card
+                    title={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <IconSetting />
+                            <span>Content Manager (CM) 检测</span>
+                        </div>
+                    }
+                    style={{ backgroundColor: '#232326', border: '1px solid #444', marginTop: 20, marginBottom: 16 }}
+                    headerStyle={{ borderBottom: '1px solid #333', color: '#fff' }}
+                >
+                    {checkingEnv ? (
+                        <div style={{ textAlign: 'center', padding: 24 }}>
+                            <Space vertical align="center">
+                                <IconRefresh style={{ animation: 'spin 1s linear infinite' }} />
+                                <Text>正在检测本地是否已安装 Content Manager...</Text>
+                            </Space>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center' }}>
+                            <div style={{ flex: 1 }}>
+                                <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>
+                                    如果未安装 CM，将无法方便地管理光影与模组。建议先完成安装。
+                                </Text>
+                                <Space spacing={8}>
+                                    <Tag color={cmInstalled ? 'orange' : 'grey'} type="solid">
+                                        {cmInstalled ? '已检测到 CM' : '未检测到 CM'}
+                                    </Tag>
+                                    {cmInstalled && (
+                                        <Text type="tertiary" size="small">
+                                            继续安装可能覆盖部分 CM 配置
+                                        </Text>
+                                    )}
+                                </Space>
+                            </div>
+                            <Space>
+                                <Button icon={<IconHelpCircle />} theme="light" onClick={() => setCmTutorialVisible(true)}>
+                                    配置教程
+                                </Button>
+                                {cmInstalled ? (
+                                    <Tooltip content="检测到已安装，继续可覆盖未保护的 CM 配置">
+                                        <Button theme="solid" type="warning" disabled style={{ opacity: 0.6 }}>
+                                            已安装
+                                        </Button>
+                                    </Tooltip>
+                                ) : (
+                                    <Button theme="solid" icon={<IconDownload />} style={{ backgroundColor: '#00b5ad' }}>
+                                        一键安装 CM
+                                    </Button>
+                                )}
+                            </Space>
+                        </div>
+                    )}
+                </Card>
+
+                <Card
+                    title={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <IconFile style={{ color: hasAllDLC ? '#6bc786' : '#ff4d4f' }} />
+                            <span>DLC 与车包检测</span>
+                        </div>
+                    }
+                    style={{ backgroundColor: '#232326', border: '1px solid #444', marginBottom: 20 }}
+                    headerStyle={{ borderBottom: '1px solid #333', color: '#fff' }}
+                >
+                    {hasAllDLC ? (
+                        <div style={{ color: '#6bc786', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <IconTickCircle />
+                            <Text style={{ color: '#6bc786' }}>已检测到完整 DLC，可直接开始安装。</Text>
+                        </div>
+                    ) : (
+                        <>
+                            <Banner
+                                type="danger"
+                                description="缺少 Japanese Pack 等核心 DLC，部分服务器（如首都高）需要这些内容。"
+                                style={{ marginBottom: 12, borderRadius: 8 }}
+                            />
+                            {devRegionCN ? (
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 8 }}>
+                                    <Text strong style={{ color: '#ff9f43' }}>中国区推荐：淘宝全 DLC 版本</Text>
+                                    <div style={{ margin: '10px 0' }}>
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                                            <div>
+                                                <Text type="tertiary" size="small">Steam 官方价</Text>
+                                                <div style={{ color: '#666', textDecoration: 'line-through' }}>¥ 88.00</div>
+                                            </div>
+                                            <Divider layout="vertical" style={{ borderColor: '#555', height: 32, margin: '0 4px' }} />
+                                            <div>
+                                                <Text type="tertiary" size="small">淘宝全 DLC 估价</Text>
+                                                <div style={{ color: '#6bc786', fontWeight: 'bold', fontSize: 18 }}>¥ 12.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Space spacing={10}>
+                                        <Button
+                                            theme="solid"
+                                            type="primary"
+                                            icon={<IconFolder />}
+                                            onClick={() => window.open('https://s.taobao.com/search?q=Assetto+Corsa+Ultimate', '_blank')}
+                                        >
+                                            进入购买页面
+                                        </Button>
+                                        <Button theme="borderless" icon={<IconHelpCircle />} onClick={() => setKeyTutorialVisible(true)} style={{ color: '#fff' }}>
+                                            如何使用 CDKey？
+                                        </Button>
+                                    </Space>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Text style={{ color: '#ccc' }}>建议前往 Steam 购买官方 DLC，以保证正版体验。</Text>
+                                    <Button theme="solid" icon={<IconDownload />} onClick={() => window.open('https://store.steampowered.com/app/244210/Assetto_Corsa/', '_blank')}>
+                                        前往 Steam
+                                    </Button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </Card>
+
+                <div style={{ textAlign: 'center', marginTop: 30 }}>
+                    <Button
+                        theme="solid"
+                        size="large"
+                        style={{ width: 320, height: 56, fontSize: 16, fontWeight: 'bold', backgroundColor: currentMode.color }}
+                        onClick={startRealInstall}
+                    >
+                        确认环境并开始安装
+                    </Button>
+                    <div style={{ marginTop: 10 }}>
+                        <Checkbox defaultChecked>我已阅读并知晓上述提示</Checkbox>
+                    </div>
+                </div>
+
+                {renderMarkdownModal(cmTutorialVisible, setCmTutorialVisible, 'CM 配置教程', MD_CM_CONFIG)}
+                {renderMarkdownModal(keyTutorialVisible, setKeyTutorialVisible, 'CDKey 激活教程', MD_CDKEY_USAGE)}
+            </div>
+        );
+    };
+
+    const renderPostInstallPage = (): React.JSX.Element => {
+        const servers = [
+            { name: 'SRP 首都高 | 新手服 #1', ping: '2ms', players: '28/32', map: 'Shutoko Revival Project' },
+            { name: 'No Hesi | 穿梭炸街', ping: '15ms', players: '12/40', map: 'FDR' }
+        ];
+
+        return (
+            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
+                <div style={{ textAlign: 'center', marginBottom: 30 }}>
+                    <IconTickCircle size="extra-large" style={{ color: '#6bc786', fontSize: 54, marginBottom: 12 }} />
+                    <Title heading={3} style={{ color: '#fff', marginBottom: 4 }}>安装完成！</Title>
+                    <Text type="tertiary">环境已配置完成，挑选一个服务器上路吧。</Text>
+                </div>
+
+                <Row gutter={[16, 16]}>
+                    <Col span={14}>
+                        <Card
+                            title="热门服务器推荐"
+                            style={{ backgroundColor: '#232326', border: '1px solid #444', height: '100%' }}
+                            headerStyle={{ color: '#fff' }}
+                            bodyStyle={{ padding: 0 }}
+                        >
+                            <List
+                                dataSource={servers}
+                                renderItem={item => (
+                                    <List.Item style={{ padding: '12px 16px', borderBottom: '1px solid #333' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                            <div>
+                                                <Text strong style={{ color: '#fff' }}>{item.name}</Text>
+                                                <div style={{ color: '#888', fontSize: 12 }}>
+                                                    <IconServer size="small" /> {item.map} | Ping: {item.ping} | 在线: {item.players}
+                                                </div>
+                                            </div>
+                                            <Button theme="solid" size="small" style={{ backgroundColor: '#2b2b30', color: '#6bc786', border: '1px solid #6bc786' }}>
+                                                加入
+                                            </Button>
+                                        </div>
+                                    </List.Item>
+                                )}
+                            />
+                            <div style={{ padding: 12 }}>
+                                <Button block theme="borderless" style={{ color: '#ccc' }}>查看全部服务器</Button>
+                            </div>
+                        </Card>
+                    </Col>
+                    <Col span={10}>
+                        <Card
+                            style={{
+                                background: 'linear-gradient(135deg, #a06cd5 0%, #6bc786 100%)',
+                                border: 'none',
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center'
+                            }}
+                            bodyStyle={{ padding: 20 }}
+                        >
+                            <IconHelpCircle style={{ fontSize: 42, color: '#fff', marginBottom: 10 }} />
+                            <Title heading={4} style={{ color: '#fff' }}>赞助我们</Title>
+                            <Paragraph style={{ color: 'rgba(255,255,255,0.9)' }}>
+                                如果这个安装器帮助到你，欢迎请开发者喝杯咖啡。赞助非强制，但能让项目走得更远。
+                            </Paragraph>
+                            <Button theme="solid" style={{ backgroundColor: '#fff', color: '#a06cd5', fontWeight: 'bold' }} block>
+                                ☕ 赞助一杯咖啡
+                            </Button>
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Divider style={{ borderColor: '#333', margin: '36px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+                    <Button onClick={() => setCurrentStep('SELECT_MODE')}>返回主页</Button>
+                    <Button theme="solid" type="primary" onClick={() => window.close()}>启动 CM 并关闭</Button>
+                </div>
+            </div>
+        );
     };
 
     // --- 渲染：纯净重装向导 (Mode: clean_install) ---
@@ -353,6 +639,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     <div>
                         <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装</Title>
                         <Text style={{ color: '#888' }}>选择适合你的预设方案，全自动配置游戏环境</Text>
+                        <div style={{ marginTop: 6 }}>
+                            <Text size="small" style={{ color: '#555', cursor: 'pointer' }} onClick={() => setDevRegionCN(!devRegionCN)}>
+                                [DEV] 当前地区模拟：{devRegionCN ? '中国区' : '非中国区'}（点击切换）
+                            </Text>
+                        </div>
                     </div>
                     <Button
                         icon={<IconRefresh />}
@@ -524,7 +815,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                     <Text strong style={{ color: '#fff', fontSize: 15 }}>需要更个性化的选择？</Text>
                                     <div style={{ marginTop: 4 }}>
                                         <Text style={{ color: '#ccc', fontSize: 13 }}>
-                                            如果您只想安装特定的车包，或者想手动调整光影版本，请前往"模组安装"页面。
+                                            如果您只想安装特定的车包，或者想手动调整光影版本，请前往「模组安装」页面。
                                         </Text>
                                     </div>
                                 </div>
@@ -557,7 +848,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                         disabled={isSpaceLow}
                         onClick={handleInstallClick}
                     >
-                        {isSpaceLow ? '磁盘空间不足' : `安装 ${currentMode.name}`}
+                        {isSpaceLow ? '磁盘空间不足' : '下一步：环境检查'}
                     </Button>
                     <Text style={{ display: 'block', marginTop: 16, color: '#666', fontSize: 12 }}>
                         点击安装即代表同意覆盖现有配置
@@ -569,7 +860,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     title={<span style={{color:'#ff9f43'}}>确认覆盖安装？</span>}
                     visible={conflictModalVisible}
                     onCancel={() => setConflictModalVisible(false)}
-                    onOk={startInstall}
+                    onOk={() => {
+                        setConflictModalVisible(false);
+                        setCurrentStep('PRE_CHECK');
+                    }}
                     okText="我确定，覆盖它们"
                     okButtonProps={{ type: 'danger', theme: 'solid' }}
                     cancelText="取消"
@@ -589,10 +883,6 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         );
     };
 
-    // 如果显示安装进度页面，直接渲染进度页面
-    if (showProgressPage) {
-        return <InstallProgressPage onComplete={handleInstallComplete} />;
-    }
 
     if (isDiagnosing) {
         return (
@@ -602,10 +892,28 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         );
     }
 
+    const renderContent = (): React.JSX.Element => {
+        if (mode !== 'normal') {
+            return renderCleanInstallWizard();
+        }
+        switch (currentStep) {
+            case 'SELECT_MODE':
+                return renderNormalInstaller();
+            case 'PRE_CHECK':
+                return renderPreCheckPage();
+            case 'INSTALLING':
+                return <InstallProgressPage onComplete={handleInstallComplete} />;
+            case 'POST_INSTALL':
+                return renderPostInstallPage();
+            default:
+                return renderNormalInstaller();
+        }
+    };
+
     return (
         <Layout style={{ minHeight: '100vh', background: '#16161a', color: 'white', padding: 40 }}>
             <Content>
-                {mode === 'normal' ? renderNormalInstaller() : renderCleanInstallWizard()}
+                {renderContent()}
             </Content>
         </Layout>
     );
