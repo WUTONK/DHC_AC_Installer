@@ -253,9 +253,9 @@ export default function CarPackInstaller() {
 
   return (
 
-    <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
+    <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
 
-      <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+      <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
 
           <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center' }}>
 
@@ -271,7 +271,7 @@ export default function CarPackInstaller() {
 
         </Header>
 
-        <Content style={{ padding: '0 40px', overflowY: 'auto', position: 'relative' }}>
+        <Content style={{ padding: '0 40px', overflowY: 'auto', position: 'relative', flex: 1, minHeight: 0 }}>
 
           {/* 警告 Banner */}
 
@@ -549,7 +549,9 @@ export default function CarPackInstaller() {
 
           flexDirection: 'column',
 
-          gap: 12
+          gap: 12,
+
+          flexShrink: 0
 
         }}>
 

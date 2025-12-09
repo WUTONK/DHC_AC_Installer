@@ -116,7 +116,7 @@ export default function CustomInstallWizard(): JSX.Element {
 
     return (
         <Layout style={{
-            height: '100vh',
+            height: '100%',
             background: THEME.bg,
             color: 'white',
             // [修复1] 强制使用 Flex 纵向布局，并隐藏 body 级滚动条

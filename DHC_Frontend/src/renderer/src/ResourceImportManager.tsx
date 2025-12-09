@@ -235,8 +235,8 @@ export default function ResourceImportManager(): React.JSX.Element {
     );
 
     return (
-        <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326' }}>
+        <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
+            <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326', flexShrink: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                             <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
@@ -272,7 +272,7 @@ export default function ResourceImportManager(): React.JSX.Element {
                         </div>
                     </div>
                 </Header>
-                <Content style={{ padding: '20px 40px', overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Content style={{ padding: '20px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                     {/* 顶部工具栏：模式切换 */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                         <Radio.Group
@@ -350,7 +350,8 @@ export default function ResourceImportManager(): React.JSX.Element {
                 <Footer style={{
                     padding: '16px 40px',
                     background: '#232326',
-                    borderTop: '1px solid #333'
+                    borderTop: '1px solid #333',
+                    flexShrink: 0
                 }}>
                     <Upload
                         action="#"

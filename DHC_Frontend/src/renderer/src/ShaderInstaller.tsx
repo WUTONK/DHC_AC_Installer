@@ -183,9 +183,9 @@ export default function ShaderInstaller() {
 
     return (
 
-        <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
+        <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
 
-            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+            <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
 
                     {/* 顶部导航省略... */}
 
@@ -193,7 +193,7 @@ export default function ShaderInstaller() {
 
                 </Header>
 
-                <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
+                <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
 
 
 

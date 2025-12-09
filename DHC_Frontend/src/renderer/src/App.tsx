@@ -218,8 +218,10 @@ function App(): React.JSX.Element {
           </Sider>
 
           {/* 内容页面 */}
-          <Content className="overflow-auto flex-1 min-h-0 h-full">
-            {renderPage(activeKey)}
+          <Content className="flex-1 min-h-0 h-full" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              {renderPage(activeKey)}
+            </div>
           </Content>
 
         </Layout>

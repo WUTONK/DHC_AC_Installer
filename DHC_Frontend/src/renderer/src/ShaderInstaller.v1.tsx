@@ -135,8 +135,8 @@ export default function ShaderInstallerV1(): React.JSX.Element {
     };
 
     return (
-        <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
+        <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
+            <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
                     <div
                         style={{
                             display: 'flex',
@@ -163,7 +163,7 @@ export default function ShaderInstallerV1(): React.JSX.Element {
                     </div>
                 </Header>
 
-                <Content style={{ padding: '0 40px', overflowY: 'auto' }}>
+                <Content style={{ padding: '0 40px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
                     {/* 顶部 Banner: CSP 状态概览 */}
                     <div style={{ marginBottom: 24 }}>
                         <Title heading={3} style={{ color: '#fff', marginBottom: 12 }}>
