@@ -139,3 +139,9 @@ body[theme-mode='dark'] .dark-nav .semi-nav-item-selected .semi-icon {
 body[theme-mode='dark'] .dark-nav .semi-nav-item:hover .semi-icon {
   color: #fff;
 }
+
+/* 服务器卡片悬停效果 */
+.server-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}

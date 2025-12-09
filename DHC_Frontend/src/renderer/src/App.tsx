@@ -1,8 +1,8 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
+import { Layout,Nav, Button,Avatar, Switch, Select} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
-import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting } from '@douyinfe/semi-icons';
+import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import ComponentTest from './ComponentTest'
 import ShutokoWiki from './ShutokoWiki';
@@ -16,6 +16,8 @@ import SettingsPage from './SettingsPage';
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal';
 import CustomInstallWizard from './CustomInstallWizard';
 import WelcomePage from './WelcomePage';
+import ServerListPage from './ServerListPage';
+import ServerListPageOldDemo from './ServerListPageOldDemo';
 
 // const { Title, Text } = Typography
 
@@ -66,6 +68,10 @@ function App(): React.JSX.Element {
         return <SettingsPage />
       case 'CustomInstallWizard':
         return <CustomInstallWizard />
+      case 'ServerListPage':
+        return <ServerListPage overrideContinent={devContinent || undefined} />
+      case 'ServerListPageOldDemo':
+        return <ServerListPageOldDemo />
       default:
         return <div>Not Found</div>
     }
@@ -74,6 +80,8 @@ function App(): React.JSX.Element {
   const [activeKey, setActiveKey] = useState<string>('Home')
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
   const { isDevMode, toggleDevMode } = useDevMode()
+  // 开发者模式：手动设置大洲（用于测试）
+  const [devContinent, setDevContinent] = useState<string>('')
 
   // 地区切换按钮容器样式
   const regionToggleContainerStyle: React.CSSProperties = {
@@ -160,6 +168,22 @@ function App(): React.JSX.Element {
                 开发者模式
               </span>
             </div>
+            {isDevMode && (
+              <Select
+                placeholder="设置大洲（测试用）"
+                value={devContinent || undefined}
+                onChange={(value) => setDevContinent((value as string) || '')}
+                style={{ width: 150 }}
+                size="small"
+              >
+                <Select.Option value="">自动检测</Select.Option>
+                <Select.Option value="Asia">亚洲</Select.Option>
+                <Select.Option value="Europe">欧洲</Select.Option>
+                <Select.Option value="Americas">美洲</Select.Option>
+                <Select.Option value="Oceania">大洋洲</Select.Option>
+                <Select.Option value="Africa">非洲</Select.Option>
+              </Select>
+            )}
             <Avatar size="small">
               WUTONK
             </Avatar>
@@ -173,6 +197,8 @@ function App(): React.JSX.Element {
               selectedKeys={[activeKey]}
               items={[
                 { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+                { itemKey: 'ServerListPage', text: '服务器推荐', icon: <IconServer size="large" /> },
+                { itemKey: 'ServerListPageOldDemo', text: '服务器推荐（旧版DEMO）', icon: <IconServer size="large" /> },
                 { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
                 { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
                 { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
