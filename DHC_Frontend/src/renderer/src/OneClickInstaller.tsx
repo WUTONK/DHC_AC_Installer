@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag } from '@douyinfe/semi-ui';
+import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag, Switch } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
     IconDownload, IconFile, IconSetting, IconHelpCircle
 } from '@douyinfe/semi-icons';
 import InstallProgressPage from './InstallProgressPage';
+import { useDevMode } from './contexts/DevModeContext';
 
 // 模拟数据：磁盘情况
 const GAME_PATH = "D:\\SteamLibrary\\steamapps\\common\\assettocorsa";
@@ -131,6 +132,32 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
 
     // 开发者调试：地区
     const [devRegionCN, setDevRegionCN] = useState<boolean>(true);
+    const { registerDevOption, unregisterDevOption } = useDevMode();
+
+    // 注册地区模拟选项到开发者面板
+    useEffect(() => {
+        registerDevOption({
+            id: 'oneclick-installer-region',
+            label: '地区模拟（一键式安装）',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devRegionCN}
+                        onChange={(checked) => setDevRegionCN(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devRegionCN ? '中国区' : '非中国区'}
+                    </span>
+                </div>
+            ),
+            order: 2
+        });
+
+        return () => {
+            unregisterDevOption('oneclick-installer-region');
+        };
+    }, [registerDevOption, unregisterDevOption, devRegionCN]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);
@@ -426,11 +453,6 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     };
 
     const renderPostInstallPage = (): React.JSX.Element => {
-        const servers = [
-            { name: 'SRP 首都高 | 新手服 #1', ping: '2ms', players: '28/32', map: 'Shutoko Revival Project' },
-            { name: 'No Hesi | 穿梭炸街', ping: '15ms', players: '12/40', map: 'FDR' }
-        ];
-
         return (
             <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
                 <div style={{ textAlign: 'center', marginBottom: 30 }}>
@@ -442,32 +464,27 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                 <Row gutter={[16, 16]}>
                     <Col span={14}>
                         <Card
-                            title="热门服务器推荐"
                             style={{ backgroundColor: '#232326', border: '1px solid #444', height: '100%' }}
-                            headerStyle={{ color: '#fff' }}
-                            bodyStyle={{ padding: 0 }}
+                            bodyStyle={{ padding: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
                         >
-                            <List
-                                dataSource={servers}
-                                renderItem={item => (
-                                    <List.Item style={{ padding: '12px 16px', borderBottom: '1px solid #333' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                            <div>
-                                                <Text strong style={{ color: '#fff' }}>{item.name}</Text>
-                                                <div style={{ color: '#888', fontSize: 12 }}>
-                                                    <IconServer size="small" /> {item.map} | Ping: {item.ping} | 在线: {item.players}
-                                                </div>
-                                            </div>
-                                            <Button theme="solid" size="small" style={{ backgroundColor: '#2b2b30', color: '#6bc786', border: '1px solid #6bc786' }}>
-                                                加入
-                                            </Button>
-                                        </div>
-                                    </List.Item>
-                                )}
-                            />
-                            <div style={{ padding: 12 }}>
-                                <Button block theme="borderless" style={{ color: '#ccc' }}>查看全部服务器</Button>
-                            </div>
+                            <IconServer size="extra-large" style={{ color: '#6bc786', fontSize: 64, marginBottom: 20 }} />
+                            <Title heading={4} style={{ color: '#fff', marginBottom: 12 }}>探索服务器</Title>
+                            <Text style={{ color: '#888', marginBottom: 24, lineHeight: 1.6 }}>
+                                浏览热门服务器推荐，找到适合你的服务器加入游戏
+                            </Text>
+                            <Button
+                                theme="solid"
+                                size="large"
+                                icon={<IconArrowRight />}
+                                style={{ backgroundColor: '#6bc786', color: '#fff', fontWeight: 'bold', minWidth: 200 }}
+                                onClick={() => {
+                                    if (onNavigate) {
+                                        onNavigate('ServerListPage')
+                                    }
+                                }}
+                            >
+                                前往服务器推荐页面
+                            </Button>
                         </Card>
                     </Col>
                     <Col span={10}>
@@ -639,11 +656,6 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     <div>
                         <Title heading={3} style={{ color: '#fff', margin: 0 }}>一键式安装</Title>
                         <Text style={{ color: '#888' }}>选择适合你的预设方案，全自动配置游戏环境</Text>
-                        <div style={{ marginTop: 6 }}>
-                            <Text size="small" style={{ color: '#555', cursor: 'pointer' }} onClick={() => setDevRegionCN(!devRegionCN)}>
-                                [DEV] 当前地区模拟：{devRegionCN ? '中国区' : '非中国区'}（点击切换）
-                            </Text>
-                        </div>
                     </div>
                     <Button
                         icon={<IconRefresh />}

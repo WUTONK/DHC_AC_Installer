@@ -18,6 +18,7 @@ import CustomInstallWizard from './CustomInstallWizard';
 import WelcomePage from './WelcomePage';
 import ServerListPage from './ServerListPage';
 import ServerListPageOldDemo from './ServerListPageOldDemo';
+import DevModePanel from './components/DevModePanel';
 
 // const { Title, Text } = Typography
 
@@ -79,9 +80,42 @@ function App(): React.JSX.Element {
 
   const [activeKey, setActiveKey] = useState<string>('Home')
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
-  const { isDevMode, toggleDevMode } = useDevMode()
+  const { isDevMode, toggleDevMode, registerDevOption, unregisterDevOption } = useDevMode()
   // 开发者模式：手动设置大洲（用于测试）
   const [devContinent, setDevContinent] = useState<string>('')
+
+  // 注册大洲选择器到开发者选项
+  React.useEffect(() => {
+    const updateOption = (): void => {
+      registerDevOption({
+        id: 'continent-selector',
+        label: '设置大洲（测试用）',
+        component: (
+          <Select
+            placeholder="选择大洲"
+            value={devContinent || undefined}
+            onChange={(value) => setDevContinent((value as string) || '')}
+            style={{ width: '100%' }}
+            size="small"
+          >
+            <Select.Option value="">自动检测</Select.Option>
+            <Select.Option value="Asia">亚洲</Select.Option>
+            <Select.Option value="Europe">欧洲</Select.Option>
+            <Select.Option value="Americas">美洲</Select.Option>
+            <Select.Option value="Oceania">大洋洲</Select.Option>
+            <Select.Option value="Africa">非洲</Select.Option>
+          </Select>
+        ),
+        order: 1
+      })
+    }
+
+    updateOption()
+
+    return () => {
+      unregisterDevOption('continent-selector')
+    }
+  }, [registerDevOption, unregisterDevOption, devContinent])
 
   // 地区切换按钮容器样式
   const regionToggleContainerStyle: React.CSSProperties = {
@@ -168,22 +202,7 @@ function App(): React.JSX.Element {
                 开发者模式
               </span>
             </div>
-            {isDevMode && (
-              <Select
-                placeholder="设置大洲（测试用）"
-                value={devContinent || undefined}
-                onChange={(value) => setDevContinent((value as string) || '')}
-                style={{ width: 150 }}
-                size="small"
-              >
-                <Select.Option value="">自动检测</Select.Option>
-                <Select.Option value="Asia">亚洲</Select.Option>
-                <Select.Option value="Europe">欧洲</Select.Option>
-                <Select.Option value="Americas">美洲</Select.Option>
-                <Select.Option value="Oceania">大洋洲</Select.Option>
-                <Select.Option value="Africa">非洲</Select.Option>
-              </Select>
-            )}
+            <DevModePanel />
             <Avatar size="small">
               WUTONK
             </Avatar>
