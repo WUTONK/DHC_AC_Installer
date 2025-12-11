@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Layout, Button, Row, Col, Typography,
     Tag, Checkbox, Toast, Input, Switch, Popover, Empty
@@ -8,6 +8,8 @@ import {
     IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
     IconCode, IconArrowLeft, IconList
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
+import { useDevMode } from './contexts/DevModeContext';
 
 // =================================================================
 // 1. 样式与配置 (CONFIG)
@@ -79,6 +81,7 @@ export default function CustomInstallWizard(): JSX.Element {
     const [currentStep, setCurrentStep] = useState(0);
     const [selections, setSelections] = useState<Set<string>>(new Set(['cm']));
     const [localState, setLocalState] = useState<Record<string, boolean>>(INITIAL_DEBUG_STATE);
+    const { registerDevOption, unregisterDevOption } = useDevMode();
 
     // --- Actions ---
     const toggleSelection = (id: string): void => {
@@ -88,9 +91,32 @@ export default function CustomInstallWizard(): JSX.Element {
         setSelections(next);
     };
 
-    const toggleLocalState = (key: string): void => {
+    const toggleLocalState = useCallback((key: string): void => {
         setLocalState(prev => ({ ...prev, [key]: !prev[key] }));
-    };
+    }, []);
+
+    // 注册开发者选项：模拟本地环境
+    useEffect(() => {
+        registerDevOption({
+            id: 'custom-install-wizard-debug',
+            label: '模拟本地环境（自定义安装向导）',
+            component: (
+                <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                    {Object.keys(localState).map(key => (
+                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' }}>
+                            <Text style={{ color: '#ccc', fontSize: 12, fontFamily: 'monospace' }}>{key}</Text>
+                            <Switch size="small" checked={localState[key]} onChange={() => toggleLocalState(key)} />
+                        </div>
+                    ))}
+                </div>
+            ),
+            order: 3
+        });
+
+        return () => {
+            unregisterDevOption('custom-install-wizard-debug');
+        };
+    }, [registerDevOption, unregisterDevOption, localState, toggleLocalState]);
 
     const handleNext = (): void => {
         if (currentStep < TABS.length - 1) setCurrentStep(prev => prev + 1);
@@ -138,7 +164,7 @@ export default function CustomInstallWizard(): JSX.Element {
             }}>
                 {/* 左侧：返回/标题 */}
                 <div style={{ width: 120, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Button icon={<IconArrowLeft />} theme="borderless" style={{ color: '#ccc' }} />
+                    <BackToHomeButton variant="minimal" />
                 </div>
 
                 {/* 中间：图1 风格的 Tab Bar */}

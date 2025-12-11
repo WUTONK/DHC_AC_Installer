@@ -7,6 +7,7 @@ import {
   IconFile, IconInfoCircle, IconSearch, IconAlertTriangle, IconTickCircle, IconList
 
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
 
 // 定义车辆类型
 interface Car {
@@ -256,8 +257,9 @@ export default function CarPackInstaller() {
     <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
 
       <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
-
-          <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+            <BackToHomeButton variant="minimal" />
+            <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center', flex: 1 }}>
 
             <span>管理器安装</span>
 
@@ -266,9 +268,8 @@ export default function CarPackInstaller() {
             <span style={{ color: THEME_GREEN, borderBottom: `2px solid ${THEME_GREEN}`, paddingBottom: 4 }}>车包安装</span>
 
             <span>光影安装</span>
-
+            </div>
           </div>
-
         </Header>
 
         <Content style={{ padding: '0 40px', overflowY: 'auto', position: 'relative', flex: 1, minHeight: 0 }}>

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Layout, Typography } from '@douyinfe/semi-ui'
 import ServerCard from './components/serverCard'
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal'
+import BackToHomeButton from './components/BackToHomeButton'
 
 const { Header, Content } = Layout
 const { Title } = Typography
@@ -34,9 +35,12 @@ export default function ServerListPageOldDemo(): React.JSX.Element {
           alignItems: 'center'
         }}
       >
-        <Title heading={3} style={{ color: '#fff' }}>
-          服务器推荐（旧版DEMO）
-        </Title>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <BackToHomeButton variant="minimal" />
+          <Title heading={3} style={{ color: '#fff' }}>
+            服务器推荐（旧版DEMO）
+          </Title>
+        </div>
       </Header>
 
       <Content style={{ padding: '24px 40px', overflowY: 'auto' }}>

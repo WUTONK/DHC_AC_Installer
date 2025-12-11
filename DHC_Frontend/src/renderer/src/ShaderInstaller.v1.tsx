@@ -25,6 +25,7 @@ import {
     IconAlertTriangle,
     IconSave,
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
 
 // 模拟数据：CSP 版本列表
 interface CspVersion {
@@ -137,15 +138,18 @@ export default function ShaderInstallerV1(): React.JSX.Element {
     return (
         <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
             <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            gap: '30px',
-                            fontSize: '12px',
-                            color: '#666',
-                            justifyContent: 'center',
-                        }}
-                    >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+                        <BackToHomeButton variant="minimal" />
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '30px',
+                                fontSize: '12px',
+                                color: '#666',
+                                justifyContent: 'center',
+                                flex: 1,
+                            }}
+                        >
                         <span>管理器安装</span>
                         <span>地图安装</span>
                         <span>车包安装</span>
@@ -160,6 +164,7 @@ export default function ShaderInstallerV1(): React.JSX.Element {
                             光影安装
                         </span>
                         <span>其他设置</span>
+                        </div>
                     </div>
                 </Header>
 

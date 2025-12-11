@@ -7,6 +7,7 @@ import {
     IconHome, IconDownload, IconRefresh, IconTickCircle, IconFolder, IconAlertTriangle, IconArrowRight, IconPlay
 
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
 
 // --- 1. 定义数据源：目标安装包的版本 vs 本地已安装的状态 ---
 
@@ -186,10 +187,10 @@ export default function ShaderInstaller() {
         <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
 
             <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
-
-                    {/* 顶部导航省略... */}
-
-                    <Title heading={5} style={{color:'white'}}>光影安装</Title>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <BackToHomeButton variant="minimal" />
+                        <Title heading={5} style={{color:'white'}}>光影安装</Title>
+                    </div>
 
                 </Header>
 

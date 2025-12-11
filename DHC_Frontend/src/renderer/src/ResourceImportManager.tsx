@@ -7,6 +7,7 @@ import {
     IconAlertTriangle, IconTickCircle,
     IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
 
 // --- 1. 模拟数据结构 ---
 interface Car {
@@ -238,9 +239,12 @@ export default function ResourceImportManager(): React.JSX.Element {
         <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
             <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326', flexShrink: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
-                            <Text style={{ color: '#888' }}>拖入压缩包即可自动安装，请确保关键资源无缺失。</Text>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <BackToHomeButton variant="minimal" />
+                            <div>
+                                <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
+                                <Text style={{ color: '#888' }}>拖入压缩包即可自动安装，请确保关键资源无缺失。</Text>
+                            </div>
                         </div>
 
                         {/* 右侧按钮组：清除按钮 + 帮助按钮 */}

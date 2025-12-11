@@ -8,6 +8,9 @@ import remarkGfm from 'remark-gfm';
 // 导入本地图片资源
 import wikiImage1 from '../../../resources/image/shutokowiki/SCR-20251109-teqy.jpeg';
 import wikiImage2 from '../../../resources/image/shutokowiki/SCR-20251109-tqkp.jpeg';
+// 导入地图资源
+import c1Map from '../../../resources/image/shutokowiki/map/c1_full_map.svg';
+import newCircularMap from '../../../resources/image/shutokowiki/map/new_circular_full_map.svg';
 
 // --- 1. 模拟 Wiki 数据 (支持 Markdown) ---
 interface WikiArticle {
@@ -206,10 +209,40 @@ export default function ShutokoWiki(): React.JSX.Element {
                                                 padding: 20,
                                                 background: 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)'
                                             }}>
-                                                {/* 模拟地图 SVG (发光效果) */}
-                                                <svg width="60" height="60" viewBox="0 0 150 150" className="map-icon" style={{fill: 'none', stroke: '#fff', strokeWidth: 4, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))'}}>
-                                                    <path d={MAP_SVG_PATH} />
-                                                </svg>
+                                                {/* 地图图标 - 根据文章类型显示对应的地图 */}
+                                                {item.id === 'c1_loop' ? (
+                                                    <img
+                                                        src={c1Map}
+                                                        alt="C1 Map"
+                                                        className="map-icon"
+                                                        style={{
+                                                            width: 60,
+                                                            height: 60,
+                                                            opacity: 0.8,
+                                                            marginBottom: 15,
+                                                            filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))',
+                                                            objectFit: 'contain'
+                                                        }}
+                                                    />
+                                                ) : item.id === 'new_loop' ? (
+                                                    <img
+                                                        src={newCircularMap}
+                                                        alt="New Circular Map"
+                                                        className="map-icon"
+                                                        style={{
+                                                            width: 60,
+                                                            height: 60,
+                                                            opacity: 0.8,
+                                                            marginBottom: 15,
+                                                            filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))',
+                                                            objectFit: 'contain'
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <svg width="60" height="60" viewBox="0 0 150 150" className="map-icon" style={{fill: 'none', stroke: '#fff', strokeWidth: 4, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))'}}>
+                                                        <path d={MAP_SVG_PATH} />
+                                                    </svg>
+                                                )}
 
                                                 <div style={{ backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 12px', borderRadius: 4, backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)' }}>
                                                     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, letterSpacing: 1 }}>{item.title}</Text>
@@ -286,8 +319,10 @@ export default function ShutokoWiki(): React.JSX.Element {
                     filter: brightness(0.8) !important;
                 }
                 .wiki-card:hover .map-icon {
+                    filter: drop-shadow(0 0 8px ${THEME_ACCENT}) brightness(1.2);
+                }
+                .wiki-card:hover .map-icon svg {
                     stroke: ${THEME_ACCENT} !important;
-                    filter: drop-shadow(0 0 8px ${THEME_ACCENT});
                 }
 
                 /* 简单的进场动画 */

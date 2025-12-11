@@ -4,6 +4,7 @@ import {
     IconSetting, IconFolder, IconHelpCircle,
     IconFile, IconHome, IconDownload, IconServer, IconTickCircle, IconAlertTriangle
 } from '@douyinfe/semi-icons';
+import BackToHomeButton from './components/BackToHomeButton';
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -62,9 +63,10 @@ export default function SettingsPage(): React.JSX.Element {
 
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
-            <Header style={{ padding: '20px 40px', background: BG_DARK }}>
-                    <Title heading={3} style={{ color: '#fff' }}>设置</Title>
-                </Header>
+            <Header style={{ padding: '20px 40px', background: BG_DARK, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <BackToHomeButton variant="minimal" />
+                <Title heading={3} style={{ color: '#fff' }}>设置</Title>
+            </Header>
                 <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
 
                     {/* --- 1. 通用设置 (语言) --- */}

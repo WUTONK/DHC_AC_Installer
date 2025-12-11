@@ -4,6 +4,7 @@ import { Layout,Nav, Button,Avatar, Switch, Select} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
 import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
+import { NavigationProvider } from './contexts/NavigationContext';
 import ComponentTest from './ComponentTest'
 import ShutokoWiki from './ShutokoWiki';
 import NetDemo from './NetDemo';
@@ -163,8 +164,9 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
-    <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
+    <NavigationProvider onNavigate={setActiveKey}>
+      <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
+        <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
           <div className="flex items-center gap-4 shrink-0">
             <img src={""} alt="Logo" className="h-8" />
             <span className="font-semibold">----</span>
@@ -245,13 +247,13 @@ function App(): React.JSX.Element {
 
         </Layout>
 
-    <JoinServerInstructionsModal
-      visible={semiModalVisible}
-      onCancel={closeSemiModal}
-      onOk={semiHandleOk}
-    />
-
-  </Layout>
+        <JoinServerInstructionsModal
+          visible={semiModalVisible}
+          onCancel={closeSemiModal}
+          onOk={semiHandleOk}
+        />
+      </Layout>
+    </NavigationProvider>
   )
 
 

@@ -17,6 +17,7 @@ import {
   IconAlertTriangle,
   IconFilter
 } from '@douyinfe/semi-icons'
+import BackToHomeButton from './components/BackToHomeButton'
 import ae86Banner from '../../../resources/image/server/banner/ae86_01.jpeg'
 import lightupTopBanner from '../../../resources/image/server/banner/lightup_top_01.png'
 import rb04Banner from '../../../resources/image/server/banner/rb_04.jpg'
@@ -433,9 +434,12 @@ export default function ServerListPage({ overrideContinent }: ServerListPageProp
           justifyContent: 'space-between'
         }}
       >
-        <Title heading={3} style={{ color: '#fff' }}>
-          服务器推荐
-        </Title>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <BackToHomeButton variant="minimal" />
+          <Title heading={3} style={{ color: '#fff' }}>
+            服务器推荐
+          </Title>
+        </div>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
           <div
