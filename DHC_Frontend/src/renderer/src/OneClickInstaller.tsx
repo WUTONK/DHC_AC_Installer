@@ -113,6 +113,24 @@ const MD_CDKEY_USAGE = `# Steam CDKey 激活教程
 2. 选择「在 Steam 上激活产品」。
 3. 输入购买的 CDKey 并确认激活。`;
 
+const MD_TAOBAO_TUTORIAL = (
+    <div>
+        <p>1. 点击下方“前往淘宝购买”按钮。</p>
+        <p>2. 在搜索结果中选择“Assetto Corsa Ultimate”或“神力科莎 终极版”。</p>
+        <p>3. 推荐选择销量较高、价格合理的店铺（通常 15 元左右）。</p>
+        <div style={{ margin: '16px 0', textAlign: 'center' }}>
+            <img
+                src="https://placehold.co/600x300/png?text=Taobao+Search+Example"
+                alt="淘宝搜索示例"
+                style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #eee' }}
+            />
+            <div style={{ color: '#999', fontSize: 12, marginTop: 8 }}>示例：搜索结果页示意图</div>
+        </div>
+        <p>4. 购买后您将获得 Steam 激活码 (CDKey)。</p>
+        <p>5. 拿到激活码后，请参考界面的“如何使用 CDKey?”教程进行激活。</p>
+    </div>
+);
+
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
@@ -164,7 +182,13 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     const [hasAllDLC, setHasAllDLC] = useState<boolean>(true);
     const [cmTutorialVisible, setCmTutorialVisible] = useState<boolean>(false);
     const [keyTutorialVisible, setKeyTutorialVisible] = useState<boolean>(false);
+    const [taobaoTutorialVisible, setTaobaoTutorialVisible] = useState<boolean>(false);
     const [checkingEnv, setCheckingEnv] = useState<boolean>(false);
+
+    // CM 安装状态
+    const [cmInstalling, setCmInstalling] = useState<boolean>(false);
+    const [cmInstallProgress, setCmInstallProgress] = useState<number>(0);
+    const [cmInstallStatusText, setCmInstallStatusText] = useState<string>('');
 
     // 纯净安装向导状态
     const [wizardStep, setWizardStep] = useState<number>(0);
@@ -175,6 +199,9 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     // 冲突检测状态
     const [conflictModalVisible, setConflictModalVisible] = useState<boolean>(false);
 
+    // 启动时的冲突检测弹窗
+    const [initConflictVisible, setInitConflictVisible] = useState<boolean>(false);
+
     // 获取当前选中的模式对象
     const currentMode = useMemo(() => INSTALL_MODES.find(m => m.id === selectedModeId) || INSTALL_MODES[1], [selectedModeId]);
 
@@ -183,27 +210,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         // 模拟：检测到本地已经安装了 CSP 或 Sol
         const hasExistingShaders = true;
         if (hasExistingShaders) {
-            Modal.confirm({
-                title: '检测到已安装光影模组',
-                icon: <IconAlertTriangle style={{ color: '#ff9f43' }} size="extra-large" />,
-                content: (
-                    <div>
-                        <p>检测到您的游戏中已经安装了 CSP 或 Sol。</p>
-                        <p style={{ fontWeight: 'bold', marginTop: 10 }}>您是因为遇到游戏崩溃、黑屏或光影失效才使用此安装器的吗？</p>
-                    </div>
-                ),
-                okText: '是的，我要修复问题',
-                cancelText: '不是，我只是想更新/覆盖',
-                style: { maxWidth: 500 },
-                onOk: () => {
-                    setMode('clean_install');
-                    setIsDiagnosing(false);
-                },
-                onCancel: () => {
-                    setMode('normal');
-                    setIsDiagnosing(false);
-                }
-            });
+            setInitConflictVisible(true);
         } else {
             setIsDiagnosing(false);
         }
@@ -281,17 +288,55 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         Toast.info('开始安装，一切准备就绪');
     };
 
+    const handleInstallCM = (): void => {
+        setCmInstalling(true);
+        setCmInstallStatusText('正在连接服务器...');
+        let p = 0;
+
+        // 模拟下载和安装过程
+        const timer = setInterval(() => {
+            p += 2;
+            setCmInstallProgress(p);
+
+            if (p < 30) {
+                setCmInstallStatusText(`正在下载 Content Manager... ${p}%`);
+            } else if (p < 60) {
+                setCmInstallStatusText(`正在下载 Content Manager... ${p}%`);
+            } else if (p < 80) {
+                setCmInstallStatusText('下载完成，正在解压文件...');
+            } else if (p < 95) {
+                setCmInstallStatusText('正在配置 CM 环境...');
+            } else {
+                setCmInstallStatusText('正在完成安装...');
+            }
+
+            if (p >= 100) {
+                clearInterval(timer);
+                setCmInstalling(false);
+                setCmInstalled(true);
+                setCmInstallProgress(0);
+                Toast.success('Content Manager 安装成功！');
+            }
+        }, 100);
+    };
+
     const renderMarkdownModal = (
         visible: boolean,
         setVisible: React.Dispatch<React.SetStateAction<boolean>>,
         title: string,
-        content: string
+        content: React.ReactNode,
+        action?: React.ReactNode
     ): React.JSX.Element => (
         <Modal
             title={title}
             visible={visible}
             onCancel={() => setVisible(false)}
-            footer={<Button onClick={() => setVisible(false)}>关闭</Button>}
+            footer={
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                    <Button onClick={() => setVisible(false)}>关闭</Button>
+                    {action}
+                </div>
+            }
             style={{ maxWidth: 620 }}
             bodyStyle={{ maxHeight: '60vh', overflowY: 'auto', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
         >
@@ -359,11 +404,33 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                         </Button>
                                     </Tooltip>
                                 ) : (
-                                    <Button theme="solid" icon={<IconDownload />} style={{ backgroundColor: '#00b5ad' }}>
-                                        一键安装 CM
+                                    <Button
+                                        theme="solid"
+                                        icon={<IconDownload />}
+                                        style={{ backgroundColor: '#00b5ad' }}
+                                        onClick={handleInstallCM}
+                                        loading={cmInstalling}
+                                    >
+                                        {cmInstalling ? '正在安装' : '一键安装 CM'}
                                     </Button>
                                 )}
                             </Space>
+                        </div>
+                    )}
+
+                    {/* CM 安装进度条 */}
+                    {cmInstalling && (
+                        <div style={{ marginTop: 24, borderTop: '1px solid #333', paddingTop: 16 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                <Text style={{ color: '#ccc', fontSize: 13 }}>{cmInstallStatusText}</Text>
+                                <Text style={{ color: '#00b5ad', fontWeight: 'bold', fontSize: 13 }}>{cmInstallProgress}%</Text>
+                            </div>
+                            <Progress
+                                percent={cmInstallProgress}
+                                stroke="#00b5ad"
+                                style={{ height: 6 }}
+                                showInfo={false}
+                            />
                         </div>
                     )}
                 </Card>
@@ -411,7 +478,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                             theme="solid"
                                             type="primary"
                                             icon={<IconFolder />}
-                                            onClick={() => window.open('https://s.taobao.com/search?q=Assetto+Corsa+Ultimate', '_blank')}
+                                            onClick={() => setTaobaoTutorialVisible(true)}
                                         >
                                             进入购买页面
                                         </Button>
@@ -448,6 +515,15 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
 
                 {renderMarkdownModal(cmTutorialVisible, setCmTutorialVisible, 'CM 配置教程', MD_CM_CONFIG)}
                 {renderMarkdownModal(keyTutorialVisible, setKeyTutorialVisible, 'CDKey 激活教程', MD_CDKEY_USAGE)}
+                {renderMarkdownModal(
+                    taobaoTutorialVisible,
+                    setTaobaoTutorialVisible,
+                    '淘宝购买教程',
+                    MD_TAOBAO_TUTORIAL,
+                    <Button theme="solid" type="primary" onClick={() => window.open('https://s.taobao.com/search?q=Assetto+Corsa+Ultimate', '_blank')}>
+                        前往淘宝购买
+                    </Button>
+                )}
             </div>
         );
     };
@@ -893,6 +969,33 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         return (
             <Layout style={{ minHeight: '100vh', background: '#16161a', padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: '#fff' }}>正在检测游戏环境...</Text>
+
+                {/* 启动检测弹窗（在 loading 界面之上） */}
+                <Modal
+                    title="检测到已安装光影模组"
+                    icon={<IconAlertTriangle style={{ color: '#ff9f43' }} size="extra-large" />}
+                    visible={initConflictVisible}
+                    closable={false}
+                    maskClosable={false}
+                    okText="是的，我要修复问题"
+                    cancelText="不是，我只是想更新/覆盖"
+                    style={{ maxWidth: 500 }}
+                    onOk={() => {
+                        setMode('clean_install');
+                        setInitConflictVisible(false);
+                        setIsDiagnosing(false);
+                    }}
+                    onCancel={() => {
+                        setMode('normal');
+                        setInitConflictVisible(false);
+                        setIsDiagnosing(false);
+                    }}
+                >
+                    <div>
+                        <p>检测到您的游戏中已经安装了 CSP 或 Sol。</p>
+                        <p style={{ fontWeight: 'bold', marginTop: 10 }}>您是因为遇到游戏崩溃、黑屏或光影失效才使用此安装器的吗？</p>
+                    </div>
+                </Modal>
             </Layout>
         );
     }
