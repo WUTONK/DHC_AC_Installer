@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Button, Typography, Row, Col, Breadcrumb, Tag } from '@douyinfe/semi-ui';
 import { IconHome, IconArrowLeft } from '@douyinfe/semi-icons';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import VideoTutorialSection from './components/VideoTutorialSection';
+import { useDevMode } from './contexts/DevModeContext';
 
 // 导入本地图片资源 (保持你原有的引用)
 import wikiImage1 from '../../../resources/image/shutokowiki/SCR-20251109-teqy.jpeg';
@@ -178,10 +179,76 @@ interface ShutokoWikiProps {
 }
 
 export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): React.JSX.Element {
+    const { isDevMode, registerDevOption, unregisterDevOption } = useDevMode();
     const [view, setView] = useState<'grid' | 'detail'>('grid');
     const [activeArticle, setActiveArticle] = useState<WikiArticle | null>(null);
+    const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
+
+    // --- 持久化逻辑：管理已读状态 ---
+    // 从 localStorage 加载已读文章 ID 列表
+    useEffect(() => {
+        const savedReadArticles = localStorage.getItem('shutoko_wiki_read_articles');
+        if (savedReadArticles) {
+            try {
+                setReadArticles(new Set(JSON.parse(savedReadArticles)));
+            } catch (e) {
+                console.error("Failed to parse read articles from localStorage", e);
+            }
+        }
+    }, []);
+
+    // 辅助函数：标记文章为已读并更新 localStorage
+    const markAsRead = (id: string) => {
+        if (!readArticles.has(id)) {
+            const newReadArticles = new Set(readArticles);
+            newReadArticles.add(id);
+            setReadArticles(newReadArticles);
+            // 将 Set 转为 Array 进行存储
+            localStorage.setItem('shutoko_wiki_read_articles', JSON.stringify(Array.from(newReadArticles)));
+        }
+    };
+
+    // --- 开发者选项集成 ---
+    const resetReadStatus = () => {
+        setReadArticles(new Set());
+        localStorage.removeItem('shutoko_wiki_read_articles');
+    };
+
+    useEffect(() => {
+        registerDevOption({
+            id: 'wiki-reset-read',
+            label: 'Wiki 状态管理',
+            component: (
+                <div style={{ padding: '4px 0' }}>
+                    <div style={{ marginBottom: 8, fontSize: '12px', color: '#aaa' }}>
+                        已缓存的已读文章: {readArticles.size} 篇
+                    </div>
+                    <Button
+                        onClick={resetReadStatus}
+                        theme='solid'
+                        type='warning'
+                        style={{ width: '100%' }}
+                    >
+                        重置所有为未读
+                    </Button>
+                    <div style={{ marginTop: 8, fontSize: '12px', color: '#e6a23c', lineHeight: 1.2 }}>
+                        * 开发者模式下会显示未读红点，无论是否已读。
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: '12px', color: '#666', lineHeight: 1.2 }}>
+                        * 此操作将让红点提示再次出现（需关闭开发者模式查看真实效果）。
+                    </div>
+                </div>
+            ),
+            order: 10
+        });
+
+        return () => {
+            unregisterDevOption('wiki-reset-read');
+        };
+    }, [readArticles, registerDevOption, unregisterDevOption]);
 
     const openArticle = (article: WikiArticle): void => {
+        markAsRead(article.id);
         setActiveArticle(article);
         setView('detail');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -254,7 +321,13 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
             <div className="line"></div>
             <div className="content">
                 <span className="dot">•</span>
-                <span className="zh">{title}</span>
+                {title === '必读指南' ? (
+                    <span className="zh bold-title">
+                        <span className="glow-part">必读</span>指南
+                    </span>
+                ) : (
+                    <span className="zh">{title}</span>
+                )}
                 <span className="en">{enTitle}</span>
                 <span className="dot">•</span>
             </div>
@@ -308,7 +381,8 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                                             if (!item) return null;
 
                                             // --- 逻辑控制：只在 'overview' 显示红点 (driving_tech 移除) ---
-                                            const showUnread = item.id === 'overview';
+                                            // 逻辑：如果是 'overview' 且 (是开发者模式 或 未读)，则显示红点
+                                            const showUnread = item.id === 'overview' && (isDevMode || !readArticles.has(item.id));
 
                                             return (
                                                 <Col {...colProps} key={item.id}>
@@ -354,16 +428,33 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                                                             padding: 20,
                                                             background: 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)'
                                                         }}>
-                                                            {/* 图标/SVG 渲染逻辑 */}
-                                                            {item.id === 'c1_loop' ? (
-                                                                <img src={c1Map} alt="C1 Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
-                                                            ) : item.id === 'new_loop' ? (
-                                                                <img src={newCircularMap} alt="New Circular Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
-                                                            ) : (
-                                                                <svg width="60" height="60" viewBox="0 0 150 150" className="map-icon" style={{ fill: 'none', stroke: '#fff', strokeWidth: 4, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }}>
-                                                                    <path d={MAP_SVG_PATH} />
-                                                                </svg>
-                                                            )}
+                                                        {/* 图标/SVG 渲染逻辑 */}
+                                                        {item.id === 'c1_loop' ? (
+                                                            <img src={c1Map} alt="C1 Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
+                                                        ) : item.id === 'new_loop' ? (
+                                                            <img src={newCircularMap} alt="New Circular Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
+                                                        ) : item.id === 'overview' ? (
+                                                            /* 首都高概览图标 - 东京塔风格 */
+                                                            <svg width="80" height="80" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}>
+                                                                <path d="M50 10 L80 90 H20 L50 10 Z M50 10 V 90 M30 65 H70" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                                            </svg>
+                                                        ) : item.id === 'driving_tech' ? (
+                                                            /* 驾驶技巧图标 - 方向盘 */
+                                                            <svg width="80" height="80" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}>
+                                                                <circle cx="50" cy="50" r="35" stroke="white" strokeWidth="4" fill="none" />
+                                                                <path d="M50 50 L50 15 M50 50 L25 75 M50 50 L75 75" stroke="white" strokeWidth="4" strokeLinecap="round" />
+                                                            </svg>
+                                                        ) : item.id === 'pa_guide' ? (
+                                                            /* 停车场图标 - P 字 */
+                                                            <svg width="60" height="60" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }}>
+                                                                <rect x="15" y="15" width="70" height="70" rx="15" stroke="white" strokeWidth="4" fill="none" />
+                                                                <path d="M40 75 V 25 H 55 C 70 25 70 55 55 55 H 40" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg width="60" height="60" viewBox="0 0 150 150" className="map-icon" style={{ fill: 'none', stroke: '#fff', strokeWidth: 4, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }}>
+                                                                <path d={MAP_SVG_PATH} />
+                                                            </svg>
+                                                        )}
 
                                                             <div style={{ backgroundColor: 'rgba(0,0,0,0.6)', padding: '4px 12px', borderRadius: 4, backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.2)' }}>
                                                                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, letterSpacing: 1 }}>{item.title}</Text>
@@ -466,6 +557,14 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                     font-weight: 500;
                     color: #fff;
                     letter-spacing: 1px;
+                }
+                .section-divider .zh.bold-title {
+                    font-weight: 800; /* 加粗 */
+                    font-size: 20px;  /* 稍微放大 */
+                }
+                .section-divider .zh .glow-part {
+                    color: ${THEME_ACCENT}; /* 使用赛博青色 */
+                    text-shadow: 0 0 10px ${THEME_ACCENT}, 0 0 20px ${THEME_ACCENT}; /* 发光效果 */
                 }
                 .section-divider .en {
                     font-size: 12px;

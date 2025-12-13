@@ -1,6 +1,6 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button,Avatar, Switch, Select} from '@douyinfe/semi-ui'
+import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
 import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
@@ -71,7 +71,7 @@ function App(): React.JSX.Element {
       case 'CustomInstallWizard':
         return <CustomInstallWizard />
       case 'ServerListPage':
-        return <ServerListPage overrideContinent={devContinent || undefined} />
+        return <ServerListPage />
       case 'ServerListPageOldDemo':
         return <ServerListPageOldDemo />
       default:
@@ -81,42 +81,7 @@ function App(): React.JSX.Element {
 
   const [activeKey, setActiveKey] = useState<string>('Home')
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
-  const { isDevMode, toggleDevMode, registerDevOption, unregisterDevOption } = useDevMode()
-  // 开发者模式：手动设置大洲（用于测试）
-  const [devContinent, setDevContinent] = useState<string>('')
-
-  // 注册大洲选择器到开发者选项
-  React.useEffect(() => {
-    const updateOption = (): void => {
-      registerDevOption({
-        id: 'continent-selector',
-        label: '设置大洲（测试用）',
-        component: (
-          <Select
-            placeholder="选择大洲"
-            value={devContinent || undefined}
-            onChange={(value) => setDevContinent((value as string) || '')}
-            style={{ width: '100%' }}
-            size="small"
-          >
-            <Select.Option value="">自动检测</Select.Option>
-            <Select.Option value="Asia">亚洲</Select.Option>
-            <Select.Option value="Europe">欧洲</Select.Option>
-            <Select.Option value="Americas">美洲</Select.Option>
-            <Select.Option value="Oceania">大洋洲</Select.Option>
-            <Select.Option value="Africa">非洲</Select.Option>
-          </Select>
-        ),
-        order: 1
-      })
-    }
-
-    updateOption()
-
-    return () => {
-      unregisterDevOption('continent-selector')
-    }
-  }, [registerDevOption, unregisterDevOption, devContinent])
+  const { isDevMode, toggleDevMode } = useDevMode()
 
   // 地区切换按钮容器样式
   const regionToggleContainerStyle: React.CSSProperties = {

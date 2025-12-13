@@ -185,7 +185,7 @@ const detectUserContinent = (): string => {
   // 1. 通过时区推断
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
   const timezoneLower = timezone.toLowerCase()
-  
+
   // 亚洲时区
   if (
     timezoneLower.includes('shanghai') ||
@@ -200,7 +200,7 @@ const detectUserContinent = (): string => {
   ) {
     return 'Asia'
   }
-  
+
   // 欧洲时区
   if (
     timezoneLower.includes('london') ||
@@ -213,7 +213,7 @@ const detectUserContinent = (): string => {
   ) {
     return 'Europe'
   }
-  
+
   // 北美洲时区
   if (
     timezoneLower.includes('new_york') ||
@@ -225,7 +225,7 @@ const detectUserContinent = (): string => {
   ) {
     return 'Americas'
   }
-  
+
   // 大洋洲时区
   if (
     timezoneLower.includes('sydney') ||
@@ -235,11 +235,11 @@ const detectUserContinent = (): string => {
   ) {
     return 'Oceania'
   }
-  
+
   // 2. 通过浏览器语言推断（备用方案）
   const language = navigator.language || (navigator as any).userLanguage || ''
   const langLower = language.toLowerCase()
-  
+
   if (langLower.includes('zh') || langLower.includes('cn') || langLower.includes('tw') || langLower.includes('hk')) {
     return 'Asia'
   }
@@ -250,7 +250,7 @@ const detectUserContinent = (): string => {
     // 英语可能是多个大洲，默认返回未知，让时区判断优先
     return 'Unknown'
   }
-  
+
   return 'Unknown'
 }
 
@@ -259,10 +259,10 @@ const detectUserContinent = (): string => {
 // =================================================================
 
 interface ServerListPageProps {
-  overrideContinent?: string // 开发者模式：手动覆盖大洲设置
+  // overrideContinent?: string // 移除此属性
 }
 
-export default function ServerListPage({ overrideContinent }: ServerListPageProps = {}): React.JSX.Element {
+export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.Element {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [hideUnreachable, setHideUnreachable] = useState(false)
   const [servers, setServers] = useState<Server[]>(MOCK_SERVERS)
@@ -272,15 +272,11 @@ export default function ServerListPage({ overrideContinent }: ServerListPageProp
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedServer, setSelectedServer] = useState<Server | null>(null)
 
-  // 检测用户大洲（如果开发者模式未覆盖）
+  // 检测用户大洲
   useEffect(() => {
-    if (overrideContinent) {
-      setUserContinent(overrideContinent)
-    } else {
-      const continent = detectUserContinent()
-      setUserContinent(continent)
-    }
-  }, [overrideContinent])
+    const continent = detectUserContinent()
+    setUserContinent(continent)
+  }, [])
 
   // 模拟刷新
   const handleRefresh = (): void => {
@@ -351,7 +347,7 @@ export default function ServerListPage({ overrideContinent }: ServerListPageProp
   const getDisplayOrder = (): Array<{ key: string; title: string; servers: Server[] }> => {
     const sections: Array<{ key: string; title: string; servers: Server[] }> = []
     const isInAsia = userContinent === 'Asia'
-    const isInCN = navigator.language.toLowerCase().includes('zh') || 
+    const isInCN = navigator.language.toLowerCase().includes('zh') ||
                    navigator.language.toLowerCase().includes('cn')
 
     // 如果用户在亚洲（特别是大中华区），优先显示大中华区和官方服务器
