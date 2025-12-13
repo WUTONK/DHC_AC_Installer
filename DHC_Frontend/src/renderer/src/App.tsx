@@ -51,7 +51,7 @@ function App(): React.JSX.Element {
       case 'Home':
         return <WelcomePage region={region} onNavigate={(page: string) => setActiveKey(page)} />
       case 'ShutokoWiki':
-        return <ShutokoWiki />
+        return <ShutokoWiki region={region} />
       case 'NetDemo':
         return <NetDemo></NetDemo>
       case 'ComponentTest':

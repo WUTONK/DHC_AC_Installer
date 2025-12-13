@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Layout, Button, Typography, Row, Col, Breadcrumb, Tag } from '@douyinfe/semi-ui';
 import { IconHome, IconArrowLeft } from '@douyinfe/semi-icons';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import VideoTutorialSection from './components/VideoTutorialSection';
 
 // 导入本地图片资源 (保持你原有的引用)
 import wikiImage1 from '../../../resources/image/shutokowiki/SCR-20251109-teqy.jpeg';
@@ -36,6 +37,24 @@ const WIKI_DATA: WikiArticle[] = [
 ## 项目愿景
 
 该项目不仅还原了道路，还致力于还原 JDM 地下赛车文化、PA (停车区) 聚会氛围以及东京独特的夜景光照系统。
+
+[[VIDEO_TUTORIAL: {
+  "title": "安装教程视频",
+  "videos": [
+    {
+      "platform": "bilibili",
+      "title": "首都高模组安装教程 2024版",
+      "author": "Bilibili @东濠涌车队",
+      "url": "https://www.bilibili.com/video/BV1example"
+    },
+    {
+      "platform": "youtube",
+      "title": "Shutoko Install Guide 2024",
+      "author": "YouTube @ShutokoRevival",
+      "url": "https://www.youtube.com/watch?v=example"
+    }
+  ]
+}]]
 
 ## 包含区域
 
@@ -154,7 +173,11 @@ const MAP_SVG_PATH = "M50 10 C 20 20, 10 50, 30 80 S 80 120, 100 100 S 140 50, 1
 const BG_DARK = '#16161a';
 const THEME_ACCENT = '#00f2fe'; // 赛博青
 
-export default function ShutokoWiki(): React.JSX.Element {
+interface ShutokoWikiProps {
+    region?: 'zhCN' | 'enUS';
+}
+
+export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): React.JSX.Element {
     const [view, setView] = useState<'grid' | 'detail'>('grid');
     const [activeArticle, setActiveArticle] = useState<WikiArticle | null>(null);
 
@@ -171,6 +194,51 @@ export default function ShutokoWiki(): React.JSX.Element {
 
     // 辅助函数：根据ID获取文章数据
     const getArticleById = (id: string): WikiArticle | undefined => WIKI_DATA.find(item => item.id === id);
+
+    // --- 自定义 Markdown 组件 ---
+    const markdownComponents: Components = {
+        p: ({ children }) => {
+            // 更加鲁棒的检查逻辑：检查子元素是否包含占位符
+            const childArray = React.Children.toArray(children);
+            const fullText = childArray.map(child => {
+                if (typeof child === 'string') return child;
+                if (typeof child === 'number') return String(child);
+                return '';
+            }).join('').trim();
+
+            const match = fullText.match(/^\[\[VIDEO_TUTORIAL:\s*({[\s\S]*?})\s*\]\]$/);
+            if (match) {
+                try {
+                    // 使用 Function 构造函数来安全地解析类似 JSON 的对象（允许单引号等）
+                    // 注意：在生产环境中可能需要更严格的 JSON 解析，但这里为了方便手写 config 做了宽容处理
+                    // 或者强制要求用户写标准 JSON
+                    const config = JSON.parse(match[1]);
+                    const targetDefaultPlatform = region === 'zhCN' ? 'bilibili' : 'youtube';
+
+                    return <VideoTutorialSection
+                        key={`${activeArticle?.id}-${region}`}
+                        defaultPlatform={targetDefaultPlatform}
+                        {...config}
+                    />;
+                } catch (e) {
+                    console.error("Failed to parse video tutorial config:", e);
+                    return <Text type="danger">Error parsing video tutorial config</Text>;
+                }
+            } else if (fullText === '[[VIDEO_TUTORIAL]]') {
+                // 向后兼容旧语法：如果 activeArticle 有 videos 属性则使用（虽然现在 WikiArticle 接口已移除 videos，但运行时可能还存在）
+                const legacyArticle = activeArticle as any;
+                if (legacyArticle && legacyArticle.videos && legacyArticle.videos.length > 0) {
+                    return <VideoTutorialSection
+                        key={`${activeArticle?.id}-${region}`}
+                        videos={legacyArticle.videos}
+                        defaultPlatform={region === 'zhCN' ? 'bilibili' : 'youtube'}
+                    />;
+                }
+                return null;
+            }
+            return <p>{children}</p>;
+        }
+    };
 
     // --- 组件：未读提示红点 ---
     const UnreadBadge = (): React.JSX.Element => (
@@ -351,7 +419,10 @@ export default function ShutokoWiki(): React.JSX.Element {
                             color: '#e0e0e0',
                             lineHeight: 1.8
                         }} className="markdown-body">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={markdownComponents}
+                            >
                                 {activeArticle.content}
                             </ReactMarkdown>
                         </div>
