@@ -7,7 +7,7 @@ import {
     IconAlertTriangle, IconTickCircle,
     IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 // --- 1. 模拟数据结构 ---
 interface Car {
@@ -112,7 +112,7 @@ const RESOURCES_DB: ResourceItem[] = [
 ];
 
 const { Header, Content, Footer } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function ResourceImportManager(): React.JSX.Element {
     // --- 状态管理 ---
@@ -240,9 +240,8 @@ export default function ResourceImportManager(): React.JSX.Element {
             <Header style={{ padding: '20px 40px', background: BG_DARK, borderBottom: '1px solid #232326', flexShrink: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <BackToHomeButton variant="minimal" />
-                            <div>
-                                <Title heading={3} style={{ color: '#fff', margin: 0 }}>资源导入与管理</Title>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <HomeBreadcrumb current="资源导入与管理" />
                                 <Text style={{ color: '#888' }}>拖入压缩包即可自动安装，请确保关键资源无缺失。</Text>
                             </div>
                         </div>

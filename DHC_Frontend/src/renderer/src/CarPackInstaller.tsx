@@ -7,7 +7,7 @@ import {
   IconFile, IconInfoCircle, IconSearch, IconAlertTriangle, IconTickCircle, IconList
 
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 // 定义车辆类型
 interface Car {
@@ -258,7 +258,7 @@ export default function CarPackInstaller() {
 
       <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-            <BackToHomeButton variant="minimal" />
+            <HomeBreadcrumb current="车包安装" />
             <div style={{ display: 'flex', gap: '30px', fontSize: '12px', color: '#666', justifyContent: 'center', flex: 1 }}>
 
             <span>管理器安装</span>

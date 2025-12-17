@@ -15,17 +15,12 @@ import {
 } from '@douyinfe/semi-ui';
 
 import {
-    IconHome,
-    IconDownload,
-    IconFile,
     IconSetting,
     IconUpload,
     IconRefresh,
     IconTickCircle,
-    IconAlertTriangle,
-    IconSave,
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 // 模拟数据：CSP 版本列表
 interface CspVersion {
@@ -54,7 +49,7 @@ const WEATHER_MODS: { sol: WeatherModState; pure: WeatherModState } = {
     pure: { installed: false, version: null, latest: '0.238' }, // Pure 未安装
 };
 
-const { Header, Footer, Content } = Layout;
+const { Header, Content } = Layout;
 const { Text, Title, Paragraph } = Typography;
 
 export default function ShaderInstallerV1(): React.JSX.Element {
@@ -139,7 +134,7 @@ export default function ShaderInstallerV1(): React.JSX.Element {
         <Layout style={{ height: '100%', background: BG_DARK, color: 'white', display: 'flex', flexDirection: 'column' }} className="semi-always-dark">
             <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-                        <BackToHomeButton variant="minimal" />
+                        <HomeBreadcrumb current="光影安装" />
                         <div
                             style={{
                                 display: 'flex',

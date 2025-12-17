@@ -17,7 +17,7 @@ import {
   IconAlertTriangle,
   IconFilter
 } from '@douyinfe/semi-icons'
-import BackToHomeButton from './components/BackToHomeButton'
+import HomeBreadcrumb from './components/HomeBreadcrumb'
 import ae86Banner from '../../../resources/image/server/banner/ae86_01.jpeg'
 import lightupTopBanner from '../../../resources/image/server/banner/lightup_top_01.png'
 import rb04Banner from '../../../resources/image/server/banner/rb_04.jpg'
@@ -156,7 +156,7 @@ const THEME = {
 }
 
 const { Header, Content } = Layout
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 
 // =================================================================
 // 2. 辅助函数
@@ -265,7 +265,7 @@ interface ServerListPageProps {
 export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.Element {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [hideUnreachable, setHideUnreachable] = useState(false)
-  const [servers, setServers] = useState<Server[]>(MOCK_SERVERS)
+  const [servers] = useState<Server[]>(MOCK_SERVERS)
   const [userContinent, setUserContinent] = useState<string>('Unknown')
 
   // 弹窗状态
@@ -431,10 +431,7 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <BackToHomeButton variant="minimal" />
-          <Title heading={3} style={{ color: '#fff' }}>
-            服务器推荐
-          </Title>
+          <HomeBreadcrumb current="服务器推荐" />
         </div>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
@@ -670,7 +667,7 @@ const ServerDisclaimerModal: React.FC<ServerDisclaimerModalProps> = ({
   visible,
   onCancel,
   onConfirm,
-  server
+  server: _server
 }) => {
   const [countdown, setCountdown] = useState(10)
   const timerRef = React.useRef<NodeJS.Timeout | null>(null)

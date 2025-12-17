@@ -1,0 +1,960 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DHC AC Installer API (RESTful Design)",
+    "description": "一键式安装前后端API接口规范 - RESTful风格设计",
+    "version": "2.0.0"
+  },
+  "tags": [
+    {
+      "name": "Installations",
+      "description": "安装任务管理"
+    },
+    {
+      "name": "CM",
+      "description": "Content Manager 管理"
+    },
+    {
+      "name": "System",
+      "description": "系统信息"
+    }
+  ],
+  "paths": {
+    "/api/installations": {
+      "get": {
+        "summary": "获取安装任务列表",
+        "description": "获取所有安装任务列表",
+        "tags": ["Installations"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "过滤状态：idle, installing, completed, failed, cancelled",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["idle", "installing", "completed", "failed", "cancelled"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "返回数量限制，默认10",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回安装任务列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationListResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建新的安装任务",
+        "description": "开始一键式安装",
+        "tags": ["Installations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInstallationReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功创建安装任务",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installations/{installId}": {
+      "get": {
+        "summary": "获取安装任务详情",
+        "description": "获取特定安装任务的详细信息",
+        "tags": ["Installations"],
+        "parameters": [
+          {
+            "name": "installId",
+            "in": "path",
+            "required": true,
+            "description": "安装任务ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回安装任务详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "安装任务不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "取消安装任务",
+        "description": "取消正在进行的安装任务",
+        "tags": ["Installations"],
+        "parameters": [
+          {
+            "name": "installId",
+            "in": "path",
+            "required": true,
+            "description": "安装任务ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取消安装任务",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无法取消（任务已完成或已失败）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installations/{installId}/progress": {
+      "get": {
+        "summary": "获取安装进度",
+        "description": "获取安装任务的进度信息。通过category参数可以过滤特定类别的进度，或获取所有类别的进度。",
+        "tags": ["Installations"],
+        "parameters": [
+          {
+            "name": "installId",
+            "in": "path",
+            "required": true,
+            "description": "安装任务ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "进度类别过滤：all(所有), carPack(车包), shader(光影), map(地图), car(单个车辆), cm(CM安装), core(核心环境)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "carPack", "shader", "map", "car", "cm", "core"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "carName",
+            "in": "query",
+            "description": "当category=car时，指定车辆名称",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回安装进度",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationProgressResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "安装任务不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installations/{installId}/logs": {
+      "get": {
+        "summary": "获取安装日志",
+        "description": "获取安装任务的日志信息",
+        "tags": ["Installations"],
+        "parameters": [
+          {
+            "name": "installId",
+            "in": "path",
+            "required": true,
+            "description": "安装任务ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "时间戳（Unix时间戳，秒），只返回此时间之后的日志",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "返回日志条数限制，默认100",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "日志级别过滤：info, warn, error, all",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["info", "warn", "error", "all"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "日志类别过滤：core, weather, map, cars等",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回安装日志",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationLogsResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cm/status": {
+      "get": {
+        "summary": "检查CM安装状态",
+        "description": "检查Content Manager是否已安装",
+        "tags": ["CM"],
+        "responses": {
+          "200": {
+            "description": "成功返回CM状态",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CMStatusResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cm/install": {
+      "post": {
+        "summary": "开始安装CM",
+        "description": "开始下载并安装Content Manager",
+        "tags": ["CM"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallCMReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功启动CM安装",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallCMResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "安装失败或已在安装中",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cm/install/progress": {
+      "get": {
+        "summary": "获取CM安装进度",
+        "description": "获取Content Manager的安装进度",
+        "tags": ["CM"],
+        "responses": {
+          "200": {
+            "description": "成功返回CM安装进度",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CMInstallProgressResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/disk": {
+      "get": {
+        "summary": "获取磁盘信息",
+        "description": "获取当前磁盘信息和可用空间",
+        "tags": ["System"],
+        "parameters": [
+          {
+            "name": "drive",
+            "in": "query",
+            "description": "磁盘盘符，例如 'C:', 'D:'。如果为空则返回默认磁盘信息",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "D:"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回磁盘信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiskInfoResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/game-path": {
+      "get": {
+        "summary": "获取游戏路径",
+        "description": "获取游戏存储路径",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "成功返回游戏路径",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamePathResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/install-versions": {
+      "get": {
+        "summary": "获取安装版本列表",
+        "description": "获取三种安装模式（基础极速版、标准推荐版、豪华全享版）的详细信息",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "成功返回安装版本列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallVersionsResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/servers/info": {
+      "get": {
+        "summary": "获取服务器信息",
+        "description": "获取游戏服务器信息",
+        "tags": ["System"],
+        "parameters": [
+          {
+            "name": "host",
+            "in": "query",
+            "description": "服务器地址，例如 '1.1.1.1:8080'",
+            "required": false,
+            "example": "1.1.1.1:8080",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回服务器信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateInstallationReq": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "enum": ["minimal", "standard", "full"],
+            "description": "要安装的版本ID"
+          },
+          "gamePath": {
+            "type": "string",
+            "description": "游戏安装路径（可选，如果为空则使用自动检测的路径）",
+            "nullable": true
+          },
+          "cleanInstall": {
+            "type": "boolean",
+            "description": "是否使用纯净安装模式（会先清理现有模组）",
+            "default": false
+          }
+        },
+        "required": ["versionId"]
+      },
+      "InstallationResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "安装任务ID"
+          },
+          "versionId": {
+            "type": "string",
+            "description": "安装版本ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["idle", "preparing", "installing", "completed", "failed", "cancelled"],
+            "description": "安装状态"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开始时间（Unix时间戳，秒）"
+          },
+          "endTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "结束时间（Unix时间戳，秒），如果未完成则为null",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "错误信息（如果状态为failed）",
+            "nullable": true
+          }
+        },
+        "required": ["id", "versionId", "status", "startTime"]
+      },
+      "InstallationListResp": {
+        "type": "object",
+        "properties": {
+          "installations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallationResp"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总数量"
+          }
+        },
+        "required": ["installations"]
+      },
+      "CategoryProgress": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "类别ID：core, carPack, shader, map, cm等"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "类别名称",
+            "example": "基础环境 (CSP)"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["waiting", "active", "completed", "failed"],
+            "description": "状态"
+          },
+          "progress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "进度百分比（0-100）"
+          },
+          "currentItem": {
+            "type": "string",
+            "nullable": true,
+            "description": "当前正在处理的子项名称",
+            "example": "CSP v0.1.79"
+          },
+          "totalItems": {
+            "type": "integer",
+            "description": "总子项数量"
+          },
+          "completedItems": {
+            "type": "integer",
+            "description": "已完成子项数量"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["waiting", "installing", "completed", "failed"]
+                },
+                "progress": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            },
+            "description": "子项详细进度（当category参数指定特定类别时返回）",
+            "nullable": true
+          }
+        },
+        "required": ["categoryId", "categoryName", "status", "progress"]
+      },
+      "InstallationProgressResp": {
+        "type": "object",
+        "properties": {
+          "installId": {
+            "type": "string",
+            "description": "安装任务ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["idle", "preparing", "installing", "completed", "failed", "cancelled"],
+            "description": "总体状态"
+          },
+          "totalProgress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "总进度百分比（0-100）"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryProgress"
+            },
+            "description": "各类别的安装进度。当category参数为'all'时返回所有类别，否则只返回匹配的类别"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开始时间（Unix时间戳，秒）"
+          },
+          "endTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "结束时间（Unix时间戳，秒），如果未完成则为null",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "错误信息（如果状态为failed）",
+            "nullable": true
+          }
+        },
+        "required": ["installId", "status", "totalProgress", "categories"]
+      },
+      "InstallLog": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "时间戳（Unix时间戳，秒）"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["info", "warn", "error"],
+            "description": "日志级别"
+          },
+          "message": {
+            "type": "string",
+            "description": "日志消息"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true,
+            "description": "日志类别：core, weather, map, cars等"
+          }
+        },
+        "required": ["timestamp", "level", "message"]
+      },
+      "InstallationLogsResp": {
+        "type": "object",
+        "properties": {
+          "installId": {
+            "type": "string",
+            "description": "安装任务ID"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallLog"
+            },
+            "description": "日志列表（按时间倒序）"
+          },
+          "total": {
+            "type": "integer",
+            "description": "总日志条数"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "是否还有更多日志"
+          }
+        },
+        "required": ["logs"]
+      },
+      "CMStatusResp": {
+        "type": "object",
+        "properties": {
+          "installed": {
+            "type": "boolean",
+            "description": "CM是否已安装"
+          },
+          "path": {
+            "type": "string",
+            "description": "CM安装路径（如果已安装）",
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "description": "CM版本（如果已安装）",
+            "nullable": true
+          }
+        },
+        "required": ["installed"]
+      },
+      "InstallCMReq": {
+        "type": "object",
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "description": "是否强制重新安装（即使已安装）",
+            "default": false
+          }
+        }
+      },
+      "InstallCMResp": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "是否成功启动安装"
+          },
+          "installId": {
+            "type": "string",
+            "description": "CM安装任务ID，用于查询进度",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "返回消息"
+          }
+        },
+        "required": ["success"]
+      },
+      "CMInstallProgressResp": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["idle", "downloading", "extracting", "installing", "completed", "failed"],
+            "description": "安装状态"
+          },
+          "progress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "安装进度百分比（0-100）"
+          },
+          "statusText": {
+            "type": "string",
+            "description": "状态描述文本",
+            "example": "正在下载 Content Manager... 45%"
+          },
+          "downloadedBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "已下载字节数",
+            "nullable": true
+          },
+          "totalBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "总字节数",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "错误信息（如果状态为failed）",
+            "nullable": true
+          }
+        },
+        "required": ["status", "progress"]
+      },
+      "DiskInfoResp": {
+        "type": "object",
+        "properties": {
+          "drive": {
+            "type": "string",
+            "description": "磁盘盘符，例如 'C:', 'D:'",
+            "example": "D:"
+          },
+          "label": {
+            "type": "string",
+            "description": "磁盘卷标",
+            "example": "Data"
+          },
+          "totalBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "总空间（字节）"
+          },
+          "usedBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "已用空间（字节）"
+          },
+          "freeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "可用空间（字节）"
+          },
+          "isSSD": {
+            "type": "boolean",
+            "description": "是否为SSD"
+          },
+          "isRemovable": {
+            "type": "boolean",
+            "description": "是否为可移动磁盘"
+          }
+        },
+        "required": ["drive", "totalBytes", "usedBytes", "freeBytes"]
+      },
+      "GamePathResp": {
+        "type": "object",
+        "properties": {
+          "gamePath": {
+            "type": "string",
+            "description": "游戏安装路径"
+          }
+        },
+        "required": ["gamePath"]
+      },
+      "InstallVersion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["minimal", "standard", "full"],
+            "description": "版本ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "版本名称",
+            "example": "标准推荐版"
+          },
+          "description": {
+            "type": "string",
+            "description": "版本描述"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "预计安装大小（字节）"
+          },
+          "recommended": {
+            "type": "boolean",
+            "description": "是否为推荐版本"
+          },
+          "includes": {
+            "type": "object",
+            "properties": {
+              "csp": {"type": "boolean"},
+              "sol": {"type": "boolean"},
+              "pure": {"type": "boolean"},
+              "map": {"type": "boolean"},
+              "carPack": {"type": "boolean"},
+              "carPack4K": {"type": "boolean"}
+            }
+          }
+        },
+        "required": ["id", "name", "sizeBytes"]
+      },
+      "InstallVersionsResp": {
+        "type": "object",
+        "properties": {
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallVersion"
+            }
+          }
+        },
+        "required": ["versions"]
+      },
+      "ServerInfoResp": {
+        "type": "object",
+        "properties": {
+          "rtt": {
+            "type": "string"
+          },
+          "clients": {
+            "type": "number"
+          },
+          "maxClients": {
+            "type": "number"
+          }
+        },
+        "required": ["rtt", "clients", "maxClients"]
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "错误消息"
+          },
+          "code": {
+            "type": "string",
+            "description": "错误代码",
+            "nullable": true
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:19810",
+      "description": "本地开发服务器"
+    }
+  ]
+}

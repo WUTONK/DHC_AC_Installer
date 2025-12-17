@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout, Button, Typography, Row, Col, Breadcrumb, Tag } from '@douyinfe/semi-ui';
-import { IconHome, IconArrowLeft } from '@douyinfe/semi-icons';
+import { Layout, Button, Typography, Row, Col, Tag, Select, InputNumber } from '@douyinfe/semi-ui';
+import { IconArrowLeft } from '@douyinfe/semi-icons';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import VideoTutorialSection from './components/VideoTutorialSection';
+import VideoTutorialSection, { VideoData } from './components/VideoTutorialSection';
 import { useDevMode } from './contexts/DevModeContext';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 // 导入本地图片资源 (保持你原有的引用)
 import wikiImage1 from '../../../resources/image/shutokowiki/SCR-20251109-teqy.jpeg';
@@ -13,6 +14,10 @@ import wikiImage2 from '../../../resources/image/shutokowiki/SCR-20251109-tqkp.j
 // 导入地图资源
 import c1Map from '../../../resources/image/shutokowiki/map/c1_full_map.svg';
 import newCircularMap from '../../../resources/image/shutokowiki/map/new_circular_full_map.svg';
+// 导入首都高 Logo
+import shutokoLogo2 from '../../../resources/image/shutokowiki/logo/shutoko_logo_2.svg';
+import shutokoLogo3 from '../../../resources/image/shutokowiki/logo/shutoko_logo_3.svg';
+import shutokoLogo4 from '../../../resources/image/shutokowiki/logo/shutoko_logo_4.svg';
 
 // --- 1. 数据定义 ---
 interface WikiArticle {
@@ -183,6 +188,23 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     const [view, setView] = useState<'grid' | 'detail'>('grid');
     const [activeArticle, setActiveArticle] = useState<WikiArticle | null>(null);
     const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
+    const [selectedLogo, setSelectedLogo] = useState<2 | 3 | 4>(2);
+    const [logoSize, setLogoSize] = useState<number>(120);
+
+    // Logo 映射
+    const logoMap: Record<2 | 3 | 4, string> = {
+        2: shutokoLogo2,
+        3: shutokoLogo3,
+        4: shutokoLogo4
+    };
+
+    // Logo 默认尺寸映射（根据版本自动调整）
+    const getLogoSize = (): number => {
+        if (selectedLogo === 2 || selectedLogo === 3) {
+            return logoSize; // 使用自定义尺寸
+        }
+        return 80; // Logo 4 保持较小尺寸
+    };
 
     // --- 持久化逻辑：管理已读状态 ---
     // 从 localStorage 加载已读文章 ID 列表
@@ -198,7 +220,7 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     }, []);
 
     // 辅助函数：标记文章为已读并更新 localStorage
-    const markAsRead = (id: string) => {
+    const markAsRead = (id: string): void => {
         if (!readArticles.has(id)) {
             const newReadArticles = new Set(readArticles);
             newReadArticles.add(id);
@@ -209,7 +231,7 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     };
 
     // --- 开发者选项集成 ---
-    const resetReadStatus = () => {
+    const resetReadStatus = (): void => {
         setReadArticles(new Set());
         localStorage.removeItem('shutoko_wiki_read_articles');
     };
@@ -242,10 +264,53 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
             order: 10
         });
 
+        registerDevOption({
+            id: 'wiki-logo-selector',
+            label: '首都高 Logo 选择',
+            component: (
+                <div style={{ padding: '4px 0' }}>
+                    <div style={{ marginBottom: 8, fontSize: '12px', color: '#aaa' }}>
+                        选择概览卡片使用的 Logo 版本
+                    </div>
+                    <Select
+                        value={selectedLogo}
+                        onChange={(value) => setSelectedLogo(value as 2 | 3 | 4)}
+                        style={{ width: '100%', marginBottom: 12 }}
+                        size="small"
+                    >
+                        <Select.Option value={2}>Logo 2</Select.Option>
+                        <Select.Option value={3}>Logo 3</Select.Option>
+                        <Select.Option value={4}>Logo 4</Select.Option>
+                    </Select>
+                    {(selectedLogo === 2 || selectedLogo === 3) && (
+                        <div style={{ marginBottom: 8 }}>
+                            <div style={{ marginBottom: 4, fontSize: '12px', color: '#aaa' }}>
+                                Logo {selectedLogo} 尺寸 (px)
+                            </div>
+                            <InputNumber
+                                value={logoSize}
+                                onChange={(value) => setLogoSize(value as number || 120)}
+                                min={60}
+                                max={200}
+                                step={10}
+                                style={{ width: '100%' }}
+                                size="small"
+                            />
+                        </div>
+                    )}
+                    <div style={{ marginTop: 8, fontSize: '12px', color: '#666', lineHeight: 1.2 }}>
+                        当前选择: Logo {selectedLogo} ({getLogoSize()}px)
+                    </div>
+                </div>
+            ),
+            order: 11
+        });
+
         return () => {
             unregisterDevOption('wiki-reset-read');
+            unregisterDevOption('wiki-logo-selector');
         };
-    }, [readArticles, registerDevOption, unregisterDevOption]);
+    }, [readArticles, selectedLogo, logoSize, registerDevOption, unregisterDevOption]);
 
     const openArticle = (article: WikiArticle): void => {
         markAsRead(article.id);
@@ -293,7 +358,7 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                 }
             } else if (fullText === '[[VIDEO_TUTORIAL]]') {
                 // 向后兼容旧语法：如果 activeArticle 有 videos 属性则使用（虽然现在 WikiArticle 接口已移除 videos，但运行时可能还存在）
-                const legacyArticle = activeArticle as any;
+                const legacyArticle = activeArticle as WikiArticle & { videos?: VideoData[] };
                 if (legacyArticle && legacyArticle.videos && legacyArticle.videos.length > 0) {
                     return <VideoTutorialSection
                         key={`${activeArticle?.id}-${region}`}
@@ -338,11 +403,10 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
             <Header style={{ padding: '20px 40px', background: BG_DARK }}>
-                <Breadcrumb>
-                    <Breadcrumb.Item icon={<IconHome />} onClick={goBack} style={{ cursor: 'pointer' }}>首页</Breadcrumb.Item>
-                    <Breadcrumb.Item onClick={goBack} style={{ cursor: 'pointer' }}>首都高百科</Breadcrumb.Item>
-                    {view === 'detail' && <Breadcrumb.Item>{activeArticle?.title}</Breadcrumb.Item>}
-                </Breadcrumb>
+                <HomeBreadcrumb
+                    current={view === 'detail' ? (activeArticle?.title ?? '') : '首都高百科'}
+                    trail={view === 'detail' ? [{ label: '首都高百科', onClick: goBack }] : []}
+                />
             </Header>
 
             <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
@@ -434,10 +498,20 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                                                         ) : item.id === 'new_loop' ? (
                                                             <img src={newCircularMap} alt="New Circular Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
                                                         ) : item.id === 'overview' ? (
-                                                            /* 首都高概览图标 - 东京塔风格 */
-                                                            <svg width="80" height="80" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}>
-                                                                <path d="M50 10 L80 90 H20 L50 10 Z M50 10 V 90 M30 65 H70" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                                                            </svg>
+                                                            /* 首都高概览图标 - 使用 Logo */
+                                                            <img
+                                                                src={logoMap[selectedLogo]}
+                                                                alt="Shutoko Logo"
+                                                                className="map-icon"
+                                                                style={{
+                                                                    width: getLogoSize(),
+                                                                    height: getLogoSize(),
+                                                                    opacity: 0.9,
+                                                                    marginBottom: 15,
+                                                                    filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))',
+                                                                    objectFit: 'contain'
+                                                                }}
+                                                            />
                                                         ) : item.id === 'driving_tech' ? (
                                                             /* 驾驶技巧图标 - 方向盘 */
                                                             <svg width="80" height="80" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}>

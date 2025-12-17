@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-import { Layout, Button, Row, Col, Typography, Tag, Space, Progress, Card, List, Toast, Banner, Modal, Descriptions } from '@douyinfe/semi-ui';
+import { Layout, Button, Row, Col, Typography, Tag, Progress, Card, List, Toast, Banner, Modal } from '@douyinfe/semi-ui';
 
 import {
 
-    IconHome, IconDownload, IconRefresh, IconTickCircle, IconFolder, IconAlertTriangle, IconArrowRight, IconPlay
+    IconTickCircle, IconAlertTriangle, IconArrowRight, IconPlay
 
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 // --- 1. 定义数据源：目标安装包的版本 vs 本地已安装的状态 ---
 
@@ -188,8 +188,7 @@ export default function ShaderInstaller() {
 
             <Header style={{ padding: '20px 40px', background: BG_DARK, flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <BackToHomeButton variant="minimal" />
-                        <Title heading={5} style={{color:'white'}}>光影安装</Title>
+                        <HomeBreadcrumb current="光影安装" />
                     </div>
 
                 </Header>

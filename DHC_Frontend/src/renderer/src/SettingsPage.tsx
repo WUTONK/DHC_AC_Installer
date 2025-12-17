@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Layout, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Divider, Row, Col, Input, Banner } from '@douyinfe/semi-ui';
+import { Layout, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Row, Col, Input, Banner } from '@douyinfe/semi-ui';
 import {
     IconSetting, IconFolder, IconHelpCircle,
-    IconFile, IconHome, IconDownload, IconServer, IconTickCircle, IconAlertTriangle
+    IconFile, IconServer, IconTickCircle, IconAlertTriangle
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 const { Header, Content } = Layout;
-const { Title, Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 export default function SettingsPage(): React.JSX.Element {
     // --- 状态管理 ---
 
     // 1. 语言设置 (模拟系统语言检测)
-    const systemLang = 'zh_CN';
+    const systemLang: string = 'zh_CN';
     const [language, setLanguage] = useState<string>('zh_CN');
 
     // 2. 存储设置
@@ -44,7 +44,7 @@ export default function SettingsPage(): React.JSX.Element {
     const handleExportLog = (): void => {
         const loadingToast = Toast.info({ content: '正在打包日志文件...', duration: 0 });
         setTimeout(() => {
-            Toast.close(loadingToast.id);
+            Toast.close(loadingToast);
             Toast.success({
                 content: '导出成功！已保存至桌面 "DHC_ERROR_LOG" 文件夹',
                 duration: 4000
@@ -64,8 +64,7 @@ export default function SettingsPage(): React.JSX.Element {
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
             <Header style={{ padding: '20px 40px', background: BG_DARK, display: 'flex', alignItems: 'center', gap: 16 }}>
-                <BackToHomeButton variant="minimal" />
-                <Title heading={3} style={{ color: '#fff' }}>设置</Title>
+                <HomeBreadcrumb current="设置" />
             </Header>
                 <Content style={{ padding: '0 40px 40px 40px', overflowY: 'auto' }}>
 

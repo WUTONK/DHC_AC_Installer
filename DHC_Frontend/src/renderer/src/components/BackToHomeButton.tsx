@@ -3,9 +3,11 @@ import { Button } from '@douyinfe/semi-ui'
 import { IconHome } from '@douyinfe/semi-icons'
 import { useNavigation } from '../contexts/NavigationContext'
 
+type SemiButtonSize = NonNullable<React.ComponentProps<typeof Button>>['size']
+
 interface BackToHomeButtonProps {
   style?: React.CSSProperties
-  size?: 'small' | 'medium' | 'large'
+  size?: SemiButtonSize
   variant?: 'default' | 'minimal' // minimal 版本更小更简洁
 }
 

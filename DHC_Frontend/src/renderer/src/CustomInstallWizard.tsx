@@ -6,9 +6,9 @@ import {
 import {
     IconSetting,
     IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
-    IconCode, IconArrowLeft, IconList
+    IconCode, IconList
 } from '@douyinfe/semi-icons';
-import BackToHomeButton from './components/BackToHomeButton';
+import HomeBreadcrumb from './components/HomeBreadcrumb';
 import { useDevMode } from './contexts/DevModeContext';
 
 // =================================================================
@@ -163,8 +163,8 @@ export default function CustomInstallWizard(): JSX.Element {
                 zIndex: 10
             }}>
                 {/* 左侧：返回/标题 */}
-                <div style={{ width: 120, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <BackToHomeButton variant="minimal" />
+                <div style={{ minWidth: 260, display: 'flex', alignItems: 'center' }}>
+                    <HomeBreadcrumb current="自定义安装向导" />
                 </div>
 
                 {/* 中间：图1 风格的 Tab Bar */}

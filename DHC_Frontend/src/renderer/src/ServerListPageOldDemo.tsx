@@ -1,18 +1,13 @@
 import React, { useState } from 'react'
-import { Layout, Typography } from '@douyinfe/semi-ui'
+import { Layout } from '@douyinfe/semi-ui'
 import ServerCard from './components/serverCard'
 import JoinServerInstructionsModal from './components/joinServerInstructionsModal'
-import BackToHomeButton from './components/BackToHomeButton'
+import HomeBreadcrumb from './components/HomeBreadcrumb'
 
 const { Header, Content } = Layout
-const { Title } = Typography
 
 export default function ServerListPageOldDemo(): React.JSX.Element {
   const [modalVisible, setModalVisible] = useState(false)
-
-  const handleOpenModal = (): void => {
-    setModalVisible(true)
-  }
 
   const handleCloseModal = (): void => {
     setModalVisible(false)
@@ -24,7 +19,10 @@ export default function ServerListPageOldDemo(): React.JSX.Element {
   }
 
   return (
-    <Layout style={{ height: '100vh', background: '#16161a', color: 'white', overflow: 'hidden' }}>
+    <Layout
+      style={{ height: '100vh', background: '#16161a', color: 'white', overflow: 'hidden' }}
+      className="semi-always-dark"
+    >
       <Header
         style={{
           padding: '0 40px',
@@ -36,10 +34,7 @@ export default function ServerListPageOldDemo(): React.JSX.Element {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <BackToHomeButton variant="minimal" />
-          <Title heading={3} style={{ color: '#fff' }}>
-            服务器推荐（旧版DEMO）
-          </Title>
+          <HomeBreadcrumb current="服务器推荐（旧版DEMO）" />
         </div>
       </Header>
 
