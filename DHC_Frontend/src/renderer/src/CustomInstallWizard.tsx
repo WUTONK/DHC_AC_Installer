@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Layout, Button, Row, Col, Typography,
-    Tag, Checkbox, Toast, Input, Switch, Popover, Empty
+    Tag, Checkbox, Toast, Input, Switch, Popover, Empty, Banner
 } from '@douyinfe/semi-ui';
 import {
     IconSetting,
     IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
-    IconCode, IconList
+    IconCode, IconList, IconInfoCircle
 } from '@douyinfe/semi-icons';
 import HomeBreadcrumb from './components/HomeBreadcrumb';
 import { useDevMode } from './contexts/DevModeContext';
@@ -82,6 +82,24 @@ export default function CustomInstallWizard(): JSX.Element {
     const [selections, setSelections] = useState<Set<string>>(new Set(['cm']));
     const [localState, setLocalState] = useState<Record<string, boolean>>(INITIAL_DEBUG_STATE);
     const { registerDevOption, unregisterDevOption } = useDevMode();
+
+    // --- Helpers ---
+    // 获取当前步骤对应的所有资源 ID
+    const getCurrentStepResources = useCallback((stepIndex: number) => {
+        switch (stepIndex) {
+            case 0: return RESOURCES.manager;
+            case 1: return RESOURCES.maps;
+            case 2: return RESOURCES.cars;
+            case 3: return RESOURCES.shaders;
+            default: return [];
+        }
+    }, []);
+
+    // 判断当前步骤是否有选中的项目
+    const hasCurrentSelection = useMemo(() => {
+        const currentResources = getCurrentStepResources(currentStep);
+        return currentResources.some(item => selections.has(item.id));
+    }, [currentStep, selections, getCurrentStepResources]);
 
     // --- Actions ---
     const toggleSelection = (id: string): void => {
@@ -218,6 +236,25 @@ export default function CustomInstallWizard(): JSX.Element {
                 flexDirection: 'column'
             }}>
                 <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', flex: '0 0 auto' }}>
+                    {/* 顶部全局提示 Banner */}
+                    <Banner
+                        fullMode={false}
+                        type="info"
+                        icon={<IconInfoCircle style={{color: '#ccc'}} />}
+                        closeIcon={null}
+                        description={
+                            <div style={{ fontSize: 13, color: '#ccc' }}>
+                                流程说明：请在每个步骤勾选您需要的资源，点击"下一步"保存选择。
+                                <span style={{ color: THEME.green, marginLeft: 8 }}>所有选中的模组将在最后统一进行安装。</span>
+                            </div>
+                        }
+                        style={{
+                            marginBottom: 20,
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid #333',
+                            borderRadius: 8
+                        }}
+                    />
                     {renderContent()}
                 </div>
             </Content>
