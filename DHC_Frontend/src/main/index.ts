@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { spawn, ChildProcess } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -51,7 +51,9 @@ function stopBackend(): void {
 function createMenu(): void {
   const isMac = process.platform === 'darwin'
 
-  const template: any[] = [
+  // Electron's menu typing is quite strict across versions; keep runtime-safe structure,
+  // and cast once to avoid verbose per-item literal typing.
+  const template = ([
     // { role: 'appMenu' }
     ...(isMac
       ? [
@@ -144,13 +146,12 @@ function createMenu(): void {
         {
           label: 'Learn More',
           click: async () => {
-            const { shell } = require('electron')
             await shell.openExternal('https://electronjs.org')
           }
         }
       ]
     }
-  ]
+  ] as unknown) as Electron.MenuItemConstructorOptions[]
 
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
@@ -279,6 +280,21 @@ app.commandLine.appendSwitch('--disable-site-isolation-trials')
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // Ensure macOS Dock/app name is not the default "Electron" (especially in dev)
+  app.setName('DHC')
+
+  // Ensure macOS Dock icon matches our app icon (especially in dev)
+  if (process.platform === 'darwin') {
+    try {
+      const dockIcon = nativeImage.createFromPath(icon)
+      if (!dockIcon.isEmpty()) {
+        app.dock?.setIcon(dockIcon)
+      }
+    } catch (e) {
+      console.warn('Failed to set Dock icon:', e)
+    }
+  }
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.dhc.acinstaller')
 

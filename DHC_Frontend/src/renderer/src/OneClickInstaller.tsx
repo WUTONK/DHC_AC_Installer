@@ -143,17 +143,40 @@ type InstallStep = 'SELECT_MODE' | 'PRE_CHECK' | 'INSTALLING' | 'POST_INSTALL';
 
 export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
-    const [isDiagnosing, setIsDiagnosing] = useState<boolean>(true); // 是否正在诊断
+    // 开发者调试：地区
+    const [devRegionCN, setDevRegionCN] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devRegionCN');
+        return saved !== null ? saved === 'true' : true;
+    });
+    // 开发者调试：模拟启动时检测到光影冲突
+    const [devSimulateConflict, setDevSimulateConflict] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devSimulateConflict');
+        return saved !== null ? saved === 'true' : false;
+    });
+
+    // 根据开发者选项初始化诊断状态（使用函数初始化确保读取到正确的值）
+    const [isDiagnosing, setIsDiagnosing] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devSimulateConflict');
+        return saved !== null ? saved === 'true' : false;
+    }); // 是否正在诊断
     const [mode, setMode] = useState<'normal' | 'clean_install'>('normal'); // 'normal' | 'clean_install'
     const [selectedModeId, setSelectedModeId] = useState<string>('standard'); // 默认选中标准版
     const [currentStep, setCurrentStep] = useState<InstallStep>('SELECT_MODE'); // 安装步骤
 
-    // 开发者调试：地区
-    const [devRegionCN, setDevRegionCN] = useState<boolean>(true);
     const { registerDevOption, unregisterDevOption } = useDevMode();
 
-    // 注册地区模拟选项到开发者面板
+    // 持久化开发者选项状态
     useEffect(() => {
+        localStorage.setItem('devRegionCN', String(devRegionCN));
+    }, [devRegionCN]);
+
+    useEffect(() => {
+        localStorage.setItem('devSimulateConflict', String(devSimulateConflict));
+    }, [devSimulateConflict]);
+
+    // 注册开发者选项到开发者面板
+    useEffect(() => {
+        // 选项 1: 地区模拟
         registerDevOption({
             id: 'oneclick-installer-region',
             label: '地区模拟（一键式安装）',
@@ -172,10 +195,30 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
             order: 2
         });
 
+        // 选项 2: 启动冲突检测模拟
+        registerDevOption({
+            id: 'oneclick-installer-conflict',
+            label: '模拟：启动时检测到光影冲突',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devSimulateConflict}
+                        onChange={(checked) => setDevSimulateConflict(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devSimulateConflict ? '开启' : '关闭'}
+                    </span>
+                </div>
+            ),
+            order: 3
+        });
+
         return () => {
             unregisterDevOption('oneclick-installer-region');
+            unregisterDevOption('oneclick-installer-conflict');
         };
-    }, [registerDevOption, unregisterDevOption, devRegionCN]);
+    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);
@@ -199,22 +242,27 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     // 冲突检测状态
     const [conflictModalVisible, setConflictModalVisible] = useState<boolean>(false);
 
-    // 启动时的冲突检测弹窗
-    const [initConflictVisible, setInitConflictVisible] = useState<boolean>(false);
+    // 启动时的冲突检测弹窗（初始值根据开发者选项设置，使用函数初始化确保读取到正确的值）
+    const [initConflictVisible, setInitConflictVisible] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devSimulateConflict');
+        return saved !== null ? saved === 'true' : false;
+    });
 
     // 获取当前选中的模式对象
     const currentMode = useMemo(() => INSTALL_MODES.find(m => m.id === selectedModeId) || INSTALL_MODES[1], [selectedModeId]);
 
-    // --- 1. 启动时检测逻辑 ---
+    // --- 1. 启动时检测逻辑 (修改后：受开发者模式控制) ---
     useEffect(() => {
-        // 模拟：检测到本地已经安装了 CSP 或 Sol
-        const hasExistingShaders = true;
-        if (hasExistingShaders) {
+        // 如果开发者开关开启，则模拟检测到冲突
+        if (devSimulateConflict) {
+            setIsDiagnosing(true);
             setInitConflictVisible(true);
         } else {
+            // 默认情况下，直接跳过检测，进入主界面
             setIsDiagnosing(false);
+            setInitConflictVisible(false);
         }
-    }, []);
+    }, [devSimulateConflict]);
 
     // 进入预检查后自动检测 CM 与 DLC 状态（可替换为后端接口）
     useEffect(() => {
@@ -898,7 +946,7 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                         style={{ backgroundColor: 'rgba(35, 35, 38, 0.8)', borderColor: '#444', borderRadius: 8 }}
                         description={
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                <div>
+                                <div style={{ flex: 1 }}>
                                     {/* [修复]: 强制 Title 和 Text 颜色 */}
                                     <Text strong style={{ color: '#fff', fontSize: 15 }}>需要更个性化的选择？</Text>
                                     <div style={{ marginTop: 4 }}>
@@ -907,6 +955,24 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                                         </Text>
                                     </div>
                                 </div>
+                                <Button
+                                    theme="solid"
+                                    type="primary"
+                                    icon={<IconArrowRight />}
+                                    style={{
+                                        backgroundColor: '#00b5ad',
+                                        color: '#fff',
+                                        marginLeft: 16,
+                                        flexShrink: 0
+                                    }}
+                                    onClick={() => {
+                                        if (onNavigate) {
+                                            onNavigate('CustomInstallWizard');
+                                        }
+                                    }}
+                                >
+                                    前往自定义安装
+                                </Button>
                             </div>
                         }
                     />
@@ -965,38 +1031,43 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     };
 
 
+    // 启动检测弹窗（始终渲染在顶层）
+    const renderInitConflictModal = (): React.JSX.Element => (
+        <Modal
+            title="检测到已安装光影模组"
+            icon={<IconAlertTriangle style={{ color: '#ff9f43' }} size="extra-large" />}
+            visible={initConflictVisible}
+            closable={false}
+            maskClosable={false}
+            okText="是的，我要修复问题"
+            cancelText="不是，我只是想更新/覆盖"
+            style={{ maxWidth: 500 }}
+            onOk={() => {
+                setMode('clean_install');
+                setInitConflictVisible(false);
+                setIsDiagnosing(false);
+            }}
+            onCancel={() => {
+                setMode('normal');
+                setInitConflictVisible(false);
+                setIsDiagnosing(false);
+            }}
+        >
+            <div>
+                <p>检测到您的游戏中已经安装了 CSP 或 Sol。</p>
+                <p style={{ fontWeight: 'bold', marginTop: 10 }}>您是因为遇到游戏崩溃、黑屏或光影失效才使用此安装器的吗？</p>
+            </div>
+        </Modal>
+    );
+
     if (isDiagnosing) {
         return (
-            <Layout style={{ minHeight: '100vh', background: '#16161a', padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: '#fff' }}>正在检测游戏环境...</Text>
-
-                {/* 启动检测弹窗（在 loading 界面之上） */}
-                <Modal
-                    title="检测到已安装光影模组"
-                    icon={<IconAlertTriangle style={{ color: '#ff9f43' }} size="extra-large" />}
-                    visible={initConflictVisible}
-                    closable={false}
-                    maskClosable={false}
-                    okText="是的，我要修复问题"
-                    cancelText="不是，我只是想更新/覆盖"
-                    style={{ maxWidth: 500 }}
-                    onOk={() => {
-                        setMode('clean_install');
-                        setInitConflictVisible(false);
-                        setIsDiagnosing(false);
-                    }}
-                    onCancel={() => {
-                        setMode('normal');
-                        setInitConflictVisible(false);
-                        setIsDiagnosing(false);
-                    }}
-                >
-                    <div>
-                        <p>检测到您的游戏中已经安装了 CSP 或 Sol。</p>
-                        <p style={{ fontWeight: 'bold', marginTop: 10 }}>您是因为遇到游戏崩溃、黑屏或光影失效才使用此安装器的吗？</p>
-                    </div>
-                </Modal>
-            </Layout>
+            <>
+                <Layout style={{ minHeight: '100vh', background: '#16161a', padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: '#fff' }}>正在检测游戏环境...</Text>
+                </Layout>
+                {renderInitConflictModal()}
+            </>
         );
     }
 
@@ -1019,10 +1090,13 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     };
 
     return (
-        <Layout style={{ minHeight: '100vh', background: '#16161a', color: 'white', padding: 40 }}>
-            <Content>
-                {renderContent()}
-            </Content>
-        </Layout>
+        <>
+            <Layout style={{ minHeight: '100vh', background: '#16161a', color: 'white', padding: 40 }}>
+                <Content>
+                    {renderContent()}
+                </Content>
+            </Layout>
+            {renderInitConflictModal()}
+        </>
     );
 }

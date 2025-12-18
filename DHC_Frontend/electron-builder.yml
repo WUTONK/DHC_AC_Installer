@@ -1,5 +1,5 @@
 appId: com.dhc.acinstaller
-productName: DHC AC Installer
+productName: DHC
 version: 1.0.0
 directories:
   buildResources: build
@@ -37,6 +37,9 @@ win:
       arch:
         - x64
         - ia32
+  icon: build/icon.ico
+mac:
+  icon: build/icon.icns
 nsis:
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   shortcutName: ${productName}
