@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Button, Typography, Row, Col, Tag, Select, InputNumber } from '@douyinfe/semi-ui';
 import { IconArrowLeft } from '@douyinfe/semi-icons';
 import ReactMarkdown, { Components } from 'react-markdown';
@@ -189,7 +189,7 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     const [activeArticle, setActiveArticle] = useState<WikiArticle | null>(null);
     const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
     const [selectedLogo, setSelectedLogo] = useState<2 | 3 | 4>(2);
-    const [logoSize, setLogoSize] = useState<number>(120);
+    const [logoSize, setLogoSize] = useState<number>(200);
 
     // Logo 映射
     const logoMap: Record<2 | 3 | 4, string> = {
@@ -199,12 +199,12 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     };
 
     // Logo 默认尺寸映射（根据版本自动调整）
-    const getLogoSize = (): number => {
+    const getLogoSize = useCallback((): number => {
         if (selectedLogo === 2 || selectedLogo === 3) {
             return logoSize; // 使用自定义尺寸
         }
         return 80; // Logo 4 保持较小尺寸
-    };
+    }, [selectedLogo, logoSize]);
 
     // --- 持久化逻辑：管理已读状态 ---
     // 从 localStorage 加载已读文章 ID 列表
@@ -289,9 +289,9 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                             </div>
                             <InputNumber
                                 value={logoSize}
-                                onChange={(value) => setLogoSize(value as number || 120)}
+                                onChange={(value) => setLogoSize(value as number || 200)}
                                 min={60}
-                                max={200}
+                                max={400}
                                 step={10}
                                 style={{ width: '100%' }}
                                 size="small"
@@ -310,7 +310,7 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
             unregisterDevOption('wiki-reset-read');
             unregisterDevOption('wiki-logo-selector');
         };
-    }, [readArticles, selectedLogo, logoSize, registerDevOption, unregisterDevOption]);
+    }, [readArticles, selectedLogo, logoSize, getLogoSize, registerDevOption, unregisterDevOption]);
 
     const openArticle = (article: WikiArticle): void => {
         markAsRead(article.id);
@@ -499,19 +499,42 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                                                             <img src={newCircularMap} alt="New Circular Map" className="map-icon" style={{ width: 60, height: 60, opacity: 0.8, marginBottom: 15, filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))', objectFit: 'contain' }} />
                                                         ) : item.id === 'overview' ? (
                                                             /* 首都高概览图标 - 使用 Logo */
-                                                            <img
-                                                                src={logoMap[selectedLogo]}
-                                                                alt="Shutoko Logo"
-                                                                className="map-icon"
-                                                                style={{
-                                                                    width: getLogoSize(),
-                                                                    height: getLogoSize(),
-                                                                    opacity: 0.9,
-                                                                    marginBottom: 15,
-                                                                    filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))',
-                                                                    objectFit: 'contain'
-                                                                }}
-                                                            />
+                                                            <div style={{
+                                                                width: 80,  // 这里的 80px 负责占位，保证和右边卡片对齐，不顶文字
+                                                                height: 80,
+                                                                position: 'relative',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                marginBottom: 15,
+                                                                flexShrink: 0 // 防止容器本身被压缩
+                                                            }}>
+                                                                <img
+                                                                    src={logoMap[selectedLogo]}
+                                                                    alt="Shutoko Logo"
+                                                                    className="map-icon"
+                                                                    style={{
+                                                                        /* 设定你想要的尺寸 */
+                                                                        width: getLogoSize(),
+                                                                        height: getLogoSize(),
+
+                                                                        /* 核心修复：允许图片超出父容器限制 */
+                                                                        maxWidth: 'none',
+                                                                        maxHeight: 'none',
+
+                                                                        /* 绝对定位居中逻辑 */
+                                                                        position: 'absolute',
+                                                                        top: '50%',
+                                                                        left: '50%',
+                                                                        transform: 'translate(-50%, -50%)',
+
+                                                                        opacity: 0.9,
+                                                                        objectFit: 'contain',
+                                                                        filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))',
+                                                                        zIndex: 1 // 确保图片不会被奇怪的层级遮挡，但如果在文字下方可移除
+                                                                    }}
+                                                                />
+                                                            </div>
                                                         ) : item.id === 'driving_tech' ? (
                                                             /* 驾驶技巧图标 - 方向盘 */
                                                             <svg width="80" height="80" viewBox="0 0 100 100" className="map-icon" style={{ opacity: 0.9, marginBottom: 15, filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' }}>

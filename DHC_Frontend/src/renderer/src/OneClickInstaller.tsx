@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag, Switch } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
-    IconDownload, IconFile, IconSetting, IconHelpCircle
+    IconDownload, IconFile, IconSetting, IconHelpCircle, IconBox, IconUpload, IconCloud
 } from '@douyinfe/semi-icons';
 import InstallProgressPage from './InstallProgressPage';
 import { useDevMode } from './contexts/DevModeContext';
@@ -154,6 +154,16 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         return saved !== null ? saved === 'true' : false;
     });
 
+    // [新增] 开发者调试：资源模拟状态
+    const [devResourceImported, setDevResourceImported] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devResourceImported');
+        return saved !== null ? saved === 'true' : false;
+    });
+    const [devResourceComplete, setDevResourceComplete] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devResourceComplete');
+        return saved !== null ? saved === 'true' : true;
+    });
+
     // 根据开发者选项初始化诊断状态（使用函数初始化确保读取到正确的值）
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(() => {
         const saved = localStorage.getItem('devSimulateConflict');
@@ -173,6 +183,14 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     useEffect(() => {
         localStorage.setItem('devSimulateConflict', String(devSimulateConflict));
     }, [devSimulateConflict]);
+
+    useEffect(() => {
+        localStorage.setItem('devResourceImported', String(devResourceImported));
+    }, [devResourceImported]);
+
+    useEffect(() => {
+        localStorage.setItem('devResourceComplete', String(devResourceComplete));
+    }, [devResourceComplete]);
 
     // 注册开发者选项到开发者面板
     useEffect(() => {
@@ -214,11 +232,51 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
             order: 3
         });
 
+        // [新增] 选项 3: 资源已导入模拟
+        registerDevOption({
+            id: 'oneclick-resource-imported',
+            label: '模拟：资源已导入',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devResourceImported}
+                        onChange={(checked) => setDevResourceImported(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devResourceImported ? '开启' : '关闭'}
+                    </span>
+                </div>
+            ),
+            order: 4
+        });
+
+        // [新增] 选项 4: 资源完整性校验通过模拟
+        registerDevOption({
+            id: 'oneclick-resource-complete',
+            label: '模拟：资源完整性校验通过',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devResourceComplete}
+                        onChange={(checked) => setDevResourceComplete(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devResourceComplete ? '开启' : '关闭'}
+                    </span>
+                </div>
+            ),
+            order: 5
+        });
+
         return () => {
             unregisterDevOption('oneclick-installer-region');
             unregisterDevOption('oneclick-installer-conflict');
+            unregisterDevOption('oneclick-resource-imported');
+            unregisterDevOption('oneclick-resource-complete');
         };
-    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict]);
+    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devResourceImported, devResourceComplete]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);
@@ -227,6 +285,13 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     const [keyTutorialVisible, setKeyTutorialVisible] = useState<boolean>(false);
     const [taobaoTutorialVisible, setTaobaoTutorialVisible] = useState<boolean>(false);
     const [checkingEnv, setCheckingEnv] = useState<boolean>(false);
+
+    // [新增] 资源检测相关状态
+    const [checkingResources, setCheckingResources] = useState<boolean>(false);
+    const [resourceState, setResourceState] = useState<{ imported: boolean; complete: boolean }>({ imported: false, complete: false });
+    const [resourceDownloadVisible, setResourceDownloadVisible] = useState<boolean>(false);
+    const [importingProgress, setImportingProgress] = useState<number>(0); // 模拟导入进度
+    const [deletePackageAfterInstall, setDeletePackageAfterInstall] = useState<boolean>(false); // 安装后删除包选项
 
     // CM 安装状态
     const [cmInstalling, setCmInstalling] = useState<boolean>(false);
@@ -264,17 +329,26 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         }
     }, [devSimulateConflict]);
 
-    // 进入预检查后自动检测 CM 与 DLC 状态（可替换为后端接口）
+    // 进入预检查后自动检测 CM、DLC 和资源状态（可替换为后端接口）
     useEffect(() => {
         if (currentStep !== 'PRE_CHECK') return;
         setCheckingEnv(true);
+        setCheckingResources(true);
+        // 模拟并行检测
         const timer = setTimeout(() => {
             setCmInstalled(false); // TODO: 替换为后端返回
             setHasAllDLC(false);   // TODO: 替换为后端返回
             setCheckingEnv(false);
-        }, 400);
+
+            // 资源检测结果 (基于 DevMode)
+            setResourceState({
+                imported: devResourceImported,
+                complete: devResourceComplete
+            });
+            setCheckingResources(false);
+        }, 600);
         return () => clearTimeout(timer);
-    }, [currentStep]);
+    }, [currentStep, devResourceImported, devResourceComplete]);
 
     // --- 辅助函数：格式化大小 ---
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
@@ -368,6 +442,23 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         }, 100);
     };
 
+    // [新增] 模拟导入资源文件动作
+    const handleImportResource = (): void => {
+        setImportingProgress(1);
+        const timer = setInterval(() => {
+            setImportingProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(timer);
+                    setResourceState({ imported: true, complete: devResourceComplete }); // 导入后状态取决于完整性开关
+                    setImportingProgress(0);
+                    Toast.success('资源包导入成功！');
+                    return 0;
+                }
+                return prev + 10;
+            });
+        }, 100);
+    };
+
     const renderMarkdownModal = (
         visible: boolean,
         setVisible: React.Dispatch<React.SetStateAction<boolean>>,
@@ -393,8 +484,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     );
 
     const renderPreCheckPage = (): React.JSX.Element => {
+        // 判断是否允许开始安装：资源必须已导入且完整
+        const canStartInstall = resourceState.imported && resourceState.complete;
+
         return (
-            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
+            <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px', paddingBottom: '40px' }}>
                 <Button
                     icon={<IconArrowRight style={{ transform: 'rotate(180deg)' }} />}
                     onClick={() => setCurrentStep('SELECT_MODE')}
@@ -405,7 +499,104 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                 </Button>
 
                 <Title heading={3} style={{ color: 'var(--semi-color-text-0)', marginBottom: 12 }}>环境检查与准备</Title>
-                <Text type="tertiary">确保 Content Manager 与所需 DLC 就绪，再开始安装。</Text>
+                <Text type="tertiary">正在为 <Text strong style={{color: currentMode.color}}>{currentMode.name}</Text> 准备环境，请确保以下项就绪。</Text>
+
+                {/* 1. 本地资源包检测 (新增) */}
+                <Card
+                    title={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <IconBox style={{ color: canStartInstall ? '#6bc786' : '#ff9f43' }} />
+                            <span>资源包就绪状态 (必要)</span>
+                        </div>
+                    }
+                    style={{ backgroundColor: '#232326', border: canStartInstall ? '1px solid #444' : '1px solid #ff9f43', marginTop: 20, marginBottom: 16 }}
+                    headerStyle={{ borderBottom: '1px solid #333', color: '#fff' }}
+                >
+                    {checkingResources ? (
+                        <div style={{ padding: 20, textAlign: 'center' }}>
+                            <Space>
+                                <IconRefresh style={{ animation: 'spin 1s linear infinite' }} />
+                                <Text>正在扫描本地资源缓存...</Text>
+                            </Space>
+                        </div>
+                    ) : (
+                        <div>
+                            {/* 情况 A: 未导入 */}
+                            {!resourceState.imported && (
+                                <div>
+                                    <Banner
+                                        type="warning"
+                                        bordered
+                                        icon={<IconAlertTriangle />}
+                                        description="未检测到所需的安装包资源。请先获取资源并导入。"
+                                        style={{ marginBottom: 16, backgroundColor: 'rgba(255, 159, 67, 0.1)' }}
+                                    />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 8 }}>
+                                        <div>
+                                            <Text style={{ color: '#ccc', display: 'block', marginBottom: 4 }}>方式一：从群文件/网盘下载</Text>
+                                            <Text type="tertiary" size="small">下载 <Text code>DHC_{currentMode.id}_v1.0.7z</Text> 后，拖入或手动选择。</Text>
+                                        </div>
+                                        <Space>
+                                            <Button theme="light" icon={<IconCloud />} onClick={() => setResourceDownloadVisible(true)}>获取资源链接</Button>
+                                            <Button theme="solid" icon={<IconUpload />} onClick={handleImportResource} loading={importingProgress > 0}>
+                                                {importingProgress > 0 ? `导入中 ${importingProgress}%` : '选择本地文件导入'}
+                                            </Button>
+                                        </Space>
+                                    </div>
+                                    {importingProgress > 0 && (
+                                        <Progress percent={importingProgress} stroke={currentMode.color} style={{height: 4, marginTop: 16}} />
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 情况 B: 已导入但损坏 */}
+                            {resourceState.imported && !resourceState.complete && (
+                                <div>
+                                    <Banner
+                                        type="danger"
+                                        bordered
+                                        description="资源包校验失败！文件可能损坏或不完整 (MD5 Mismatch)。"
+                                        style={{ marginBottom: 16, backgroundColor: 'rgba(255, 77, 79, 0.1)' }}
+                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                        <Button theme="solid" type="danger" icon={<IconRefresh />} onClick={handleImportResource}>重新导入资源包</Button>
+                                        <Text type="tertiary">建议重新下载资源包后再次尝试。</Text>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 情况 C: 就绪 */}
+                            {resourceState.imported && resourceState.complete && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                        <IconTickCircle size="extra-large" style={{ color: '#6bc786' }} />
+                                        <div>
+                                            <Text style={{ color: '#6bc786', fontWeight: 'bold', fontSize: 16 }}>资源包已就绪</Text>
+                                            <div style={{ marginTop: 4 }}>
+                                                <Text type="tertiary" size="small">完整性校验通过，可以开始安装。</Text>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ borderLeft: '1px solid #444', paddingLeft: 20 }}>
+                                        <Checkbox
+                                            checked={deletePackageAfterInstall}
+                                            onChange={(e) => {
+                                                const checked = (e.target as HTMLInputElement).checked;
+                                                setDeletePackageAfterInstall(checked);
+                                            }}
+                                        >
+                                            <Text style={{ color: '#ccc' }}>安装完成后删除源文件</Text>
+                                        </Checkbox>
+                                        <div style={{ marginTop: 4 }}>
+                                            <Text type="tertiary" size="small">释放约 {formatSize(currentMode.size)} 磁盘空间</Text>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </Card>
 
                 <Card
                     title={
@@ -547,19 +738,56 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     )}
                 </Card>
 
-                <div style={{ textAlign: 'center', marginTop: 30 }}>
+                <div style={{ textAlign: 'center', marginTop: 30, marginBottom: 20 }}>
                     <Button
                         theme="solid"
                         size="large"
-                        style={{ width: 320, height: 56, fontSize: 16, fontWeight: 'bold', backgroundColor: currentMode.color }}
+                        disabled={!canStartInstall}
+                        style={{
+                            width: 320,
+                            height: 56,
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            backgroundColor: canStartInstall ? currentMode.color : '#444',
+                            cursor: canStartInstall ? 'pointer' : 'not-allowed'
+                        }}
                         onClick={startRealInstall}
                     >
-                        确认环境并开始安装
+                        {canStartInstall ? '确认环境并开始安装' : '请先准备资源包'}
                     </Button>
-                    <div style={{ marginTop: 10 }}>
+                    {!canStartInstall && (
+                        <div style={{ marginTop: 12 }}>
+                            <Text type="tertiary">您需要先导入并校验通过资源包才能继续</Text>
+                        </div>
+                    )}
+                    {canStartInstall && (
+                    <div style={{ marginTop: 12 }}>
                         <Checkbox defaultChecked>我已阅读并知晓上述提示</Checkbox>
                     </div>
+                    )}
                 </div>
+
+                {/* 资源下载链接 Modal */}
+                <Modal
+                    visible={resourceDownloadVisible}
+                    onCancel={() => setResourceDownloadVisible(false)}
+                    title="获取资源包"
+                    footer={null}
+                    style={{ maxWidth: 500 }}
+                >
+                    <List>
+                        <List.Item
+                            main={<Text link onClick={() => window.open('https://example.com/qq-group', '_blank')}>QQ群文件下载 (推荐)</Text>}
+                            extra={<Text type="tertiary">群号: 888888</Text>}
+                        />
+                        <List.Item
+                            main={<Text link onClick={() => window.open('https://pan.baidu.com/example', '_blank')}>百度网盘 (提取码: 1234)</Text>}
+                        />
+                        <List.Item
+                            main={<Text link onClick={() => window.open('https://123pan.com/example', '_blank')}>123 云盘 (不限速)</Text>}
+                        />
+                    </List>
+                </Modal>
 
                 {renderMarkdownModal(cmTutorialVisible, setCmTutorialVisible, 'CM 配置教程', MD_CM_CONFIG)}
                 {renderMarkdownModal(keyTutorialVisible, setKeyTutorialVisible, 'CDKey 激活教程', MD_CDKEY_USAGE)}
@@ -1063,8 +1291,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     if (isDiagnosing) {
         return (
             <>
-                <Layout style={{ minHeight: '100vh', background: '#16161a', padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: '#fff' }}>正在检测游戏环境...</Text>
+                <Layout style={{ minHeight: '100vh', background: '#16161a', overflow: 'auto' }}>
+                    <Content style={{ padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: '#fff' }}>正在检测游戏环境...</Text>
+                    </Content>
                 </Layout>
                 {renderInitConflictModal()}
             </>
@@ -1091,8 +1321,8 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
 
     return (
         <>
-            <Layout style={{ minHeight: '100vh', background: '#16161a', color: 'white', padding: 40 }}>
-                <Content>
+            <Layout style={{ height: '100vh', background: '#16161a', color: 'white', overflow: 'hidden' }}>
+                <Content style={{ padding: 40, overflowY: 'auto', height: '100%' }}>
                     {renderContent()}
                 </Content>
             </Layout>
