@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag, Switch } from '@douyinfe/semi-ui';
+import { Layout, Button, Typography, Modal, Steps, Card, Checkbox, Progress, Banner, Toast, List, Space, Row, Col, Tooltip, Divider, Tag, Switch, Slider, InputNumber } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconSave, IconRefresh, IconServer, IconFolder, IconArrowRight, IconTickCircle,
     IconDownload, IconFile, IconSetting, IconHelpCircle, IconBox, IconUpload, IconCloud
@@ -17,7 +17,7 @@ interface DiskInfo {
     free: number;  // bytes
 }
 
-const DISK_INFO: DiskInfo = {
+const DEFAULT_DISK_INFO: DiskInfo = {
     label: 'D:',
     total: 1024 * 1024 * 1024 * 1024, // 1TB
     used: 600 * 1024 * 1024 * 1024,   // 600GB Used
@@ -164,6 +164,23 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
         return saved !== null ? saved === 'true' : true;
     });
 
+    // [新增] 开发者调试：磁盘可用空间 (GB)
+    const [devDiskFreeGB, setDevDiskFreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskFreeGB');
+        return saved !== null ? Number(saved) : 424; // 默认 424GB
+    });
+
+    // 动态计算磁盘信息
+    const DISK_INFO = useMemo<DiskInfo>(() => {
+        const freeBytes = devDiskFreeGB * 1024 * 1024 * 1024;
+        return {
+            label: 'D:',
+            total: DEFAULT_DISK_INFO.total,
+            used: DEFAULT_DISK_INFO.total - freeBytes,
+            free: freeBytes
+        };
+    }, [devDiskFreeGB]);
+
     // 根据开发者选项初始化诊断状态（使用函数初始化确保读取到正确的值）
     const [isDiagnosing, setIsDiagnosing] = useState<boolean>(() => {
         const saved = localStorage.getItem('devSimulateConflict');
@@ -191,6 +208,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     useEffect(() => {
         localStorage.setItem('devResourceComplete', String(devResourceComplete));
     }, [devResourceComplete]);
+
+    useEffect(() => {
+        localStorage.setItem('devDiskFreeGB', String(devDiskFreeGB));
+    }, [devDiskFreeGB]);
 
     // 注册开发者选项到开发者面板
     useEffect(() => {
@@ -270,13 +291,50 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
             order: 5
         });
 
+        // [新增] 选项 5: 磁盘可用空间调整
+        registerDevOption({
+            id: 'oneclick-disk-space',
+            label: '模拟磁盘可用空间（一键式安装）',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Slider
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={500}
+                            step={1}
+                            style={{ flex: 1, minWidth: 120 }}
+                        />
+                        <InputNumber
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={1000}
+                            suffix="GB"
+                            style={{ width: 100 }}
+                            size="small"
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(5)} style={{ fontSize: 11 }}>5GB (不足)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(20)} style={{ fontSize: 11 }}>20GB (勉强)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(100)} style={{ fontSize: 11 }}>100GB (足够)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(424)} style={{ fontSize: 11 }}>424GB (默认)</Button>
+                    </div>
+                </div>
+            ),
+            order: 6
+        });
+
         return () => {
             unregisterDevOption('oneclick-installer-region');
             unregisterDevOption('oneclick-installer-conflict');
             unregisterDevOption('oneclick-resource-imported');
             unregisterDevOption('oneclick-resource-complete');
+            unregisterDevOption('oneclick-disk-space');
         };
-    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devResourceImported, devResourceComplete]);
+    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devResourceImported, devResourceComplete, devDiskFreeGB]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);

@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
     Layout, Button, Row, Col, Typography,
-    Tag, Checkbox, Toast, Input, Switch, Popover, Empty, Banner
+    Tag, Checkbox, Input, Switch, Popover, Empty, Banner,
+    Card, Progress, Slider, InputNumber
 } from '@douyinfe/semi-ui';
 import {
     IconSetting,
     IconSearch, IconFilter, IconAlertTriangle, IconTickCircle,
-    IconCode, IconList, IconInfoCircle
+    IconCode, IconList, IconInfoCircle,
+    IconBolt, IconFile, IconFolder, IconLoading, IconServer
 } from '@douyinfe/semi-icons';
 import HomeBreadcrumb from './components/HomeBreadcrumb';
 import { useDevMode } from './contexts/DevModeContext';
@@ -30,6 +32,7 @@ const TABS = [
     { id: 'map', title: '地图安装' },
     { id: 'car', title: '车包安装' },
     { id: 'shader', title: '光影安装' },
+    { id: 'installing', title: '正在安装' }, // [新增]
 ];
 
 // 模拟资源数据
@@ -77,11 +80,53 @@ const { Title, Text } = Typography;
 // 2. 主页面容器 (CustomInstallPage)
 // =================================================================
 
+// 格式化大小辅助函数
+const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+
+// 模拟资源大小映射 (bytes)
+const RESOURCE_SIZES: Record<string, number> = {
+    cm: 50 * 1024 * 1024, // 50MB
+    srp_main: 2.4 * 1024 * 1024 * 1024, // 2.4GB
+    c1_loop: 800 * 1024 * 1024, // 800MB
+    car_jdm: 1.2 * 1024 * 1024 * 1024, // 1.2GB
+    car_euro: 850 * 1024 * 1024, // 850MB
+    car_traffic: 2.1 * 1024 * 1024 * 1024, // 2.1GB
+    car_shmc: 3.4 * 1024 * 1024 * 1024, // 3.4GB
+    car_wangan: 1.8 * 1024 * 1024 * 1024, // 1.8GB
+    csp: 150 * 1024 * 1024, // 150MB
+    sol: 200 * 1024 * 1024, // 200MB
+    pure: 500 * 1024 * 1024, // 500MB
+};
+
 export default function CustomInstallWizard(): JSX.Element {
     const [currentStep, setCurrentStep] = useState(0);
     const [selections, setSelections] = useState<Set<string>>(new Set(['cm']));
     const [localState, setLocalState] = useState<Record<string, boolean>>(INITIAL_DEBUG_STATE);
     const { registerDevOption, unregisterDevOption } = useDevMode();
+
+    // [新增] 开发者调试：磁盘可用空间 (GB)
+    const [devDiskFreeGB, setDevDiskFreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskFreeGB_custom');
+        return saved !== null ? Number(saved) : 424; // 默认 424GB
+    });
+
+    // 持久化磁盘空间设置
+    useEffect(() => {
+        localStorage.setItem('devDiskFreeGB_custom', String(devDiskFreeGB));
+    }, [devDiskFreeGB]);
+
+    // 计算已选择资源的总大小
+    const totalSelectedSize = useMemo(() => {
+        let total = 0;
+        selections.forEach(id => {
+            total += RESOURCE_SIZES[id] || 0;
+        });
+        return total;
+    }, [selections]);
+
+    // 磁盘可用空间 (bytes)
+    const diskFreeBytes = devDiskFreeGB * 1024 * 1024 * 1024;
+    const isSpaceLow = totalSelectedSize > diskFreeBytes;
 
     // --- Helpers ---
     // 获取当前步骤对应的所有资源 ID
@@ -131,18 +176,59 @@ export default function CustomInstallWizard(): JSX.Element {
             order: 3
         });
 
+        // 注册开发者选项：磁盘空间调整
+        registerDevOption({
+            id: 'custom-install-disk-space',
+            label: '模拟磁盘可用空间（自定义安装）',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Slider
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={500}
+                            step={1}
+                            style={{ flex: 1, minWidth: 120 }}
+                        />
+                        <InputNumber
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={1000}
+                            suffix="GB"
+                            style={{ width: 100 }}
+                            size="small"
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(1)} style={{ fontSize: 11 }}>1GB (极低)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(5)} style={{ fontSize: 11 }}>5GB (不足)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(50)} style={{ fontSize: 11 }}>50GB (足够)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(424)} style={{ fontSize: 11 }}>424GB (默认)</Button>
+                    </div>
+                </div>
+            ),
+            order: 4
+        });
+
         return () => {
             unregisterDevOption('custom-install-wizard-debug');
+            unregisterDevOption('custom-install-disk-space');
         };
-    }, [registerDevOption, unregisterDevOption, localState, toggleLocalState]);
+    }, [registerDevOption, unregisterDevOption, localState, toggleLocalState, devDiskFreeGB]);
 
     const handleNext = (): void => {
-        if (currentStep < TABS.length - 1) setCurrentStep(prev => prev + 1);
-        else Toast.success('开始安装流程...');
+        if (currentStep < 3) setCurrentStep(prev => prev + 1);
+        else if (currentStep === 3) {
+            // 点击"开始安装" -> 跳转到安装页 (Index 4)
+            setCurrentStep(4);
+        }
     };
 
     const handleTabClick = (index: number): void => {
-        // 允许直接点击 Tab 切换
+        // [修改] 禁止直接点击"正在安装"标签
+        if (index === 4) return;
         setCurrentStep(index);
     };
 
@@ -154,9 +240,13 @@ export default function CustomInstallWizard(): JSX.Element {
             case 1: return <MapStep {...props} />;
             case 2: return <CarStep {...props} />;
             case 3: return <ShaderStep {...props} />;
+            case 4: return <InstallingStep selections={selections} onComplete={() => console.log('Done')} />; // [新增]
             default: return null;
         }
     };
+
+    // [新增] 判断是否处于安装中步骤
+    const isInstallingStep = currentStep === 4;
 
     // 动态计算按钮文案和样式
     const isLastStep = currentStep === TABS.length - 1;
@@ -206,42 +296,44 @@ export default function CustomInstallWizard(): JSX.Element {
             }}>
                 {/* 左侧：返回/标题 */}
                 <div style={{ minWidth: 260, display: 'flex', alignItems: 'center' }}>
-                    <HomeBreadcrumb current="自定义安装向导" />
+                    <HomeBreadcrumb current={isInstallingStep ? "正在安装" : "自定义安装向导"} />
                 </div>
 
-                {/* 中间：图1 风格的 Tab Bar */}
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', height: '100%' }}>
-                    {TABS.map((tab, index) => {
-                        const isActive = currentStep === index;
-                        return (
-                            <div
-                                key={tab.id}
-                                onClick={() => handleTabClick(index)}
-                                style={{
-                                    height: '100%',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '0 24px',
-                                    cursor: 'pointer',
-                                    position: 'relative',
-                                    color: isActive ? THEME.green : THEME.textSub,
-                                    fontWeight: isActive ? 600 : 400,
-                                    fontSize: 14,
-                                    transition: 'color 0.2s'
-                                }}
-                            >
-                                {tab.title}
-                                {/* 底部高亮线 */}
-                                {isActive && (
-                                    <div style={{
-                                        position: 'absolute', bottom: 0, left: 24, right: 24,
-                                        height: 2, background: THEME.green,
-                                        boxShadow: `0 -2px 6px ${THEME.green}66` // 一点点光晕
-                                    }} />
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                {/* [修改] 安装中隐藏顶部 Tab，防止误触 */}
+                {!isInstallingStep && (
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center', height: '100%' }}>
+                        {TABS.slice(0, 4).map((tab, index) => { // slice(0,4) 隐藏 "正在安装" 的 tab 显示
+                            const isActive = currentStep === index;
+                            return (
+                                <div
+                                    key={tab.id}
+                                    onClick={() => handleTabClick(index)}
+                                    style={{
+                                        height: '100%',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '0 24px',
+                                        cursor: 'pointer',
+                                        position: 'relative',
+                                        color: isActive ? THEME.green : THEME.textSub,
+                                        fontWeight: isActive ? 600 : 400,
+                                        fontSize: 14,
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    {tab.title}
+                                    {/* 底部高亮线 */}
+                                    {isActive && (
+                                        <div style={{
+                                            position: 'absolute', bottom: 0, left: 24, right: 24,
+                                            height: 2, background: THEME.green,
+                                            boxShadow: `0 -2px 6px ${THEME.green}66` // 一点点光晕
+                                        }} />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* 右侧：调试面板 */}
                 <div style={{ width: 120, display: 'flex', justifyContent: 'flex-end' }}>
@@ -254,66 +346,108 @@ export default function CustomInstallWizard(): JSX.Element {
                 flex: 1,           // [修复3] 自动占据剩余空间
                 minHeight: 0,      // [修复6] 允许 flex 子元素正确收缩
                 overflowY: 'auto', // [修复4] 只有中间区域滚动
-                padding: '24px 40px',
+                padding: isInstallingStep ? '0' : '24px 40px', // [修改] 安装页全宽显示
                 position: 'relative',
                 display: 'flex',   // [修复7] 使用 flex 布局让内容区域自适应
                 flexDirection: 'column'
             }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', flex: '0 0 auto' }}>
-                    {/* 顶部全局提示 Banner */}
-                    <Banner
-                        fullMode={false}
-                        type="info"
-                        icon={<IconInfoCircle style={{color: '#ccc'}} />}
-                        closeIcon={null}
-                        description={
-                            <div style={{ fontSize: 13, color: '#ccc' }}>
-                                流程说明：请在每个步骤勾选您需要的资源，点击&ldquo;下一步&rdquo;保存选择。
-                                <span style={{ color: THEME.green, marginLeft: 8 }}>所有选中的模组将在最后统一进行安装。</span>
-                            </div>
-                        }
-                        style={{
-                            marginBottom: 20,
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid #333',
-                            borderRadius: 8
-                        }}
-                    />
+                <div style={{
+                    maxWidth: 1200, margin: '0 auto', width: '100%', flex: '0 0 auto',
+                    height: isInstallingStep ? '100%' : 'auto' // [修改]
+                }}>
+                    {/* [修改] 安装中隐藏 Banner */}
+                    {!isInstallingStep && (
+                        <Banner
+                            fullMode={false}
+                            type="info"
+                            icon={<IconInfoCircle style={{color: '#ccc'}} />}
+                            closeIcon={null}
+                            description={
+                                <div style={{ fontSize: 13, color: '#ccc' }}>
+                                    流程说明：请在每个步骤勾选您需要的资源，点击&ldquo;下一步&rdquo;保存选择。
+                                    <span style={{ color: THEME.green, marginLeft: 8 }}>所有选中的模组将在最后统一进行安装。</span>
+                                </div>
+                            }
+                            style={{
+                                marginBottom: 20,
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid #333',
+                                borderRadius: 8
+                            }}
+                        />
+                    )}
                     {renderContent()}
                 </div>
             </Content>
 
-            {/* Footer */}
-            <Footer style={{
-                flexShrink: 0,     // [修复5] 防止被压缩
-                padding: '16px 40px',
-                background: THEME.cardBg,
-                borderTop: `1px solid ${THEME.border}`,
-                zIndex: 10
-            }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <Text style={{ color: THEME.textSub }}>
-                            已选项目: <span style={{ color: THEME.green, fontWeight: 'bold', fontSize: 16 }}>{selections.size}</span>
-                        </Text>
-                        <div style={{ width: 1, height: 16, background: '#444' }}></div>
-                        <Text style={{ color: '#666', fontSize: 12 }}>预计占用: -- GB</Text>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        {currentStep > 0 && (
-                            <Button onClick={() => setCurrentStep(c => c - 1)} theme="solid" type="tertiary" style={{ backgroundColor: '#333', color: '#ccc' }}>上一步</Button>
+            {/* [修改] 安装中隐藏 Footer */}
+            {!isInstallingStep && (
+                <Footer style={{
+                    flexShrink: 0,     // [修复5] 防止被压缩
+                    padding: '16px 40px',
+                    background: THEME.cardBg,
+                    borderTop: `1px solid ${isSpaceLow ? '#ff4d4f' : THEME.border}`,
+                    zIndex: 10
+                }}>
+                    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                        {/* 磁盘空间不足警告 */}
+                        {isSpaceLow && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                                border: '1px solid #ff4d4f',
+                                borderRadius: 8,
+                                padding: '8px 16px',
+                                marginBottom: 12
+                            }}>
+                                <IconAlertTriangle style={{ color: '#ff4d4f' }} />
+                                <Text style={{ color: '#ff4d4f', fontSize: 13 }}>
+                                    磁盘空间不足！所选资源需要 <strong>{formatSize(totalSelectedSize)}</strong>，
+                                    但当前磁盘仅剩 <strong>{formatSize(diskFreeBytes)}</strong>，
+                                    请减少选择或清理磁盘空间。
+                                </Text>
+                            </div>
                         )}
-                        {/* 使用动态样式和文案的下一步按钮 */}
-                        <Button
-                            theme="solid" size="large" onClick={handleNext}
-                            style={nextButtonStyle}
-                        >
-                            {nextButtonText}
-                        </Button>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <Text style={{ color: THEME.textSub }}>
+                                    已选项目: <span style={{ color: THEME.green, fontWeight: 'bold', fontSize: 16 }}>{selections.size}</span>
+                                </Text>
+                                <div style={{ width: 1, height: 16, background: '#444' }}></div>
+                                <Text style={{ color: isSpaceLow ? '#ff4d4f' : '#666', fontSize: 12 }}>
+                                    预计占用: <span style={{ fontWeight: isSpaceLow ? 'bold' : 'normal' }}>{formatSize(totalSelectedSize)}</span>
+                                </Text>
+                                <div style={{ width: 1, height: 16, background: '#444' }}></div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <IconServer style={{ color: '#666', fontSize: 12 }} />
+                                    <Text style={{ color: isSpaceLow ? '#ff4d4f' : '#666', fontSize: 12 }}>
+                                        磁盘可用: {formatSize(diskFreeBytes)}
+                                    </Text>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                {currentStep > 0 && (
+                                    <Button onClick={() => setCurrentStep(c => c - 1)} theme="solid" type="tertiary" style={{ backgroundColor: '#333', color: '#ccc' }}>上一步</Button>
+                                )}
+                                {/* 使用动态样式和文案的下一步按钮 */}
+                                <Button
+                                    theme="solid" size="large" onClick={handleNext}
+                                    disabled={isSpaceLow && currentStep === 3}
+                                    style={{
+                                        ...nextButtonStyle,
+                                        backgroundColor: isSpaceLow && currentStep === 3 ? '#555' : THEME.green,
+                                        cursor: isSpaceLow && currentStep === 3 ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    {isSpaceLow && currentStep === 3 ? '空间不足' : nextButtonText}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </Footer>
+                </Footer>
+            )}
         </Layout>
     );
 }
@@ -705,6 +839,269 @@ const ResourceCard = ({ data, isInstalled, isSelected, isMissingResource, onTogg
                             <IconAlertTriangle size="small" /> 覆盖
                         </Text>
                     )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// =================================================================
+// 9. 新增组件：安装进度页面 (InstallingStep)
+//    逻辑复用于 InstallProgressPage，但数据源根据 selections 动态生成
+// =================================================================
+
+interface InstallingStepProps {
+    selections: Set<string>;
+    onComplete: () => void;
+}
+
+const InstallingStep = ({ selections, onComplete }: InstallingStepProps): JSX.Element => {
+    // 定义队列项的接口
+    interface QueueItem {
+        id: string;
+        name: string;
+        icon: React.ReactNode;
+        items: string[];
+    }
+
+    const [installQueue, setInstallQueue] = useState<QueueItem[]>([]);
+    const [activeCategoryIdx, setActiveCategoryIdx] = useState(0);
+    const [activeItemIdx, setActiveItemIdx] = useState(0);
+    const [categoryProgress, setCategoryProgress] = useState(0);
+    const [totalProgress, setTotalProgress] = useState(0);
+    const [logs, setLogs] = useState<string[]>([]);
+    const [isFinished, setIsFinished] = useState(false);
+    const logEndRef = useRef<HTMLDivElement>(null);
+
+    // 1. 初始化安装队列 (根据用户的选择)
+    useEffect(() => {
+        const queue: QueueItem[] = [];
+
+        // 辅助函数：从资源池中筛选选中的项目
+        const getNames = (source: Array<{ id: string; name: string }>): string[] =>
+            source.filter(item => selections.has(item.id)).map(item => item.name);
+
+        const managerNames = getNames(RESOURCES.manager);
+        if (managerNames.length) queue.push({ id: 'manager', name: '启动器 (CM)', icon: <IconSetting />, items: managerNames });
+
+        const mapNames = getNames(RESOURCES.maps);
+        if (mapNames.length) queue.push({ id: 'map', name: '地图包', icon: <IconFolder />, items: mapNames });
+
+        const carNames = getNames(RESOURCES.cars);
+        if (carNames.length) queue.push({ id: 'car', name: '车辆包', icon: <IconFile />, items: carNames });
+
+        const shaderNames = getNames(RESOURCES.shaders);
+        if (shaderNames.length) queue.push({ id: 'shader', name: '光影补丁', icon: <IconBolt />, items: shaderNames });
+
+        setInstallQueue(queue);
+    }, [selections]);
+
+    // 2. 日志辅助
+    const addLog = (msg: string): void => {
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        setLogs(prev => [...prev, `[${time}] ${msg}`]);
+    };
+
+    // 3. 模拟安装进程
+    useEffect(() => {
+        if (installQueue.length === 0 || isFinished) return;
+
+        const currentCategory = installQueue[activeCategoryIdx];
+
+        // 初始日志
+        if (categoryProgress === 0 && activeItemIdx === 0 && logs.length === 0) {
+            addLog(`准备安装队列，共 ${installQueue.length} 个大类...`);
+            addLog(`正在初始化: ${currentCategory.name}...`);
+        }
+
+        const timer = setInterval(() => {
+            setCategoryProgress(prev => {
+                const next = prev + (Math.random() * 8); // 模拟速度
+                // 当前大类完成
+                if (next >= 100) {
+                    clearInterval(timer);
+                    addLog(`完成: ${currentCategory.name}`);
+
+                    if (activeCategoryIdx < installQueue.length - 1) {
+                        // 进入下一个大类
+                        setTimeout(() => {
+                            setActiveCategoryIdx(p => p + 1);
+                            setActiveItemIdx(0);
+                            setCategoryProgress(0);
+                            addLog(`正在初始化: ${installQueue[activeCategoryIdx + 1].name}...`);
+                        }, 500);
+                    } else {
+                        // 全部完成
+                        setTotalProgress(100);
+                        setIsFinished(true);
+                        addLog("所有安装任务已完成。");
+                        onComplete();
+                    }
+                    return 100;
+                }
+                // 模拟子项目切换 (用于在日志中显示正在解压的具体文件)
+                const itemsCount = currentCategory.items.length;
+                if (itemsCount > 0) {
+                    const progressPerItem = 100 / itemsCount;
+                    const calculatedItemIdx = Math.floor(next / progressPerItem);
+                    if (calculatedItemIdx !== activeItemIdx && calculatedItemIdx < itemsCount) {
+                        setActiveItemIdx(calculatedItemIdx);
+                        addLog(`正在解压: ${currentCategory.items[calculatedItemIdx]}...`);
+                    }
+                }
+                return next;
+            });
+
+            // 更新总进度
+            setTotalProgress(() => {
+                const step = 100 / installQueue.length;
+                const base = activeCategoryIdx * step;
+                const current = (categoryProgress / 100) * step;
+                return Math.min(base + current, 99);
+            });
+        }, 100);
+
+        return () => clearInterval(timer);
+    }, [installQueue, activeCategoryIdx, activeItemIdx, categoryProgress, isFinished, logs.length, onComplete]);
+
+    // 4. 自动滚动日志
+    useEffect(() => {
+        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [logs]);
+
+    // --- 渲染完成态 ---
+    if (isFinished) {
+        return (
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Card
+                    style={{ width: 500, textAlign: 'center', backgroundColor: THEME.cardBg, border: `1px solid ${THEME.border}`, padding: 40 }}
+                    shadows='hover'
+                >
+                    <div style={{ marginBottom: 20 }}>
+                        <div style={{ width: 80, height: 80, background: THEME.green, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', boxShadow: `0 0 30px ${THEME.green}66` }}>
+                            <IconTickCircle size="extra-large" style={{ color: '#fff', fontSize: 40 }} />
+                        </div>
+                    </div>
+                    <Title heading={3} style={{ color: '#fff' }}>安装成功！</Title>
+                    <Text style={{ color: '#ccc', margin: '16px 0', display: 'block' }}>
+                        您选择的 {selections.size} 个项目已成功配置到游戏中。
+                    </Text>
+                    <Button theme="solid" size="large" style={{ backgroundColor: THEME.green, color: '#fff', marginTop: 20, width: '100%' }}>
+                        启动游戏
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
+
+    // --- 渲染进行态 ---
+    return (
+        <div style={{ height: '100%', padding: '40px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 800 }}>
+                {/* 顶部总进度 */}
+                <div style={{ marginBottom: 40, textAlign: 'center' }}>
+                    <Title heading={2} style={{ color: '#fff', marginBottom: 8 }}>正在配置游戏环境...</Title>
+                    <Text style={{ color: '#888' }}>请勿关闭安装器，正在处理 {activeCategoryIdx + 1}/{installQueue.length} 个任务类别</Text>
+
+                    <div style={{ marginTop: 30, padding: '0 20px' }}>
+                        <Progress
+                            percent={Math.floor(totalProgress)}
+                            stroke={THEME.green}
+                            style={{ height: 12, backgroundColor: '#333' }}
+                            showInfo={true}
+                            format={percent => <span style={{color: THEME.green, fontWeight: 'bold'}}>{percent}%</span>}
+                        />
+                    </div>
+                </div>
+
+                {/* 中间：分步安装列表 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {installQueue.map((category, index) => {
+                        const status = index < activeCategoryIdx ? 'done' : (index === activeCategoryIdx ? 'active' : 'waiting');
+                        const isDone = status === 'done';
+                        const isActive = status === 'active';
+
+                        return (
+                            <div
+                                key={category.id}
+                                style={{
+                                    backgroundColor: isActive ? 'rgba(107, 199, 134, 0.05)' : THEME.cardBg,
+                                    border: `1px solid ${isActive ? THEME.green : THEME.border}`,
+                                    borderRadius: 12,
+                                    padding: '16px 24px',
+                                    transition: 'all 0.3s',
+                                    opacity: status === 'waiting' ? 0.5 : 1
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                        <div style={{
+                                            width: 40, height: 40,
+                                            borderRadius: 8,
+                                            background: isDone ? THEME.green : (isActive ? 'rgba(107, 199, 134, 0.2)' : '#333'),
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: isDone ? '#fff' : (isActive ? THEME.green : '#666')
+                                        }}>
+                                            {isDone ? <IconTickCircle /> : category.icon}
+                                        </div>
+                                        <div>
+                                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, display: 'block' }}>
+                                                {category.name}
+                                            </Text>
+                                            {isActive && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                                                    <IconLoading style={{ color: THEME.green }} spin />
+                                                    <Text style={{ color: THEME.green, fontSize: 13 }}>
+                                                        正在处理: {category.items[activeItemIdx] || '初始化...'}
+                                                    </Text>
+                                                </div>
+                                            )}
+                                            {isDone && <Text style={{ color: '#666', fontSize: 13 }}>已完成 {category.items.length} 个项目</Text>}
+                                            {status === 'waiting' && <Text style={{ color: '#555', fontSize: 13 }}>等待中...</Text>}
+                                        </div>
+                                    </div>
+                                    <div style={{ width: 100, textAlign: 'right' }}>
+                                        {isDone ? (
+                                            <IconTickCircle style={{ color: THEME.green, fontSize: 20 }} />
+                                        ) : isActive ? (
+                                            <Text style={{ color: THEME.green, fontWeight: 'bold', fontSize: 18 }}>
+                                                {Math.floor(categoryProgress)}%
+                                            </Text>
+                                        ) : (
+                                            <Text style={{ color: '#444' }}>---</Text>
+                                        )}
+                                    </div>
+                                </div>
+                                {isActive && (
+                                    <div style={{ marginTop: 16, height: 4, background: '#333', borderRadius: 2, overflow: 'hidden' }}>
+                                        <div style={{ width: `${categoryProgress}%`, background: THEME.green, height: '100%', transition: 'width 0.2s linear' }}></div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* 底部：日志窗口 */}
+                <div style={{ marginTop: 30 }}>
+                    <div style={{
+                        backgroundColor: '#000',
+                        borderRadius: 8,
+                        border: '1px solid #333',
+                        padding: 16,
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        height: 120,
+                        overflowY: 'auto',
+                        color: '#aaa'
+                    }}>
+                        {logs.map((log, i) => (
+                            <div key={i} style={{ marginBottom: 4, wordBreak: 'break-all' }}>
+                                <span style={{ color: THEME.green }}>➜</span> {log}
+                            </div>
+                        ))}
+                        <div ref={logEndRef} />
+                    </div>
                 </div>
             </div>
         </div>

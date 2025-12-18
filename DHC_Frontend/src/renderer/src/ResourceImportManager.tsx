@@ -1,13 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Layout, Button, Typography, Tag, Tabs, TabPane,
-    Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip, Toast
+    Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip, Toast,
+    Slider, InputNumber
 } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconTickCircle,
-    IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete
+    IconFile, IconHelpCircle, IconUpload, IconFolder, IconSetting, IconDelete, IconServer
 } from '@douyinfe/semi-icons';
 import HomeBreadcrumb from './components/HomeBreadcrumb';
+import { useDevMode } from './contexts/DevModeContext';
 
 // --- 1. 模拟数据结构 ---
 interface Car {
@@ -114,12 +116,37 @@ const RESOURCES_DB: ResourceItem[] = [
 const { Header, Content, Footer } = Layout;
 const { Text } = Typography;
 
+// 格式化大小辅助函数
+const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+
+// 资源大小映射 (用于计算总需求空间)
+const getResourceSize = (item: ResourceItem): number => {
+    const sizeStr = item.size;
+    const value = parseFloat(sizeStr);
+    if (sizeStr.includes('GB')) return value * 1024 * 1024 * 1024;
+    if (sizeStr.includes('MB')) return value * 1024 * 1024;
+    return value * 1024; // KB
+};
+
 export default function ResourceImportManager(): React.JSX.Element {
     // --- 状态管理 ---
     const [viewMode, setViewMode] = useState<'minimal' | 'full'>('minimal'); // 'minimal' | 'full'
     const [activeTab, setActiveTab] = useState<string>('map');
     const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
     const [clearModalVisible, setClearModalVisible] = useState<boolean>(false);
+
+    const { registerDevOption, unregisterDevOption } = useDevMode();
+
+    // [新增] 开发者调试：磁盘可用空间 (GB)
+    const [devDiskFreeGB, setDevDiskFreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskFreeGB_resource');
+        return saved !== null ? Number(saved) : 424; // 默认 424GB
+    });
+
+    // 持久化磁盘空间设置
+    useEffect(() => {
+        localStorage.setItem('devDiskFreeGB_resource', String(devDiskFreeGB));
+    }, [devDiskFreeGB]);
 
     // --- 计算逻辑 ---
     // 1. 根据当前模式过滤资源
@@ -136,6 +163,57 @@ export default function ResourceImportManager(): React.JSX.Element {
     const getMissingCount = (category: string): number => {
         return filteredResources.filter(r => r.category === category && r.status === 'missing').length;
     };
+
+    // 4. 计算所有资源的总需求空间
+    const totalRequiredSize = useMemo(() => {
+        return filteredResources.reduce((total, item) => total + getResourceSize(item), 0);
+    }, [filteredResources]);
+
+    // 5. 计算磁盘可用空间
+    const diskFreeBytes = devDiskFreeGB * 1024 * 1024 * 1024;
+    const isSpaceLow = totalRequiredSize > diskFreeBytes;
+
+    // 注册开发者选项
+    useEffect(() => {
+        registerDevOption({
+            id: 'resource-import-disk-space',
+            label: '模拟磁盘可用空间（导入资源）',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Slider
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={500}
+                            step={1}
+                            style={{ flex: 1, minWidth: 120 }}
+                        />
+                        <InputNumber
+                            value={devDiskFreeGB}
+                            onChange={(value) => setDevDiskFreeGB(value as number)}
+                            min={0}
+                            max={1000}
+                            suffix="GB"
+                            style={{ width: 100 }}
+                            size="small"
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(1)} style={{ fontSize: 11 }}>1GB (极低)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(3)} style={{ fontSize: 11 }}>3GB (不足)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(20)} style={{ fontSize: 11 }}>20GB (足够)</Button>
+                        <Button size="small" onClick={() => setDevDiskFreeGB(424)} style={{ fontSize: 11 }}>424GB (默认)</Button>
+                    </div>
+                </div>
+            ),
+            order: 7
+        });
+
+        return () => {
+            unregisterDevOption('resource-import-disk-space');
+        };
+    }, [registerDevOption, unregisterDevOption, devDiskFreeGB]);
 
     // --- 处理清除逻辑 ---
     const handleClearAll = (): void => {
@@ -353,20 +431,77 @@ export default function ResourceImportManager(): React.JSX.Element {
                 <Footer style={{
                     padding: '16px 40px',
                     background: '#232326',
-                    borderTop: '1px solid #333',
+                    borderTop: `1px solid ${isSpaceLow ? '#ff4d4f' : '#333'}`,
                     flexShrink: 0
                 }}>
+                    {/* 磁盘空间信息条 */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 12,
+                        padding: '12px 16px',
+                        backgroundColor: isSpaceLow ? 'rgba(255, 77, 79, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                        border: `1px solid ${isSpaceLow ? '#ff4d4f' : '#444'}`,
+                        borderRadius: 8
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <IconServer style={{ color: isSpaceLow ? '#ff4d4f' : '#666' }} />
+                                <div>
+                                    <Text style={{ color: '#888', fontSize: 12, display: 'block' }}>磁盘可用空间</Text>
+                                    <Text style={{ color: isSpaceLow ? '#ff4d4f' : '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                                        {formatSize(diskFreeBytes)}
+                                    </Text>
+                                </div>
+                            </div>
+                            <div style={{ width: 1, height: 32, background: '#444' }} />
+                            <div>
+                                <Text style={{ color: '#888', fontSize: 12, display: 'block' }}>当前模式需要</Text>
+                                <Text style={{ color: isSpaceLow ? '#ff4d4f' : THEME_GREEN, fontWeight: 'bold', fontSize: 16 }}>
+                                    {formatSize(totalRequiredSize)}
+                                </Text>
+                            </div>
+                        </div>
+                        {isSpaceLow && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <IconAlertTriangle style={{ color: '#ff4d4f', fontSize: 20 }} />
+                                <Text style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+                                    磁盘空间不足！请清理磁盘或切换到最小包模式
+                                </Text>
+                            </div>
+                        )}
+                    </div>
+
                     <Upload
                         action="#"
                         draggable={true}
                         dragIcon={<IconUpload />}
                         accept=".7z,.rar,.zip"
-                        style={{ backgroundColor: '#1a1a1d', border: '1px dashed #444' }}
-                        dragMainText={<span style={{color: '#fff'}}>点击或拖拽资源包到此处 (支持批量)</span>}
-                        dragSubText={<span style={{color: '#666'}}>系统将自动识别并分拣地图、车辆和光影文件</span>}
+                        disabled={isSpaceLow}
+                        style={{
+                            backgroundColor: isSpaceLow ? '#2a2a2a' : '#1a1a1d',
+                            border: `1px dashed ${isSpaceLow ? '#555' : '#444'}`,
+                            opacity: isSpaceLow ? 0.6 : 1,
+                            cursor: isSpaceLow ? 'not-allowed' : 'pointer'
+                        }}
+                        dragMainText={<span style={{color: isSpaceLow ? '#666' : '#fff'}}>点击或拖拽资源包到此处 (支持批量)</span>}
+                        dragSubText={<span style={{color: '#666'}}>{isSpaceLow ? '请先清理磁盘空间' : '系统将自动识别并分拣地图、车辆和光影文件'}</span>}
                     >
-                        <Button theme="solid" type="primary" size="large" block style={{ marginTop: 12, backgroundColor: THEME_GREEN, color: '#fff' }}>
-                            一键扫描并安装选中资源
+                        <Button
+                            theme="solid"
+                            type="primary"
+                            size="large"
+                            block
+                            disabled={isSpaceLow}
+                            style={{
+                                marginTop: 12,
+                                backgroundColor: isSpaceLow ? '#555' : THEME_GREEN,
+                                color: '#fff',
+                                cursor: isSpaceLow ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {isSpaceLow ? '磁盘空间不足，无法安装' : '一键扫描并安装选中资源'}
                         </Button>
                     </Upload>
                 </Footer>

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Typography, Card, Row, Col, Progress, Select, Banner, Tag } from '@douyinfe/semi-ui';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Button, Typography, Card, Row, Col, Progress, Select, Banner, Tag, Slider, InputNumber } from '@douyinfe/semi-ui';
 import {
     IconBolt, IconSetting, IconServer, IconArticle,
     IconInfoCircle, IconYoutube, IconPlay,
     IconAlertTriangle
 } from '@douyinfe/semi-icons';
+import { useDevMode } from './contexts/DevModeContext';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -22,12 +23,7 @@ interface DriveInfo {
     isRemovable: boolean;
 }
 
-// 模拟磁盘信息
-const DRIVE_INFO_MOCK: DriveInfo[] = [
-    { label: 'C:', name: '系统盘', freeBytes: 50 * 1024 * 1024 * 1024, totalBytes: 500 * 1024 * 1024 * 1024, isSSD: true, isRemovable: false },
-    { label: 'D:', name: '游戏盘', freeBytes: 400 * 1024 * 1024 * 1024, totalBytes: 1000 * 1024 * 1024 * 1024, isSSD: true, isRemovable: false }, // 推荐
-    { label: 'E:', name: '仓库盘', freeBytes: 100 * 1024 * 1024 * 1024, totalBytes: 2000 * 1024 * 1024 * 1024, isSSD: false, isRemovable: false }, // HDD
-];
+// 默认磁盘信息（动态版本在组件内通过 DevMode 调整）
 
 // 阈值常量 (对应 Go const)
 const MB = 1024 * 1024;
@@ -174,13 +170,142 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
         isLowSpace: false
     });
 
+    const { registerDevOption, unregisterDevOption } = useDevMode();
+
+    // [开发者模式] 磁盘空间调整（GB）- 分别控制三个磁盘
+    const [devDiskC_FreeGB, setDevDiskC_FreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskC_FreeGB');
+        return saved !== null ? Number(saved) : 50; // 默认 50GB
+    });
+    const [devDiskD_FreeGB, setDevDiskD_FreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskD_FreeGB');
+        return saved !== null ? Number(saved) : 400; // 默认 400GB
+    });
+    const [devDiskE_FreeGB, setDevDiskE_FreeGB] = useState<number>(() => {
+        const saved = localStorage.getItem('devDiskE_FreeGB');
+        return saved !== null ? Number(saved) : 100; // 默认 100GB
+    });
+
+    // 持久化磁盘空间设置
+    useEffect(() => {
+        localStorage.setItem('devDiskC_FreeGB', String(devDiskC_FreeGB));
+    }, [devDiskC_FreeGB]);
+    useEffect(() => {
+        localStorage.setItem('devDiskD_FreeGB', String(devDiskD_FreeGB));
+    }, [devDiskD_FreeGB]);
+    useEffect(() => {
+        localStorage.setItem('devDiskE_FreeGB', String(devDiskE_FreeGB));
+    }, [devDiskE_FreeGB]);
+
+    // 动态生成磁盘信息
+    const DRIVE_INFO: DriveInfo[] = useMemo(() => [
+        { label: 'C:', name: '系统盘', freeBytes: devDiskC_FreeGB * GB, totalBytes: 500 * GB, isSSD: true, isRemovable: false },
+        { label: 'D:', name: '游戏盘', freeBytes: devDiskD_FreeGB * GB, totalBytes: 1000 * GB, isSSD: true, isRemovable: false },
+        { label: 'E:', name: '仓库盘', freeBytes: devDiskE_FreeGB * GB, totalBytes: 2000 * GB, isSSD: false, isRemovable: false },
+    ], [devDiskC_FreeGB, devDiskD_FreeGB, devDiskE_FreeGB]);
+
+    // 注册开发者选项
+    useEffect(() => {
+        registerDevOption({
+            id: 'welcome-page-disk-space',
+            label: '模拟磁盘可用空间（Home 页）',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* C 盘 */}
+                    <div>
+                        <span style={{ color: '#ccc', fontSize: 12, marginBottom: 4, display: 'block' }}>C: 系统盘</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Slider
+                                value={devDiskC_FreeGB}
+                                onChange={(value) => setDevDiskC_FreeGB(value as number)}
+                                min={0}
+                                max={500}
+                                step={1}
+                                style={{ flex: 1 }}
+                            />
+                            <InputNumber
+                                value={devDiskC_FreeGB}
+                                onChange={(value) => setDevDiskC_FreeGB(value as number)}
+                                min={0}
+                                max={500}
+                                suffix="GB"
+                                style={{ width: 90 }}
+                                size="small"
+                            />
+                        </div>
+                    </div>
+                    {/* D 盘 */}
+                    <div>
+                        <span style={{ color: '#ccc', fontSize: 12, marginBottom: 4, display: 'block' }}>D: 游戏盘</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Slider
+                                value={devDiskD_FreeGB}
+                                onChange={(value) => setDevDiskD_FreeGB(value as number)}
+                                min={0}
+                                max={1000}
+                                step={1}
+                                style={{ flex: 1 }}
+                            />
+                            <InputNumber
+                                value={devDiskD_FreeGB}
+                                onChange={(value) => setDevDiskD_FreeGB(value as number)}
+                                min={0}
+                                max={1000}
+                                suffix="GB"
+                                style={{ width: 90 }}
+                                size="small"
+                            />
+                        </div>
+                    </div>
+                    {/* E 盘 */}
+                    <div>
+                        <span style={{ color: '#ccc', fontSize: 12, marginBottom: 4, display: 'block' }}>E: 仓库盘</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Slider
+                                value={devDiskE_FreeGB}
+                                onChange={(value) => setDevDiskE_FreeGB(value as number)}
+                                min={0}
+                                max={2000}
+                                step={1}
+                                style={{ flex: 1 }}
+                            />
+                            <InputNumber
+                                value={devDiskE_FreeGB}
+                                onChange={(value) => setDevDiskE_FreeGB(value as number)}
+                                min={0}
+                                max={2000}
+                                suffix="GB"
+                                style={{ width: 90 }}
+                                size="small"
+                            />
+                        </div>
+                    </div>
+                    {/* 快捷预设按钮 */}
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                        <Button size="small" onClick={() => { setDevDiskC_FreeGB(5); setDevDiskD_FreeGB(8); setDevDiskE_FreeGB(3); }} style={{ fontSize: 11 }}>
+                            全部空间不足
+                        </Button>
+                        <Button size="small" onClick={() => { setDevDiskC_FreeGB(50); setDevDiskD_FreeGB(400); setDevDiskE_FreeGB(100); }} style={{ fontSize: 11 }}>
+                            恢复默认
+                        </Button>
+                    </div>
+                </div>
+            ),
+            order: 1
+        });
+
+        return () => {
+            unregisterDevOption('welcome-page-disk-space');
+        };
+    }, [registerDevOption, unregisterDevOption, devDiskC_FreeGB, devDiskD_FreeGB, devDiskE_FreeGB]);
+
     // --- 模拟后端 AutoSetResouceDirLocal 的逻辑 ---
     useEffect(() => {
         // 模拟游戏路径
         const gamePathDrive = 'C:';
 
-        // 执行自动推荐逻辑
-        const result = autoSetResourceDirLocal(DRIVE_INFO_MOCK, gamePathDrive);
+        // 执行自动推荐逻辑 (使用动态的 DRIVE_INFO)
+        const result = autoSetResourceDirLocal(DRIVE_INFO, gamePathDrive);
 
         // 设置推荐配置
         setConfig({
@@ -193,7 +318,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
             path: `${gamePathDrive}\\Steam\\...\\assettocorsa`,
             isLowSpace: result.recommendChangeGameDir
         });
-    }, []);
+    }, [DRIVE_INFO]);
 
     // 格式化函数
     const formatSize = (bytes: number): string => (bytes / GB).toFixed(1) + ' GB';
@@ -433,7 +558,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                     <Col span={10} style={{ borderRight: '1px solid #333', paddingRight: 40 }}>
                         <div style={{ marginBottom: 16 }}>
                             <Text style={{ color: '#ccc', marginBottom: 12, display: 'block' }}>{texts.currentDiskStatus}</Text>
-                            {DRIVE_INFO_MOCK.map(drive => {
+                            {DRIVE_INFO.map(drive => {
                                 const percent = ((drive.totalBytes - drive.freeBytes) / drive.totalBytes) * 100;
                                 const isRecommendedDrive = drive.label === config.resourceDrive || drive.label === config.cacheDrive;
 
@@ -495,7 +620,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                                 onChange={(v) => setConfig({...config, resourceDrive: v as string})}
                                 renderSelectedItem={(n) => <span style={{color: 'white'}}>{n.label}</span>}
                             >
-                                {DRIVE_INFO_MOCK.map(d => {
+                                {DRIVE_INFO.map(d => {
                                     const spaceMB = Math.floor(d.freeBytes / MB);
                                     const { resourceDirRecommendedMB } = getPackageSizeRequirements();
                                     const hasEnoughSpace = spaceMB >= resourceDirRecommendedMB;
@@ -529,7 +654,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                                 onChange={(v) => setConfig({...config, cacheDrive: v as string})}
                                 renderSelectedItem={(n) => <span style={{color: 'white'}}>{n.label}</span>}
                             >
-                                {DRIVE_INFO_MOCK.map(d => {
+                                {DRIVE_INFO.map(d => {
                                     const spaceMB = Math.floor(d.freeBytes / MB);
                                     const { cacheDirRecommendedMB } = getPackageSizeRequirements();
                                     const hasEnoughSpace = spaceMB >= cacheDirRecommendedMB;

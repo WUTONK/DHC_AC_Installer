@@ -2,7 +2,7 @@
 import React from 'react'
 import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
-import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer } from '@douyinfe/semi-icons';
+import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer, IconList, IconChevronUp } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ComponentTest from './ComponentTest'
@@ -45,6 +45,33 @@ function App(): React.JSX.Element {
     }
   }, [])
 
+  // 快捷键切换顶栏：Ctrl/Cmd + H
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent): void => {
+      // 检查是否按下了 Ctrl (Windows/Linux) 或 Cmd (Mac)
+      const isModifierPressed = e.ctrlKey || e.metaKey
+
+      // 如果按下 Ctrl/Cmd + H，切换顶栏显示
+      if (isModifierPressed && e.key.toLowerCase() === 'h') {
+        // 避免在输入框中触发
+        const target = e.target as HTMLElement
+        const isInputElement = target.tagName === 'INPUT' ||
+                              target.tagName === 'TEXTAREA' ||
+                              target.isContentEditable
+
+        if (!isInputElement) {
+          e.preventDefault()
+          setHeaderVisible(prev => !prev)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [])
+
   // 页面选择
   const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
@@ -81,6 +108,8 @@ function App(): React.JSX.Element {
 
   const [activeKey, setActiveKey] = useState<string>('Home')
   const [semiModalVisible, setSemiModalVisible] = useState<boolean>(false)
+  const [sidebarVisible, setSidebarVisible] = useState<boolean>(true)
+  const [headerVisible, setHeaderVisible] = useState<boolean>(true)
   const { isDevMode, toggleDevMode } = useDevMode()
 
   // 地区切换按钮容器样式
@@ -131,8 +160,24 @@ function App(): React.JSX.Element {
   return (
     <NavigationProvider onNavigate={setActiveKey}>
       <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
-        <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
+        {headerVisible && (
+          <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
           <div className="flex items-center gap-4 shrink-0">
+            <Button
+              icon={<IconList />}
+              theme="borderless"
+              type="tertiary"
+              size="small"
+              style={{
+                padding: '6px 10px',
+                minWidth: 'auto',
+                border: '1px solid var(--semi-color-border)',
+                borderRadius: '4px',
+                backgroundColor: sidebarVisible ? 'var(--semi-color-fill-1)' : 'transparent'
+              }}
+              onClick={() => setSidebarVisible(!sidebarVisible)}
+              title={sidebarVisible ? '关闭侧边栏' : '打开侧边栏'}
+            />
             <img src={""} alt="Logo" className="h-8" />
             <span className="font-semibold">----</span>
           </div>
@@ -174,34 +219,37 @@ function App(): React.JSX.Element {
               WUTONK
             </Avatar>
           </div>
-        </Header>
+          </Header>
+        )}
 
         <Layout className="flex-1 flex overflow-hidden min-h-0 h-0">
-          <Sider className="shrink-0">
-            <Nav
-              className="max-w-[200px] h-full dark-nav"
-              selectedKeys={[activeKey]}
-              items={[
-                { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
-                { itemKey: 'ServerListPage', text: '服务器推荐', icon: <IconServer size="large" /> },
-                { itemKey: 'ServerListPageOldDemo', text: '服务器推荐（旧版DEMO）', icon: <IconServer size="large" /> },
-                { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
-                { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
-                { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
-                { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
-                { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
-                { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
-                { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
-                { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
-                { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />},
-                { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />}
-              ]}
-              onSelect={(data) => setActiveKey(String(data.itemKey))}
-              footer={{
-                collapseButton: true
-              }}
-            />
-          </Sider>
+          {sidebarVisible && (
+            <Sider className="shrink-0">
+              <Nav
+                className="max-w-[200px] h-full dark-nav"
+                selectedKeys={[activeKey]}
+                items={[
+                  { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
+                  { itemKey: 'ServerListPage', text: '服务器推荐', icon: <IconServer size="large" /> },
+                  { itemKey: 'ServerListPageOldDemo', text: '服务器推荐（旧版DEMO）', icon: <IconServer size="large" /> },
+                  { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
+                  { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
+                  { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
+                  { itemKey: 'ShutokoWiki', text: 'ShutokoWiki', icon: <IconBookmark size="large" /> },
+                  { itemKey:"NetDemo",text: 'NetDemo', icon: <IconEdit size='large' />},
+                  { itemKey:"ComponentTest",text: 'ComponentTest', icon: <IconEdit size='large' />},
+                  { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
+                  { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
+                  { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />},
+                  { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />}
+                ]}
+                onSelect={(data) => setActiveKey(String(data.itemKey))}
+                footer={{
+                  collapseButton: true
+                }}
+              />
+            </Sider>
+          )}
 
           {/* 内容页面 */}
           <Content className="flex-1 min-h-0 h-full" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -217,6 +265,29 @@ function App(): React.JSX.Element {
           onCancel={closeSemiModal}
           onOk={semiHandleOk}
         />
+
+        {/* 顶栏隐藏时的浮动恢复按钮 */}
+        {!headerVisible && (
+          <Button
+            icon={<IconChevronUp />}
+            theme="solid"
+            type="primary"
+            size="small"
+            onClick={() => setHeaderVisible(true)}
+            style={{
+              position: 'fixed',
+              top: '8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+              borderRadius: '20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+            }}
+            title="显示顶栏 (Ctrl/Cmd + H)"
+          >
+            显示顶栏
+          </Button>
+        )}
       </Layout>
     </NavigationProvider>
   )
