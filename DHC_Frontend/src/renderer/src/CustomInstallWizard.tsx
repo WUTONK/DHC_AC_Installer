@@ -158,6 +158,30 @@ export default function CustomInstallWizard(): JSX.Element {
         }
     };
 
+    // 动态计算按钮文案和样式
+    const isLastStep = currentStep === TABS.length - 1;
+    let nextButtonText = '';
+
+    if (isLastStep) {
+        // 最后一步：有选中则"开始安装"，无选中则"跳过并安装"
+        nextButtonText = hasCurrentSelection ? '开始安装' : '跳过并安装';
+    } else {
+        // 中间步骤：有选中则"下一步"，无选中则"跳过此类别"
+        nextButtonText = hasCurrentSelection ? '下一步' : '跳过此类别';
+    }
+
+    // 动态按钮样式：如果有选中，显示外扩白框
+    const nextButtonStyle = {
+        backgroundColor: THEME.green,
+        color: '#fff',
+        width: hasCurrentSelection ? 160 : 140, // 选中时稍微宽一点增加强调感
+        fontWeight: 'bold',
+        // 关键样式：外扩白框
+        boxShadow: hasCurrentSelection ? '0 0 0 2px #16161a, 0 0 0 4px #fff' : 'none',
+        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)', // 增加一点弹跳动画
+        transform: hasCurrentSelection ? 'scale(1.05)' : 'scale(1)'
+    };
+
     return (
         <Layout style={{
             height: '100%',
@@ -244,7 +268,7 @@ export default function CustomInstallWizard(): JSX.Element {
                         closeIcon={null}
                         description={
                             <div style={{ fontSize: 13, color: '#ccc' }}>
-                                流程说明：请在每个步骤勾选您需要的资源，点击"下一步"保存选择。
+                                流程说明：请在每个步骤勾选您需要的资源，点击&ldquo;下一步&rdquo;保存选择。
                                 <span style={{ color: THEME.green, marginLeft: 8 }}>所有选中的模组将在最后统一进行安装。</span>
                             </div>
                         }
@@ -276,15 +300,16 @@ export default function CustomInstallWizard(): JSX.Element {
                         <Text style={{ color: '#666', fontSize: 12 }}>预计占用: -- GB</Text>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 12 }}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                         {currentStep > 0 && (
                             <Button onClick={() => setCurrentStep(c => c - 1)} theme="solid" type="tertiary" style={{ backgroundColor: '#333', color: '#ccc' }}>上一步</Button>
                         )}
+                        {/* 使用动态样式和文案的下一步按钮 */}
                         <Button
                             theme="solid" size="large" onClick={handleNext}
-                            style={{ backgroundColor: THEME.green, color: '#fff', width: 140, fontWeight: 'bold' }}
+                            style={nextButtonStyle}
                         >
-                            {currentStep === 3 ? '开始安装' : '下一步'}
+                            {nextButtonText}
                         </Button>
                     </div>
                 </div>
