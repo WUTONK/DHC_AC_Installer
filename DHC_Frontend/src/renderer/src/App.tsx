@@ -18,7 +18,6 @@ import JoinServerInstructionsModal from './components/joinServerInstructionsModa
 import CustomInstallWizard from './CustomInstallWizard';
 import WelcomePage from './WelcomePage';
 import ServerListPage from './ServerListPage';
-import ServerListPageOldDemo from './ServerListPageOldDemo';
 import DevModePanel from './components/DevModePanel';
 
 // const { Title, Text } = Typography
@@ -99,8 +98,6 @@ function App(): React.JSX.Element {
         return <CustomInstallWizard />
       case 'ServerListPage':
         return <ServerListPage />
-      case 'ServerListPageOldDemo':
-        return <ServerListPageOldDemo />
       default:
         return <div>Not Found</div>
     }
@@ -231,7 +228,6 @@ function App(): React.JSX.Element {
                 items={[
                   { itemKey: 'Home', text: 'Home', icon: <IconHome size="large" /> },
                   { itemKey: 'ServerListPage', text: '服务器推荐', icon: <IconServer size="large" /> },
-                  { itemKey: 'ServerListPageOldDemo', text: '服务器推荐（旧版DEMO）', icon: <IconServer size="large" /> },
                   { itemKey: 'OneClickInstaller', text: '一键式安装', icon: <IconDownload size="large" /> },
                   { itemKey: 'ResourceImportManager', text: '资源导入管理', icon: <IconUpload size="large" /> },
                   { itemKey: 'SettingsPage', text: '设置', icon: <IconSetting size="large" /> },
