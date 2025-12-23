@@ -6,6 +6,7 @@ import {
 } from '@douyinfe/semi-icons';
 import InstallProgressPage from './InstallProgressPage';
 import { useDevMode } from './contexts/DevModeContext';
+import { useNavigation } from './contexts/NavigationContext';
 
 // 模拟数据：磁盘情况
 const GAME_PATH = "D:\\SteamLibrary\\steamapps\\common\\assettocorsa";
@@ -411,18 +412,102 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
     // --- 辅助函数：格式化大小 ---
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
 
+    // [新增] 显示磁盘空间解决方案弹窗
+    const showSpaceSolutionModal = (): void => {
+        Modal.error({
+            title: '磁盘空间不足',
+            icon: <IconAlertTriangle style={{ color: '#ff4d4f' }} size="extra-large" />,
+            content: (
+                <div>
+                    <Paragraph style={{ marginBottom: 16, fontSize: 15 }}>
+                        安装 <strong style={{ color: currentMode.color }}>{currentMode.name}</strong> 需要{' '}
+                        <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>{formatSize(currentMode.size)}</span> 空间，
+                        但当前目标磁盘 ({DISK_INFO.label}) 仅剩 {formatSize(DISK_INFO.free)}。
+                    </Paragraph>
+
+                    <div
+                        style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid #444',
+                            borderRadius: 8,
+                            padding: 16
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                            <IconSetting style={{ color: '#00b5ad', marginTop: 4 }} size="large" />
+                            <div>
+                                <Text strong style={{ color: '#fff', fontSize: 14 }}>建议解决方案</Text>
+                                <Paragraph style={{ color: '#999', marginTop: 4, fontSize: 13, lineHeight: 1.5 }}>
+                                    请前往设置页面调整存储策略。您可以开启 <strong>自动选择最大剩余空间磁盘</strong> 选项，
+                                    或手动指定其他剩余空间充足的磁盘路径。
+                                </Paragraph>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ),
+            okText: '立即前往设置',
+            cancelText: '关闭',
+            onOk: () => {
+                if (onNavigate) {
+                    onNavigate('SettingsPage');
+                } else {
+                    Toast.warning('导航函数未定义');
+                }
+            },
+            style: { maxWidth: 520 }
+        });
+    };
+
+    const { navigate } = useNavigation();
+
     // --- 逻辑：处理一键安装点击 ---
     const handleInstallClick = (): void => {
         // 1. 检查磁盘空间
         if (currentMode.size > DISK_INFO.free) {
             Modal.error({
-                title: '空间不足',
-                content: `所选模式需要 ${formatSize(currentMode.size)}，但磁盘仅剩 ${formatSize(DISK_INFO.free)}`
+                title: '磁盘空间不足',
+                // 使用自定义图标增强警示感
+                icon: <IconAlertTriangle style={{ color: '#ff4d4f' }} size="extra-large" />,
+                content: (
+                    <div>
+                        <Paragraph style={{ marginBottom: 16, fontSize: 15 }}>
+                            安装 <strong style={{ color: currentMode.color }}>{currentMode.name}</strong> 需要 <span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>{formatSize(currentMode.size)}</span> 空间，
+                            但当前目标磁盘 ({DISK_INFO.label}) 仅剩 {formatSize(DISK_INFO.free)}。
+                        </Paragraph>
+
+                        {/* 建议引导卡片 */}
+                        <div style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid #444',
+                            borderRadius: 8,
+                            padding: 16
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                                <IconSetting style={{ color: '#00b5ad', marginTop: 4 }} size="large" />
+                                <div>
+                                    <Text strong style={{ color: '#fff', fontSize: 14 }}>建议解决方案</Text>
+                                    <Paragraph style={{ color: '#999', marginTop: 4, fontSize: 13, lineHeight: 1.5 }}>
+                                        请前往设置页面调整存储策略。您可以开启 <strong>自动选择最大剩余空间磁盘</strong> 选项，或手动指定其他剩余空间充足的磁盘路径。
+                                    </Paragraph>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ),
+                okText: '立即前往设置',
+                cancelText: '暂不处理',
+                // 点击确定时跳转
+                onOk: () => {
+                    // 通过全局导航上下文跳转到设置页
+                    navigate('SettingsPage');
+                },
+                style: { maxWidth: 520 }
             });
             return;
         }
 
-        // 2. 检查资源冲突
+        // 2. 检查资源冲突 (保持原有逻辑)
         if (EXISTING_RESOURCES.length > 0 && mode !== 'clean_install') {
             setConflictModalVisible(true);
         } else {
@@ -1264,28 +1349,71 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                     />
                 </div>
 
-                {/* --- 4. 底部安装按钮 --- */}
+                {/* --- 4. 底部安装按钮 (修改版) --- */}
                 <div style={{ textAlign: 'center', paddingBottom: 40 }}>
-                    <Button
-                        theme="solid"
-                        size="large"
-                        style={{
-                            backgroundColor: isSpaceLow ? '#555' : currentMode.color, // 按钮颜色随模式变
-                            color: '#fff',
-                            width: 320,
-                            height: 64,
-                            fontSize: 18,
-                            fontWeight: 'bold',
-                            boxShadow: `0 8px 20px -6px ${currentMode.color}80` // 阴影颜色也随模式变
-                        }}
-                        disabled={isSpaceLow}
-                        onClick={handleInstallClick}
-                    >
-                        {isSpaceLow ? '磁盘空间不足' : '下一步：环境检查'}
-                    </Button>
-                    <Text style={{ display: 'block', marginTop: 16, color: '#666', fontSize: 12 }}>
-                        点击安装即代表同意覆盖现有配置
-                    </Text>
+                    {isSpaceLow ? (
+                        // 空间不足时的布局：显示两个按钮
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16 }}>
+                            {/* 禁用状态的主按钮 */}
+                            <Button
+                                theme="solid"
+                                size="large"
+                                disabled
+                                style={{
+                                    backgroundColor: '#444',
+                                    color: '#999',
+                                    width: 200,
+                                    height: 64,
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    cursor: 'not-allowed'
+                                }}
+                            >
+                                磁盘空间不足
+                            </Button>
+
+                            {/* 右侧的解决方案按钮 (高亮显示) */}
+                            <Button
+                                theme="solid"
+                                type="warning"
+                                size="large"
+                                icon={<IconAlertTriangle />}
+                                onClick={showSpaceSolutionModal}
+                                style={{
+                                    height: 64,
+                                    fontSize: 16,
+                                    fontWeight: 'bold',
+                                    padding: '0 24px',
+                                    boxShadow: '0 4px 15px rgba(255, 159, 67, 0.2)'
+                                }}
+                            >
+                                查看解决方案
+                            </Button>
+                        </div>
+                    ) : (
+                        // 正常状态：显示一个大按钮
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Button
+                                theme="solid"
+                                size="large"
+                                style={{
+                                    backgroundColor: currentMode.color,
+                                    color: '#fff',
+                                    width: 320,
+                                    height: 64,
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    boxShadow: `0 8px 20px -6px ${currentMode.color}80`
+                                }}
+                                onClick={handleInstallClick}
+                            >
+                                下一步：环境检查
+                            </Button>
+                            <Text style={{ display: 'block', marginTop: 16, color: '#666', fontSize: 12 }}>
+                                点击安装即代表同意覆盖现有配置
+                            </Text>
+                        </div>
+                    )}
                 </div>
 
                 {/* 冲突确认 Modal */}
