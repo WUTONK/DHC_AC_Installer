@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Layout, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Row, Col, Input, Banner } from '@douyinfe/semi-ui';
+
+import { Layout, Button, Typography, Card, Select, Radio, Steps, Toast, Tag, Row, Col, Input, Banner, Modal, List, Space } from '@douyinfe/semi-ui';
+
 import {
+
     IconSetting, IconFolder, IconHelpCircle,
-    IconFile, IconServer, IconTickCircle, IconAlertTriangle
+
+    IconFile, IconServer, IconTickCircle, IconAlertTriangle,
+
+    IconCamera, IconComment, IconExport, IconLink
+
 } from '@douyinfe/semi-icons';
+
 import HomeBreadcrumb from './components/HomeBreadcrumb';
 
+
+
 const { Header, Content } = Layout;
-const { Text } = Typography;
+
+const { Text, Paragraph } = Typography;
 
 export default function SettingsPage(): React.JSX.Element {
     // --- 状态管理 ---
@@ -17,12 +28,21 @@ export default function SettingsPage(): React.JSX.Element {
     const [language, setLanguage] = useState<string>('zh_CN');
 
     // 2. 存储设置
-    const [storageMode, setStorageMode] = useState<'simple' | 'advanced'>('simple'); // 'simple' | 'advanced'
-    const [selectedDrive, setSelectedDrive] = useState<string>('D'); // 简易模式下的选择
+    const [storageMode, setStorageMode] = useState<'simple' | 'advanced'>('simple');
+    const [selectedDrive, setSelectedDrive] = useState<string>('D');
     const [paths, setPaths] = useState<{resource: string; cache: string}>({
         resource: 'D:\\SteamLibrary\\steamapps\\common\\assettocorsa',
         cache: 'D:\\DHC_Launcher\\Cache'
     });
+
+
+
+    // 3. 弹窗状态管理 (新增)
+    const [logModalVisible, setLogModalVisible] = useState(false);
+    const [screenshotModalVisible, setScreenshotModalVisible] = useState(false);
+    const [contactModalVisible, setContactModalVisible] = useState(false);
+    // 联系我们 - 是否已阅读须知
+    const [hasReadContactInfo, setHasReadContactInfo] = useState(false);
 
     // 3. 模拟磁盘数据
     interface DriveInfo {
@@ -41,25 +61,44 @@ export default function SettingsPage(): React.JSX.Element {
     ];
 
     // --- 交互逻辑 ---
-    const handleExportLog = (): void => {
-        const loadingToast = Toast.info({ content: '正在打包日志文件...', duration: 0 });
+
+
+    // 打开日志弹窗并模拟生成
+    const handleOpenLogModal = (): void => {
+        const loadingToast = Toast.info({ content: '正在打包日志...', duration: 0 });
         setTimeout(() => {
             Toast.close(loadingToast);
-            Toast.success({
-                content: '导出成功！已保存至桌面 "DHC_ERROR_LOG" 文件夹',
-                duration: 4000
-            });
-        }, 1500);
+            setLogModalVisible(true);
+        }, 800);
     };
+
+
 
     const handleSaveStorage = (): void => {
         Toast.success('存储路径配置已更新');
+    };
+
+
+
+    // 重置联系我们弹窗状态
+    const handleOpenContact = (): void => {
+        setHasReadContactInfo(false);
+        setContactModalVisible(true);
     };
 
     // 样式常量
     const BG_DARK = '#16161a';
     const CARD_BG = '#232326';
     const THEME_GREEN = '#6bc786';
+
+
+
+    // 动态生成日志文件名
+    const getLogFileName = (): string => {
+        const now = new Date();
+        const str = now.toISOString().replace(/[-:T.]/g, '').slice(2, 14); // yymmddhhmmss
+        return `DHC_LOG_${str}`;
+    };
 
     return (
         <Layout style={{ height: '100vh', background: BG_DARK, color: 'white' }} className="semi-always-dark">
@@ -196,63 +235,435 @@ export default function SettingsPage(): React.JSX.Element {
                             description="如果您在使用过程中遇到安装失败、闪退或黑屏，请按照以下步骤反馈给管理员。"
                             style={{ marginBottom: 24, borderRadius: 8, backgroundColor: 'rgba(255, 159, 67, 0.1)', borderColor: '#ff9f43' }}
                         />
-                        <div style={{ padding: '0 20px' }}>
-                            <Steps current={-1} status="process" style={{ color: '#fff' }}>
-                                <Steps.Step
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第一步：导出日志</Text>}
-                                    description={
-                                        <div style={{ marginTop: 12, padding: '12px 0' }}>
-                                            <div style={{ color: '#ccc', marginBottom: 12, fontSize: 13, lineHeight: 1.6 }}>
-                                                点击下方按钮，系统会自动将错误信息打包。
-                                                <br/>
-                                                文件将生成在桌面的 <Text code style={{color: '#6bc786'}}>DHC_ERROR_LOG</Text> 文件夹中。
-                                            </div>
+                    <div style={{ padding: '0 20px' }}>
+
+                        <Steps current={-1} status="process" style={{ color: '#fff' }}>
+
+                            {/* 第一步 */}
+
+                            <Steps.Step
+
+                                title={<Text style={{color:'#fff', fontWeight:'bold'}}>第一步：导出日志</Text>}
+
+                                description={
+
+                                    <div style={{ marginTop: 8 }}>
+
+                                        <Text type="tertiary" style={{ fontSize: 13 }}>系统会自动打包错误信息供管理员分析。</Text>
+
+                                        <div style={{ marginTop: 8 }}>
+
                                             <Button
-                                                icon={<IconFile />}
-                                                onClick={handleExportLog}
+
+                                                icon={<IconExport />}
+
                                                 theme="solid"
-                                                size="large"
-                                                block={false}
-                                                style={{
-                                                    backgroundColor: '#6bc786',
-                                                    color: '#fff',
-                                                    fontWeight: 'bold',
-                                                    border: 'none',
-                                                    boxShadow: '0 2px 8px rgba(107, 199, 134, 0.3)'
-                                                }}
+
+                                                style={{ backgroundColor: '#444', color: '#fff' }}
+
+                                                onClick={handleOpenLogModal}
+
                                             >
-                                                一键导出错误日志
+
+                                                点此导出日志
+
                                             </Button>
+
                                         </div>
-                                    }
-                                    icon={<IconFile style={{color: '#fff'}} />}
-                                />
-                                <Steps.Step
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第二步：截图保留</Text>}
-                                    description={
-                                        <div style={{ marginTop: 8, color: '#ccc', fontSize: 13 }}>
-                                            请对报错弹窗或异常画面进行截图。
-                                            <br/>
-                                            <Text type="tertiary">提示：Win + Shift + S 可快速截图</Text>
+
+                                    </div>
+
+                                }
+
+                                icon={<IconFile style={{color: '#fff'}} />}
+
+                            />
+
+                            {/* 第二步 */}
+
+                            <Steps.Step
+
+                                title={<Text style={{color:'#fff', fontWeight:'bold'}}>第二步：截图保留</Text>}
+
+                                description={
+
+                                    <div style={{ marginTop: 8 }}>
+
+                                        <Text type="tertiary" style={{ fontSize: 13 }}>对报错弹窗或异常画面进行截图。</Text>
+
+                                        <div style={{ marginTop: 8 }}>
+
+                                            <Button
+
+                                                icon={<IconCamera />}
+
+                                                theme="solid"
+
+                                                style={{ backgroundColor: '#444', color: '#fff' }}
+
+                                                onClick={() => setScreenshotModalVisible(true)}
+
+                                            >
+
+                                                如何截图？
+
+                                            </Button>
+
                                         </div>
-                                    }
-                                    icon={<IconFile style={{color: '#fff'}} />}
-                                />
-                                <Steps.Step
-                                    title={<Text style={{color:'#fff', fontWeight:'bold'}}>第三步：联系我们</Text>}
-                                    description={
-                                        <div style={{ marginTop: 8, color: '#ccc', fontSize: 13 }}>
-                                            将 <strong>日志文件夹</strong> 和 <strong>截图</strong> 发送给群管理员或技术支持。
-                                            <br/>
-                                            请简单描述："在进行什么操作时发生了什么问题"。
+
+                                    </div>
+
+                                }
+
+                                icon={<IconCamera style={{color: '#fff'}} />}
+
+                            />
+
+                            {/* 第三步 */}
+
+                            <Steps.Step
+
+                                title={<Text style={{color:'#fff', fontWeight:'bold'}}>第三步：联系我们</Text>}
+
+                                description={
+
+                                    <div style={{ marginTop: 8 }}>
+
+                                        <Text type="tertiary" style={{ fontSize: 13 }}>将日志和截图发送给技术支持。</Text>
+
+                                        <div style={{ marginTop: 8 }}>
+
+                                            <Button
+
+                                                icon={<IconComment />}
+
+                                                theme="solid"
+
+                                                style={{ backgroundColor: '#444', color: '#fff' }}
+
+                                                onClick={handleOpenContact}
+
+                                            >
+
+                                                联系我们
+
+                                            </Button>
+
                                         </div>
-                                    }
-                                    icon={<IconHelpCircle style={{color: '#fff'}} />}
-                                />
-                            </Steps>
-                        </div>
+
+                                    </div>
+
+                                }
+
+                                icon={<IconHelpCircle style={{color: '#fff'}} />}
+
+                            />
+
+                        </Steps>
+
+                    </div>
                     </Card>
-                </Content>
+
+            </Content>
+
+
+
+            {/* --- Modals (弹窗区域) --- */}
+
+
+
+            {/* 1. 导出日志成功弹窗 */}
+
+            <Modal
+
+                visible={logModalVisible}
+
+                onCancel={() => setLogModalVisible(false)}
+
+                footer={<Button type="primary" theme="solid" onClick={() => setLogModalVisible(false)}>好的，我知道了</Button>}
+
+                title="日志导出成功"
+
+                width={400}
+
+                style={{ top: 100 }}
+
+            >
+
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+
+                    <IconTickCircle size="extra-large" style={{ color: THEME_GREEN, fontSize: 48, marginBottom: 16 }} />
+
+                    <Paragraph style={{ fontSize: 16 }}>
+
+                        日志压缩包已经导出到桌面文件夹
+
+                    </Paragraph>
+
+                    <div style={{ marginTop: 8 }}>
+                        <Text code copyable style={{ fontSize: 16, color: THEME_GREEN }}>
+                            {getLogFileName()}
+                        </Text>
+                    </div>
+
+                </div>
+
+            </Modal>
+
+
+
+            {/* 2. 如何截图教程弹窗 */}
+
+            <Modal
+
+                visible={screenshotModalVisible}
+
+                onCancel={() => setScreenshotModalVisible(false)}
+
+                footer={<Button type="primary" theme="solid" onClick={() => setScreenshotModalVisible(false)}>学会了</Button>}
+
+                title="如何截图？"
+
+                width={500}
+
+            >
+
+                <div style={{ lineHeight: 1.8 }}>
+
+                    <Paragraph>1. 按 <kbd style={{ padding: '2px 6px', background: '#333', border: '1px solid #555', borderRadius: 3, fontSize: 12 }}>Windows</kbd> + <kbd style={{ padding: '2px 6px', background: '#333', border: '1px solid #555', borderRadius: 3, fontSize: 12 }}>Shift</kbd> + <kbd style={{ padding: '2px 6px', background: '#333', border: '1px solid #555', borderRadius: 3, fontSize: 12 }}>S</kbd> 键进行截图。</Paragraph>
+
+
+
+                    {/* 图片占位 */}
+
+                    <div style={{
+
+                        height: 120, background: '#333', borderRadius: 8, margin: '10px 0',
+
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '1px dashed #555'
+
+                    }}>
+
+                        [截图操作示意图占位]
+
+                    </div>
+
+
+
+                    <Paragraph>2. 然后在右侧的通知中打开。</Paragraph>
+
+
+
+                    {/* 图片占位 */}
+
+                    <div style={{
+
+                        height: 120, background: '#333', borderRadius: 8, margin: '10px 0',
+
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '1px dashed #555'
+
+                    }}>
+
+                        [通知中心打开示意图占位]
+
+                    </div>
+
+
+
+                    <Paragraph>3. 将其保存到桌面。</Paragraph>
+
+
+
+                    {/* 图片占位 */}
+
+                    <div style={{
+
+                        height: 120, background: '#333', borderRadius: 8, margin: '10px 0',
+
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', border: '1px dashed #555'
+
+                    }}>
+
+                        [保存文件示意图占位]
+
+                    </div>
+
+                </div>
+
+            </Modal>
+
+
+
+            {/* 3. 联系我们/提问须知弹窗 */}
+
+            <Modal
+
+                visible={contactModalVisible}
+
+                onCancel={() => setContactModalVisible(false)}
+
+                title={hasReadContactInfo ? "加入社区寻求帮助" : "提问须知"}
+
+                footer={null} // 自定义 Footer 逻辑
+
+                width={500}
+
+                maskClosable={false}
+
+            >
+
+                {!hasReadContactInfo ? (
+
+                    // 状态 A: 显示须知
+
+                    <>
+
+                        <Banner
+
+                            type="info"
+
+                            description="为了让我们更高效地解决您的问题，请务必阅读以下内容。"
+
+                            style={{ marginBottom: 16 }}
+
+                        />
+
+                        <List
+
+                            bordered
+
+                            style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: '#444' }}
+
+                        >
+
+                            <List.Item>1. 请将导出的 <Text strong>日志压缩包</Text> 以及 <Text strong>问题截图</Text> 和你的 <Text strong>问题描述</Text> 一起发送给我们。</List.Item>
+
+                            <List.Item>2. 如果不是在安装过程中遇到问题，而是在打开游戏时遇到问题，那么请发送概括了你的问题的截图。</List.Item>
+
+                            <List.Item>3. 礼貌且尽可能详细的描述你的问题。</List.Item>
+
+                            <List.Item><Text type="danger">4. 如果不遵循如下规范，则我们不会回答你的问题。</Text></List.Item>
+
+                        </List>
+
+                        <div style={{ marginTop: 24, textAlign: 'center' }}>
+
+                            <Button
+
+                                theme="solid"
+
+                                size="large"
+
+                                style={{ backgroundColor: THEME_GREEN, color: '#fff', width: '100%' }}
+
+                                onClick={() => setHasReadContactInfo(true)}
+
+                            >
+
+                                我已经了解须知
+
+                            </Button>
+
+                        </div>
+
+                    </>
+
+                ) : (
+
+                    // 状态 B: 显示社交链接
+
+                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
+
+                        <Paragraph style={{ marginBottom: 24, color: '#ccc' }}>
+
+                            感谢配合！请选择您常用的平台加入我们的频道进行反馈。
+
+                        </Paragraph>
+
+
+
+                        <Space spacing={20} style={{ width: '100%', justifyContent: 'center' }}>
+
+                            {/* QQ 按钮 */}
+
+                            <Button
+
+                                theme="solid"
+
+                                size="large"
+
+                                icon={<IconComment />}
+
+                                style={{
+
+                                    backgroundColor: '#12B7F5', // QQ 品牌色
+
+                                    color: '#fff',
+
+                                    height: 50,
+
+                                    padding: '0 30px',
+
+                                    fontSize: 16,
+
+                                    fontWeight: 'bold'
+
+                                }}
+
+                                onClick={() => window.open('https://qm.qq.com/example', '_blank')}
+
+                            >
+
+                                加入 QQ 群
+
+                            </Button>
+
+
+
+                            {/* Discord 按钮 */}
+
+                            <Button
+
+                                theme="solid"
+
+                                size="large"
+
+                                icon={<IconLink />}
+
+                                style={{
+
+                                    backgroundColor: '#5865F2', // Discord 品牌色
+
+                                    color: '#fff',
+
+                                    height: 50,
+
+                                    padding: '0 30px',
+
+                                    fontSize: 16,
+
+                                    fontWeight: 'bold'
+
+                                }}
+
+                                onClick={() => window.open('https://discord.gg/example', '_blank')}
+
+                            >
+
+                                加入 Discord
+
+                            </Button>
+
+                        </Space>
+
+                    </div>
+
+                )}
+
+            </Modal>
+
+
+
         </Layout>
     );
 }

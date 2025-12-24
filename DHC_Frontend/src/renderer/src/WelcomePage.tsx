@@ -344,6 +344,8 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
         serverRecommendDesc: isCN ? '精选联机服务器' : 'Curated multiplayer servers',
         shutokoWiki: isCN ? '首都高百科' : 'Shutoko Wiki',
         shutokoWikiDesc: isCN ? '赛道攻略与技巧' : 'Track guides and tips',
+        systemSettings: isCN ? '系统设置' : 'System Settings',
+        systemSettingsDesc: isCN ? '语言、存储路径与日志' : 'Language, storage path & logs',
         aboutUs: isCN ? '关于我们' : 'About Us',
         aboutUsDesc: isCN ? '赞助与开发日志' : 'Sponsors and dev logs',
         tutorial: isCN ? '新手必看' : 'Tutorial',
@@ -494,11 +496,18 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                             page: 'ShutokoWiki'
                         },
                         {
+                            title: texts.systemSettings,
+                            icon: <IconSetting />,
+                            desc: texts.systemSettingsDesc,
+                            color: '#00b5ad',
+                            page: 'SettingsPage'
+                        },
+                        {
                             title: texts.aboutUs,
                             icon: <IconInfoCircle />,
                             desc: texts.aboutUsDesc,
                             color: '#888',
-                            page: 'SettingsPage'
+                            page: 'AboutPage'
                         },
                     ].map((item, idx) => (
                         <Col span={6} key={idx}>

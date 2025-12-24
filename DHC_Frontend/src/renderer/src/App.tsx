@@ -31,6 +31,14 @@ function App(): React.JSX.Element {
   // 地区状态管理
   const [region, setRegion] = useState<'zhCN' | 'enUS'>('zhCN')
 
+  // 设置默认暗色模式
+  useEffect(() => {
+    const body = document.body;
+    if (!body.hasAttribute('theme-mode')) {
+      body.setAttribute('theme-mode', 'dark');
+    }
+  }, []);
+
   // 自动检测地区（根据系统语言或浏览器语言）
   useEffect(() => {
     // 检测系统/浏览器语言
