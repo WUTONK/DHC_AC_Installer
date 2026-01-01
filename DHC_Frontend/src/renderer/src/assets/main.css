@@ -97,7 +97,12 @@
 /* 只在暗色模式下应用自定义 Nav 样式 */
 body[theme-mode='dark'] .dark-nav.semi-nav,
 body[theme-mode='dark'] .dark-nav .semi-nav-wrapper {
-  background-color: #232326;
+  background-color: var(--semi-color-bg-1);
+}
+
+/* 顶栏在暗色模式下与侧边栏保持一致的颜色，使用主题色变量 */
+body[theme-mode='dark'] .app-header.semi-layout-header {
+  background-color: var(--semi-color-bg-1) !important;
 }
 
 body[theme-mode='dark'] .dark-nav .semi-nav-item .semi-nav-item-text {

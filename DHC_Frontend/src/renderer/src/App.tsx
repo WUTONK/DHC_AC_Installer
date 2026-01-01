@@ -117,24 +117,6 @@ function App(): React.JSX.Element {
   const [headerVisible, setHeaderVisible] = useState<boolean>(true)
   const { isDevMode, toggleDevMode } = useDevMode()
 
-  // 地区切换按钮容器样式
-  const regionToggleContainerStyle: React.CSSProperties = {
-    backgroundColor: 'var(--semi-color-fill-0)',
-    borderRadius: 20,
-    padding: 4,
-    display: 'flex',
-    border: '1px solid var(--semi-color-border)'
-  };
-
-  // 地区切换按钮基础样式
-  const regionToggleButtonBaseStyle: React.CSSProperties = {
-    padding: '4px 12px',
-    borderRadius: 16,
-    cursor: 'pointer',
-    fontSize: 12,
-    fontWeight: 'bold',
-    transition: 'all 0.2s'
-  };
 
   // 切换色彩模式
   const switchMode = (): void => {
@@ -166,7 +148,7 @@ function App(): React.JSX.Element {
     <NavigationProvider onNavigate={setActiveKey}>
       <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
         {headerVisible && (
-          <Header className="h-16 leading-[64px] px-4 flex items-center justify-between">
+          <Header className="h-16 leading-[64px] px-4 flex items-center justify-between app-header">
           <div className="flex items-center gap-4 shrink-0">
             <Button
               icon={<IconList />}
@@ -187,29 +169,6 @@ function App(): React.JSX.Element {
             <span className="font-semibold">----</span>
           </div>
           <div className="flex items-center flex-nowrap gap-3 shrink-0">
-            {/* 地区切换按钮 - 使用内联样式以支持动态状态 */}
-            <div style={regionToggleContainerStyle}>
-              <div
-                onClick={() => setRegion('zhCN')}
-                style={{
-                  ...regionToggleButtonBaseStyle,
-                  backgroundColor: region === 'zhCN' ? '#6bc786' : 'transparent',
-                  color: region === 'zhCN' ? '#fff' : 'var(--semi-color-text-2)'
-                }}
-              >
-                中国 CN
-              </div>
-              <div
-                onClick={() => setRegion('enUS')}
-                style={{
-                  ...regionToggleButtonBaseStyle,
-                  backgroundColor: region === 'enUS' ? '#0052cc' : 'transparent',
-                  color: region === 'enUS' ? '#fff' : 'var(--semi-color-text-2)'
-                }}
-              >
-                Global US
-              </div>
-            </div>
             <Button size="small" onClick={switchMode} className="whitespace-nowrap">切换色彩模式</Button>
             <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开弹窗</Button>
             <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开官方弹窗</Button>

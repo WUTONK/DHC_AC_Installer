@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Button, Typography, Row, Col, Tag, Select, InputNumber } from '@douyinfe/semi-ui';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Layout, Button, Typography, Row, Col, Tag, Select, InputNumber, Switch } from '@douyinfe/semi-ui';
 import { IconArrowLeft } from '@douyinfe/semi-icons';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -191,6 +191,17 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     const [selectedLogo, setSelectedLogo] = useState<2 | 3 | 4>(2);
     const [logoSize, setLogoSize] = useState<number>(200);
 
+    // 开发者调试：地区模拟
+    const [devRegionCN, setDevRegionCN] = useState<boolean>(() => {
+        const saved = localStorage.getItem('shutoko-wiki-devRegionCN');
+        return saved !== null ? saved === 'true' : (region === 'zhCN');
+    });
+
+    // 使用开发者选项覆盖传入的 region，或使用传入的 region
+    const effectiveRegion = useMemo<'zhCN' | 'enUS'>(() => {
+        return devRegionCN ? 'zhCN' : 'enUS';
+    }, [devRegionCN]);
+
     // Logo 映射
     const logoMap: Record<2 | 3 | 4, string> = {
         2: shutokoLogo2,
@@ -219,6 +230,11 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
         }
     }, []);
 
+    // 持久化开发者选项：地区模拟
+    useEffect(() => {
+        localStorage.setItem('shutoko-wiki-devRegionCN', String(devRegionCN));
+    }, [devRegionCN]);
+
     // 辅助函数：标记文章为已读并更新 localStorage
     const markAsRead = (id: string): void => {
         if (!readArticles.has(id)) {
@@ -237,6 +253,25 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
     };
 
     useEffect(() => {
+        // 地区模拟选项
+        registerDevOption({
+            id: 'shutoko-wiki-region',
+            label: '地区模拟（ShutokoWiki）',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devRegionCN}
+                        onChange={(checked) => setDevRegionCN(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devRegionCN ? '中国区' : '非中国区'}
+                    </span>
+                </div>
+            ),
+            order: 1
+        });
+
         registerDevOption({
             id: 'wiki-reset-read',
             label: 'Wiki 状态管理',
@@ -307,10 +342,11 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
         });
 
         return () => {
+            unregisterDevOption('shutoko-wiki-region');
             unregisterDevOption('wiki-reset-read');
             unregisterDevOption('wiki-logo-selector');
         };
-    }, [readArticles, selectedLogo, logoSize, getLogoSize, registerDevOption, unregisterDevOption]);
+    }, [readArticles, selectedLogo, logoSize, getLogoSize, devRegionCN, registerDevOption, unregisterDevOption]);
 
     const openArticle = (article: WikiArticle): void => {
         markAsRead(article.id);
@@ -345,10 +381,10 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                     // 注意：在生产环境中可能需要更严格的 JSON 解析，但这里为了方便手写 config 做了宽容处理
                     // 或者强制要求用户写标准 JSON
                     const config = JSON.parse(match[1]);
-                    const targetDefaultPlatform = region === 'zhCN' ? 'bilibili' : 'youtube';
+                    const targetDefaultPlatform = effectiveRegion === 'zhCN' ? 'bilibili' : 'youtube';
 
                     return <VideoTutorialSection
-                        key={`${activeArticle?.id}-${region}`}
+                        key={`${activeArticle?.id}-${effectiveRegion}`}
                         defaultPlatform={targetDefaultPlatform}
                         {...config}
                     />;
@@ -361,9 +397,9 @@ export default function ShutokoWiki({ region = 'zhCN' }: ShutokoWikiProps): Reac
                 const legacyArticle = activeArticle as WikiArticle & { videos?: VideoData[] };
                 if (legacyArticle && legacyArticle.videos && legacyArticle.videos.length > 0) {
                     return <VideoTutorialSection
-                        key={`${activeArticle?.id}-${region}`}
+                        key={`${activeArticle?.id}-${effectiveRegion}`}
                         videos={legacyArticle.videos}
-                        defaultPlatform={region === 'zhCN' ? 'bilibili' : 'youtube'}
+                        defaultPlatform={effectiveRegion === 'zhCN' ? 'bilibili' : 'youtube'}
                     />;
                 }
                 return null;
