@@ -1,8 +1,8 @@
 // 给AI提示：不要清理未使用的引用
 import React from 'react'
-import { Layout,Nav, Button,Avatar, Switch} from '@douyinfe/semi-ui'
+import { Layout,Nav, Button, Switch} from '@douyinfe/semi-ui'
 import { useState, useEffect } from 'react'
-import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer, IconList, IconChevronUp } from '@douyinfe/semi-icons';
+import { IconHome, IconBookmark, IconEdit, IconDownload, IconUpload, IconSetting, IconServer, IconList, IconChevronUp, IconCode } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import ComponentTest from './ComponentTest'
@@ -19,6 +19,7 @@ import CustomInstallWizard from './CustomInstallWizard';
 import WelcomePage from './WelcomePage';
 import ServerListPage from './ServerListPage';
 import DevModePanel from './components/DevModePanel';
+import TestPlayground from './TestPlayground';
 
 // const { Title, Text } = Typography
 
@@ -106,6 +107,8 @@ function App(): React.JSX.Element {
         return <CustomInstallWizard />
       case 'ServerListPage':
         return <ServerListPage />
+      case 'TestPlayground':
+        return <TestPlayground />
       default:
         return <div>Not Found</div>
     }
@@ -127,11 +130,6 @@ function App(): React.JSX.Element {
       body.setAttribute('theme-mode', 'dark');
     }
   };
-
-  // 打开弹窗
-  const openSemiModal = (): void => {
-    setSemiModalVisible(true)
-  }
 
   // 关闭弹窗
   const closeSemiModal = (): void => {
@@ -170,8 +168,6 @@ function App(): React.JSX.Element {
           </div>
           <div className="flex items-center flex-nowrap gap-3 shrink-0">
             <Button size="small" onClick={switchMode} className="whitespace-nowrap">切换色彩模式</Button>
-            <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开弹窗</Button>
-            <Button size="small" onClick={openSemiModal} className="whitespace-nowrap">打开官方弹窗</Button>
             <div className="flex items-center gap-2 whitespace-nowrap">
               <Switch checked={isDevMode} onChange={toggleDevMode} size="small" />
               <span className={`text-xs ${isDevMode ? 'text-accent-green' : 'text-text-muted'}`}>
@@ -179,9 +175,6 @@ function App(): React.JSX.Element {
               </span>
             </div>
             <DevModePanel />
-            <Avatar size="small">
-              WUTONK
-            </Avatar>
           </div>
           </Header>
         )}
@@ -204,7 +197,8 @@ function App(): React.JSX.Element {
                   { itemKey:"CarPackInstaller",text: 'CarPackInstaller', icon: <IconEdit size='large' />},
                   { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
                   { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />},
-                  { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />}
+                  { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />},
+                  { itemKey:"TestPlayground",text: '测试实验室', icon: <IconCode size='large' />}
                 ]}
                 onSelect={(data) => setActiveKey(String(data.itemKey))}
                 footer={{
