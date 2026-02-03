@@ -24,11 +24,11 @@ const (
 
 // PingResult 表示ping的结果
 type PingResult struct {
-	Target   string
-	Delay    time.Duration
-	Timeout  time.Duration
-	TimedOut bool
-	Error    error
+	Target   string // 服务器网址
+	Delay    time.Duration //延迟
+	Timeout  time.Duration //延迟多少算超时
+	TimedOut bool 		// 是否超时
+	Error    error		// 是否有错误
 }
 
 // getPing 使用ICMP协议ping目标服务器

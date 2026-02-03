@@ -4,9 +4,24 @@ import { spawn, ChildProcess } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+// ============================================
 // 后端进程管理
+// ============================================
+// 存储后端进程的引用，用于后续停止进程
 let backendProcess: ChildProcess | null = null
 
+/**
+ * 启动后端服务进程
+ *
+ * 作用：启动一个独立的进程来运行后端服务（DHC_Backend）
+ * 为什么需要：后端服务提供 HTTP API，前端通过请求这些 API 获取数据
+ *
+ * 工作流程：
+ * 1. 根据平台选择可执行文件（Windows: main.exe, macOS/Linux: main）
+ * 2. 根据环境选择路径（开发环境 vs 生产环境）
+ * 3. 使用 spawn 启动进程
+ * 4. 监听进程事件（错误、退出）
+ */
 function startBackend(): void {
   // 获取后端可执行文件路径
   // Windows 上需要 .exe 扩展名，其他平台不需要
@@ -34,6 +49,16 @@ function startBackend(): void {
   })
 }
 
+/**
+ * 停止后端服务进程
+ *
+ * 作用：优雅地关闭后端进程
+ * 为什么需要：应用退出时，需要清理资源，避免僵尸进程
+ *
+ * 注意：不同平台使用不同的终止方式
+ * - Windows: 使用 taskkill 命令
+ * - macOS/Linux: 使用 kill 信号
+ */
 function stopBackend(): void {
   if (backendProcess) {
     console.log('Stopping backend process...')
@@ -157,6 +182,22 @@ function createMenu(): void {
   Menu.setApplicationMenu(menu)
 }
 
+/**
+ * 创建应用主窗口
+ *
+ * 作用：创建一个浏览器窗口来显示 React 应用
+ *
+ * 关键配置说明：
+ * - preload: 预加载脚本路径，用于在渲染进程加载前执行代码
+ * - webPreferences: 安全设置
+ *   - sandbox: false - 关闭沙箱（方便开发）
+ *   - contextIsolation: false - 关闭上下文隔离（方便开发，但安全性较低）
+ *   - nodeIntegration: true - 允许使用 Node.js API（方便开发）
+ *
+ * 窗口尺寸策略：
+ * - Windows: 1920x1080（原始设计尺寸）
+ * - macOS: 1280x720（缩放显示，实际内容还是 1080p）
+ */
 function createWindow(): void {
   // Create the browser window.
   // 设计尺寸：1920x1080 (Windows)，在 macOS 中缩放到 1280x720 显示
@@ -312,10 +353,22 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
+  // IPC test - 测试 IPC 通信是否正常
   ipcMain.on('ping', () => console.log('pong'))
 
-  // IPC handler for API requests
+  // ============================================
+  // IPC 处理器：处理来自渲染进程的 API 请求
+  // ============================================
+  //
+  // 作用：当渲染进程调用 window.api.requestApi(url) 时，这个函数会被执行
+  //
+  // 工作流程：
+  // 1. 渲染进程通过 IPC 发送请求（包含 URL）
+  // 2. 主进程接收请求，使用 fetch 发送 HTTP 请求到后端
+  // 3. 后端返回数据
+  // 4. 主进程通过 IPC 返回结果给渲染进程
+  //
+  // 为什么需要：渲染进程不能直接发送 HTTP 请求（安全限制），需要通过主进程代理
   ipcMain.handle('api-request', async (_, url) => {
     try {
       const response = await fetch(url)

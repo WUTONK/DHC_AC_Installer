@@ -7,56 +7,8 @@
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
 [GIN-debug] GET    /api/GetServerInfo        --> DHC_Backend/handler.GetServerInfo (4 handlers)
-2026/01/01 15:50:46 Backend Server is running on port http://127.0.0.1:19810
-2026/01/01 15:50:46 Frontend login page is running on path http://localhost:11451
+2026/01/08 00:55:57 Backend Server is running on port http://127.0.0.1:19810
+2026/01/08 00:55:57 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-Players: 0/30
-Approx RTT (HTTP): 104ms
-{
-  "Rtt": "104ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:25 | 200 |   105.81525ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
-Players: 0/30
-Approx RTT (HTTP): 42ms
-{
-  "Rtt": "42ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:26 | 200 |   42.966958ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
-Players: 0/30
-Approx RTT (HTTP): 44ms
-{
-  "Rtt": "44ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:27 | 200 |   44.283334ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
-Players: 0/30
-Approx RTT (HTTP): 42ms
-{
-  "Rtt": "42ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:28 | 200 |     42.9535ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
-Players: 0/30
-Approx RTT (HTTP): 43ms
-{
-  "Rtt": "43ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:29 | 200 |   44.221459ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
-Players: 0/30
-Approx RTT (HTTP): 44ms
-{
-  "Rtt": "44ms",
-  "Clients": 0,
-  "MaxClients": 30
-}
-[GIN] 2026/01/01 - 15:51:47 | 200 |   45.224583ms |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
