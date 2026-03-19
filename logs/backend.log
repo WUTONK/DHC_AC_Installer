@@ -7,8 +7,8 @@
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
 [GIN-debug] GET    /api/GetServerInfo        --> DHC_Backend/handler.GetServerInfo (4 handlers)
-2026/01/08 00:55:57 Backend Server is running on port http://127.0.0.1:19810
-2026/01/08 00:55:57 Frontend login page is running on path http://localhost:11451
+2026/03/19 23:25:48 Backend Server is running on port http://127.0.0.1:19810
+2026/03/19 23:25:48 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810

@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  8.68 kB
-✓ built in 300ms
+✓ built in 331ms
 
 build the electron main process successfully
 
@@ -19,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.49 kB
-✓ built in 8ms
+✓ built in 9ms
 
 build the electron preload files successfully
 
@@ -41,22 +41,16 @@ Starting backend at: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Ba
 
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
-2026/01/08 00:56:01 Backend Server is running on port http://127.0.0.1:19810
-2026/01/08 00:56:01 Frontend login page is running on path http://localhost:11451
+2026/03/19 23:25:54 Backend Server is running on port http://127.0.0.1:19810
+2026/03/19 23:25:54 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
 [GIN-debug] [ERROR] listen tcp 127.0.0.1:19810: bind: address already in use
 Backend process exited with code 0 and signal null
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-01:03:30 [vite] (client) hmr update /src/NetDemo.tsx
-01:03:30 [vite] (client) hmr invalidate /src/NetDemo.tsx Could not Fast Refresh ("ServerList" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-01:03:30 [vite] (client) hmr update /src/App.tsx
-01:03:42 [vite] (client) hmr update /src/NetDemo.tsx
-01:03:42 [vite] (client) hmr invalidate /src/NetDemo.tsx Could not Fast Refresh ("ServerList" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-01:03:42 [vite] (client) hmr update /src/App.tsx
-01:03:42 [vite] (client) hmr update /src/NetDemo.tsx
-01:03:42 [vite] (client) hmr invalidate /src/NetDemo.tsx Could not Fast Refresh ("ServerList" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-01:03:42 [vite] (client) hmr update /src/App.tsx
-01:20:39 [vite] (client) hmr update /src/NetDemo.tsx
+ ELIFECYCLE  Command failed.
