@@ -13,3 +13,6 @@ DHC_Backend/models/tools/7z/windows/
 DHC_Backend/resources/cache
 DHC_Backend/test/testModFile
 DHC_Backend/test/simEnv/windows_finder
+
+# Temporary document
+doc/.*
