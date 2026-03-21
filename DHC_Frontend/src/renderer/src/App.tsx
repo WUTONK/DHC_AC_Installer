@@ -80,6 +80,8 @@ function App(): React.JSX.Element {
     }
   }, [])
 
+  const [settingsEntrySource, setSettingsEntrySource] = useState<string | null>(null)
+
   // 页面选择
   const renderPage = (key: string): React.JSX.Element => {
     switch (key) {
@@ -98,11 +100,27 @@ function App(): React.JSX.Element {
       case 'CarPackInstaller':
         return <CarPackInstaller />
       case 'OneClickInstaller':
-        return <OneClickInstaller onNavigate={(page: string) => setActiveKey(page)} />
+        return (
+          <OneClickInstaller
+            onNavigate={(page: string) => setActiveKey(page)}
+            onNavigateToSettingsFromDiskLow={() => {
+              setSettingsEntrySource('one-click-disk-low')
+              setActiveKey('SettingsPage')
+            }}
+          />
+        )
       case 'ResourceImportManager':
         return <ResourceImportManager />
       case 'SettingsPage':
-        return <SettingsPage />
+        return (
+          <SettingsPage
+            showReturnToInstaller={settingsEntrySource === 'one-click-disk-low'}
+            onReturnToInstaller={() => {
+              setSettingsEntrySource(null)
+              setActiveKey('OneClickInstaller')
+            }}
+          />
+        )
       case 'CustomInstallWizard':
         return <CustomInstallWizard />
       case 'ServerListPage':
@@ -200,7 +218,13 @@ function App(): React.JSX.Element {
                   { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />},
                   { itemKey:"TestPlayground",text: '测试实验室', icon: <IconCode size='large' />}
                 ]}
-                onSelect={(data) => setActiveKey(String(data.itemKey))}
+                onSelect={(data) => {
+                  const nextKey = String(data.itemKey)
+                  if (nextKey !== 'SettingsPage') {
+                    setSettingsEntrySource(null)
+                  }
+                  setActiveKey(nextKey)
+                }}
                 footer={{
                   collapseButton: true
                 }}

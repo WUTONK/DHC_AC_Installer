@@ -20,7 +20,15 @@ const { Header, Content } = Layout;
 
 const { Text, Paragraph } = Typography;
 
-export default function SettingsPage(): React.JSX.Element {
+interface SettingsPageProps {
+    showReturnToInstaller?: boolean;
+    onReturnToInstaller?: () => void;
+}
+
+export default function SettingsPage({
+    showReturnToInstaller = false,
+    onReturnToInstaller
+}: SettingsPageProps): React.JSX.Element {
     // --- 状态管理 ---
 
     // 1. 语言设置 (模拟系统语言检测)
@@ -43,7 +51,6 @@ export default function SettingsPage(): React.JSX.Element {
     const [contactModalVisible, setContactModalVisible] = useState(false);
     // 联系我们 - 是否已阅读须知
     const [hasReadContactInfo, setHasReadContactInfo] = useState(false);
-
     // 3. 模拟磁盘数据
     interface DriveInfo {
         label: string;
@@ -363,6 +370,20 @@ export default function SettingsPage(): React.JSX.Element {
 
                     </div>
                     </Card>
+
+                    {showReturnToInstaller && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, paddingBottom: 20 }}>
+                            <Button
+                                theme="solid"
+                                onClick={() => {
+                                    onReturnToInstaller?.();
+                                }}
+                                style={{ backgroundColor: THEME_GREEN, color: '#fff', minWidth: 180 }}
+                            >
+                                返回安装页面
+                            </Button>
+                        </div>
+                    )}
 
             </Content>
 

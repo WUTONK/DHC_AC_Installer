@@ -137,12 +137,13 @@ const { Title, Text, Paragraph } = Typography;
 
 interface OneClickInstallerProps {
     onNavigate?: (page: string) => void;
+    onNavigateToSettingsFromDiskLow?: () => void;
 }
 
 // 安装步骤路由
 type InstallStep = 'SELECT_MODE' | 'PRE_CHECK' | 'INSTALLING' | 'POST_INSTALL';
 
-export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps = {}): React.JSX.Element {
+export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFromDiskLow }: OneClickInstallerProps = {}): React.JSX.Element {
     // --- 状态管理 ---
     // 开发者调试：地区
     const [devRegionCN, setDevRegionCN] = useState<boolean>(() => {
@@ -449,10 +450,10 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
             okText: '立即前往设置',
             cancelText: '关闭',
             onOk: () => {
-                if (onNavigate) {
-                    onNavigate('SettingsPage');
+                if (onNavigateToSettingsFromDiskLow) {
+                    onNavigateToSettingsFromDiskLow();
                 } else {
-                    Toast.warning('导航函数未定义');
+                    navigate('SettingsPage');
                 }
             },
             style: { maxWidth: 520 }
@@ -499,8 +500,11 @@ export default function OneClickInstaller({ onNavigate }: OneClickInstallerProps
                 cancelText: '暂不处理',
                 // 点击确定时跳转
                 onOk: () => {
-                    // 通过全局导航上下文跳转到设置页
-                    navigate('SettingsPage');
+                    if (onNavigateToSettingsFromDiskLow) {
+                        onNavigateToSettingsFromDiskLow();
+                    } else {
+                        navigate('SettingsPage');
+                    }
                 },
                 style: { maxWidth: 520 }
             });
