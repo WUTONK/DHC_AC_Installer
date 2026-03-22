@@ -369,30 +369,51 @@ app.whenReady().then(() => {
   // 4. 主进程通过 IPC 返回结果给渲染进程
   //
   // 为什么需要：渲染进程不能直接发送 HTTP 请求（安全限制），需要通过主进程代理
-  ipcMain.handle('api-request', async (_, url) => {
-    try {
-      const response = await fetch(url)
-      const data = await response.json()
+  ipcMain.handle(
+    'api-request',
+    async (
+      _,
+      url: string,
+      options?: { method?: string; body?: string; headers?: Record<string, string> }
+    ) => {
+      try {
+        const init: RequestInit = {
+          method: options?.method ?? 'GET'
+        }
+        if (options?.body !== undefined) {
+          init.body = options.body
+        }
+        if (options?.headers && Object.keys(options.headers).length > 0) {
+          init.headers = options.headers
+        }
+        const response = await fetch(url, init)
+        const text = await response.text()
+        let data: unknown
+        try {
+          data = text ? JSON.parse(text) : null
+        } catch {
+          data = text
+        }
 
-      // 返回完整的响应信息，包括状态码
-      return {
-        success: true,
-        data,
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        status: 0,
-        statusText: 'Network Error',
-        ok: false
+        return {
+          success: true,
+          data,
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
+        }
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          status: 0,
+          statusText: 'Network Error',
+          ok: false
+        }
       }
     }
-  })
+  )
 
   createWindow()
 

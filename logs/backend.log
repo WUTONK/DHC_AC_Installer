@@ -7,8 +7,16 @@
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
 [GIN-debug] GET    /api/GetServerInfo        --> DHC_Backend/handler.GetServerInfo (4 handlers)
-2026/03/22 19:11:56 Backend Server is running on port http://127.0.0.1:19810
-2026/03/22 19:11:56 Frontend login page is running on path http://localhost:11451
+[GIN-debug] GET    /api/TestPlaygroundHealth --> DHC_Backend/handler.testPlaygroundHealth (4 handlers)
+[GIN-debug] POST   /api/TestPlaygroundEcho   --> DHC_Backend/handler.testPlaygroundEcho (4 handlers)
+[GIN-debug] POST   /api/TestPlaygroundJob/start --> DHC_Backend/handler.testPlaygroundJobStart (4 handlers)
+[GIN-debug] GET    /api/TestPlaygroundJob/progress --> DHC_Backend/handler.testPlaygroundJobProgress (4 handlers)
+2026/03/22 21:10:46 Backend Server is running on port http://127.0.0.1:19810
+2026/03/22 21:10:46 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
+[GIN] 2026/03/22 - 21:10:57 | 200 |     181.041µs |       127.0.0.1 | GET      "/api/TestPlaygroundHealth"
+[GIN] 2026/03/22 - 21:10:59 | 200 |     413.625µs |       127.0.0.1 | POST     "/api/TestPlaygroundEcho"
+use getGamePath function
+[GIN] 2026/03/22 - 21:11:04 | 200 |     293.833µs |       127.0.0.1 | GET      "/api/GetGamePath"

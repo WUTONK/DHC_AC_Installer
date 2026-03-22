@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Layout, Button, Card, Typography, Row, Col, Tag, Divider, Spin } from '@douyinfe/semi-ui';
 import {
-    IconCode, IconServer, IconPlay, IconDelete, IconBox
+    IconCode, IconServer, IconPlay, IconDelete, IconBox, IconLink
 } from '@douyinfe/semi-icons';
 import HomeBreadcrumb from './components/HomeBreadcrumb';
 
@@ -35,6 +35,45 @@ interface TestSuite {
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
+
+/** 与 DHC_Backend/cmd/main.go 监听端口一致 */
+const BACKEND_BASE = 'http://127.0.0.1:19810';
+
+type Logger = (type: LogType, msg: string, data?: any) => void;
+
+/**
+ * 经主进程 fetch 代理请求本地后端（与 OpenAPI 客户端同源路径）。
+ * 会写入右侧 Console：REQ / RES。
+ */
+async function requestBackend(
+    log: Logger,
+    method: string,
+    pathAndQuery: string,
+    body?: Record<string, unknown>
+): Promise<unknown> {
+    const url = `${BACKEND_BASE}${pathAndQuery}`;
+    const hasBody = body !== undefined;
+    log('req', `${method} ${pathAndQuery}`, hasBody ? body : undefined);
+    const result = await window.api.requestApi(
+        url,
+        hasBody
+            ? {
+                  method,
+                  body: JSON.stringify(body),
+                  headers: { 'Content-Type': 'application/json' }
+              }
+            : { method }
+    );
+    if (!result.success) {
+        log('error', 'IPC/网络失败', { error: result.error });
+        throw new Error(result.error || 'request failed');
+    }
+    log('res', `${result.status} ${result.statusText}`, result.data);
+    if (!result.ok) {
+        throw new Error(`HTTP ${result.status}`);
+    }
+    return result.data;
+}
 
 // =================================================================
 // 2. 页面组件 (TestPlayground)
@@ -118,11 +157,80 @@ export default function TestPlayground(): React.JSX.Element {
                     }
                 },
                 // --- 在这里添加新的安装测试 ---
+                // --- 在这里添加新的安装测试 ---
                 // {
                 //     id: 'test_map_install',
                 //     name: '测试地图安装',
                 //     action: async (log) => { ... }
                 // }
+            ]
+        },
+        {
+            id: 'real_demo',
+            title: '真实端到端 DEMO（需后端 19810 已启动）',
+            icon: <IconLink />,
+            cases: [
+                {
+                    id: 'real_health',
+                    name: '连通性：GET /api/TestPlaygroundHealth',
+                    desc: '渲染进程 → IPC → 主进程 fetch → Gin → 返回 JSON',
+                    action: async (log) => {
+                        await requestBackend(log, 'GET', '/api/TestPlaygroundHealth');
+                        log('success', '✅ 后端可达');
+                    }
+                },
+                {
+                    id: 'real_echo',
+                    name: 'JSON 往返：POST /api/TestPlaygroundEcho',
+                    desc: '发送 JSON，后端原样回显并附带 serverTime',
+                    action: async (log) => {
+                        await requestBackend(log, 'POST', '/api/TestPlaygroundEcho', {
+                            demo: 'from-renderer',
+                            ts: Date.now()
+                        });
+                        log('success', '✅ Echo 完成');
+                    }
+                },
+                {
+                    id: 'real_existing_get',
+                    name: '现有 API：GET /api/GetGamePath',
+                    desc: '走同一套 IPC 代理，调用项目已有接口',
+                    action: async (log) => {
+                        await requestBackend(log, 'GET', '/api/GetGamePath');
+                        log('success', '✅ GetGamePath 完成');
+                    }
+                },
+                {
+                    id: 'real_job_poll',
+                    name: '完整流程：创建任务 + 轮询进度（真实 HTTP）',
+                    desc: 'POST 创建 jobId → 轮询 GET progress 直至 phase=done（后端按时间推进进度）',
+                    action: async (log) => {
+                        const start = (await requestBackend(log, 'POST', '/api/TestPlaygroundJob/start')) as {
+                            jobId: string;
+                            message?: string;
+                        };
+                        const jobId = start.jobId;
+                        log('info', '开始轮询进度（约每秒数次，直至 100%）…');
+
+                        const pollIntervalMs = 450;
+                        for (;;) {
+                            const progress = (await requestBackend(
+                                log,
+                                'GET',
+                                `/api/TestPlaygroundJob/progress?jobId=${encodeURIComponent(jobId)}`
+                            )) as { progress: number; phase: string; detail?: unknown };
+
+                            if (progress.phase === 'done' || progress.progress >= 100) {
+                                log('success', '✅ 任务完成（后端进度已到 100%）', {
+                                    finalProgress: progress.progress,
+                                    phase: progress.phase
+                                });
+                                break;
+                            }
+                            await new Promise((r) => setTimeout(r, pollIntervalMs));
+                        }
+                    }
+                }
             ]
         },
         {

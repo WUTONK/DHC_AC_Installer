@@ -11,7 +11,10 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      requestApi: (url: string) => Promise<{
+      requestApi: (
+        url: string,
+        options?: { method?: string; body?: string; headers?: Record<string, string> }
+      ) => Promise<{
         success: boolean
         data?: unknown
         error?: string
