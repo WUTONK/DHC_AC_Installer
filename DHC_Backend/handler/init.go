@@ -19,6 +19,7 @@ func InitGin(g gin.IRouter) {
 	g.GET("/api/GetGamePath", getGamePath)
 	g.GET("/api/GetServerInfo", GetServerInfo)
 	registerTestPlaygroundRoutes(g)
+	registerCommunicationLabRoutes(g)
 }
 
 func GetServerInfo(c *gin.Context) {

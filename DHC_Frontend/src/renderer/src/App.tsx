@@ -20,6 +20,7 @@ import WelcomePage from './WelcomePage';
 import ServerListPage from './ServerListPage';
 import DevModePanel from './components/DevModePanel';
 import TestPlayground from './TestPlayground';
+import CommunicationLab from './CommunicationLab';
 
 // const { Title, Text } = Typography
 
@@ -127,6 +128,8 @@ function App(): React.JSX.Element {
         return <ServerListPage />
       case 'TestPlayground':
         return <TestPlayground />
+      case 'CommunicationLab':
+        return <CommunicationLab />
       default:
         return <div>Not Found</div>
     }
@@ -216,7 +219,8 @@ function App(): React.JSX.Element {
                   { itemKey:"ShaderInstaller",text: '光影安装(新)', icon: <IconEdit size='large' />},
                   { itemKey:"ShaderInstallerV1",text: '光影安装(旧)', icon: <IconEdit size='large' />},
                   { itemKey:"CustomInstallWizard",text: '自定义安装向导', icon: <IconSetting size='large' />},
-                  { itemKey:"TestPlayground",text: '测试实验室', icon: <IconCode size='large' />}
+                  { itemKey:"TestPlayground",text: '测试实验室', icon: <IconCode size='large' />},
+                  { itemKey:"CommunicationLab",text: '通信实验室(新手)', icon: <IconCode size='large' />}
                 ]}
                 onSelect={(data) => {
                   const nextKey = String(data.itemKey)

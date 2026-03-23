@@ -11,12 +11,54 @@
 [GIN-debug] POST   /api/TestPlaygroundEcho   --> DHC_Backend/handler.testPlaygroundEcho (4 handlers)
 [GIN-debug] POST   /api/TestPlaygroundJob/start --> DHC_Backend/handler.testPlaygroundJobStart (4 handlers)
 [GIN-debug] GET    /api/TestPlaygroundJob/progress --> DHC_Backend/handler.testPlaygroundJobProgress (4 handlers)
-2026/03/22 21:10:46 Backend Server is running on port http://127.0.0.1:19810
-2026/03/22 21:10:46 Frontend login page is running on path http://localhost:11451
+[GIN-debug] GET    /api/lab/ping             --> DHC_Backend/handler.labPing (4 handlers)
+[GIN-debug] POST   /api/lab/echo             --> DHC_Backend/handler.labEcho (4 handlers)
+[GIN-debug] POST   /api/lab/task/start       --> DHC_Backend/handler.labStartTask (4 handlers)
+[GIN-debug] GET    /api/lab/task/status      --> DHC_Backend/handler.labTaskStatus (4 handlers)
+2026/03/23 15:55:27 Backend Server is running on port http://127.0.0.1:19810
+2026/03/23 15:55:27 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-[GIN] 2026/03/22 - 21:10:57 | 200 |     181.041µs |       127.0.0.1 | GET      "/api/TestPlaygroundHealth"
-[GIN] 2026/03/22 - 21:10:59 | 200 |     413.625µs |       127.0.0.1 | POST     "/api/TestPlaygroundEcho"
+[GIN] 2026/03/23 - 15:55:38 | 200 |      221.25µs |       127.0.0.1 | POST     "/api/lab/task/start"
+[GIN] 2026/03/23 - 15:55:38 | 200 |          45µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:39 | 200 |      15.292µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:39 | 200 |      26.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:39 | 200 |      19.167µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:39 | 200 |       13.75µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:40 | 200 |      14.417µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:40 | 200 |      27.459µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:40 | 200 |      17.375µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:41 | 200 |      14.916µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:41 | 200 |      30.542µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:41 | 200 |      16.375µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:42 | 200 |      14.416µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:42 | 200 |      27.875µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:42 | 200 |        14.5µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:43 | 200 |      14.833µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:43 | 200 |      47.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:43 | 200 |      13.917µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:43 | 200 |      15.792µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:44 | 200 |      13.208µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:44 | 200 |      14.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:44 | 200 |      17.958µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:45 | 200 |      14.167µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:45 | 200 |      14.125µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:45 | 200 |      14.917µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:46 | 200 |      13.208µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:46 | 200 |       21.25µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 15:55:46 | 200 |       14.25µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
+[GIN] 2026/03/23 - 16:41:31 | 200 |          56µs |       127.0.0.1 | GET      "/api/TestPlaygroundHealth"
+[GIN] 2026/03/23 - 16:41:36 | 200 |      97.708µs |       127.0.0.1 | POST     "/api/TestPlaygroundEcho"
 use getGamePath function
-[GIN] 2026/03/22 - 21:11:04 | 200 |     293.833µs |       127.0.0.1 | GET      "/api/GetGamePath"
+[GIN] 2026/03/23 - 16:41:41 | 200 |     250.333µs |       127.0.0.1 | GET      "/api/GetGamePath"
+[GIN] 2026/03/23 - 16:41:44 | 200 |      61.958µs |       127.0.0.1 | POST     "/api/TestPlaygroundJob/start"
+[GIN] 2026/03/23 - 16:41:44 | 200 |      37.791µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:45 | 200 |      33.416µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:45 | 200 |      17.292µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:46 | 200 |      20.291µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:46 | 200 |      18.042µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:46 | 200 |      37.708µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:47 | 200 |      34.417µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:47 | 200 |      16.666µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/23 - 16:41:48 | 200 |        30.5µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
