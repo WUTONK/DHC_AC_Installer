@@ -18,6 +18,13 @@ import {
   IconFilter
 } from '@douyinfe/semi-icons'
 import HomeBreadcrumb from './components/HomeBreadcrumb'
+import { useDevMode } from './contexts/DevModeContext'
+import {
+  DEFAULT_SERVER_DISCLAIMER_STATE,
+  getServerDisclaimerState,
+  setServerDisclaimerState,
+  updateServerDisclaimerDevForceShow
+} from './services/appStateStore'
 import ae86Banner from '../../../resources/image/server/banner/ae86_01.jpeg'
 import lightupTopBanner from '../../../resources/image/server/banner/lightup_top_01.png'
 import rb04Banner from '../../../resources/image/server/banner/rb_04.jpg'
@@ -157,6 +164,7 @@ const THEME = {
 
 const { Header, Content } = Layout
 const { Title, Text } = Typography
+const DISCLAIMER_MAX_SHOW_COUNT = 2
 
 // =================================================================
 // 2. 辅助函数
@@ -263,6 +271,7 @@ interface ServerListPageProps {
 }
 
 export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.Element {
+  const { registerDevOption, unregisterDevOption } = useDevMode()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [hideUnreachable, setHideUnreachable] = useState(false)
   const [servers] = useState<Server[]>(MOCK_SERVERS)
@@ -271,11 +280,34 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
   // 弹窗状态
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedServer, setSelectedServer] = useState<Server | null>(null)
+  const [disclaimerShownCount, setDisclaimerShownCount] = useState<number>(
+    DEFAULT_SERVER_DISCLAIMER_STATE.shownCount
+  )
+  const [devForceShowSuppressedModal, setDevForceShowSuppressedModal] = useState<boolean>(
+    DEFAULT_SERVER_DISCLAIMER_STATE.devForceShowSuppressed
+  )
 
   // 检测用户大洲
   useEffect(() => {
     const continent = detectUserContinent()
     setUserContinent(continent)
+  }, [])
+
+  // 从统一状态存储加载 serverDisclaimer 配置
+  useEffect(() => {
+    let mounted = true
+    getServerDisclaimerState()
+      .then((state) => {
+        if (!mounted) return
+        setDisclaimerShownCount(state.shownCount)
+        setDevForceShowSuppressedModal(state.devForceShowSuppressed)
+      })
+      .catch(() => {
+        // 使用默认值继续运行，避免因状态读取失败阻断核心流程
+      })
+    return () => {
+      mounted = false
+    }
   }, [])
 
   // 模拟刷新
@@ -288,11 +320,88 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
     }, 1000)
   }
 
+  // 实际执行加入服务器动作
+  const proceedJoinServer = (server: Server | null): void => {
+    Toast.info(`正在启动 Content Manager 连接至: ${server?.name}`)
+  }
+
   // 打开入服警告弹窗
-  const handleJoinClick = (server: Server): void => {
+  const handleJoinClick = async (server: Server): Promise<void> => {
     setSelectedServer(server)
+    const latestState = await getServerDisclaimerState().catch(() => ({
+      shownCount: disclaimerShownCount,
+      devForceShowSuppressed: devForceShowSuppressedModal
+    }))
+    const shouldSuppressDisclaimer =
+      latestState.shownCount >= DISCLAIMER_MAX_SHOW_COUNT && !latestState.devForceShowSuppressed
+
+    if (shouldSuppressDisclaimer) {
+      proceedJoinServer(server)
+      return
+    }
+
+    const nextState = {
+      ...latestState,
+      shownCount: latestState.shownCount + 1
+    }
+    await setServerDisclaimerState(nextState).catch(() => undefined)
+    setDisclaimerShownCount(nextState.shownCount)
+    setDevForceShowSuppressedModal(nextState.devForceShowSuppressed)
     setModalVisible(true)
   }
+
+  // 注册开发者调试选项
+  useEffect(() => {
+    registerDevOption({
+      id: 'server-list-force-show-suppressed-disclaimer',
+      label: '显示已达阈值被抑制的入服弹窗',
+      component: (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Switch
+              checked={devForceShowSuppressedModal}
+              onChange={(checked) => {
+                setDevForceShowSuppressedModal(checked)
+                updateServerDisclaimerDevForceShow(checked).catch(() => undefined)
+              }}
+              size="small"
+            />
+            <span style={{ color: '#ccc', fontSize: 12 }}>
+              {devForceShowSuppressedModal
+                ? '强制显示已抑制弹窗'
+                : `当前弹窗显示计数: ${disclaimerShownCount}/${DISCLAIMER_MAX_SHOW_COUNT}`}
+            </span>
+          </div>
+          <Button
+            size="small"
+            theme="light"
+            type="danger"
+            onClick={async () => {
+              const nextState = {
+                shownCount: 0,
+                devForceShowSuppressed: devForceShowSuppressedModal
+              }
+              await setServerDisclaimerState(nextState).catch(() => undefined)
+              setDisclaimerShownCount(0)
+              Toast.success('已重置入服弹窗显示计数')
+            }}
+          >
+            重置入服弹窗显示计数
+          </Button>
+        </div>
+      ),
+      order: 12
+    })
+
+    return () => {
+      unregisterDevOption('server-list-force-show-suppressed-disclaimer')
+    }
+  }, [
+    registerDevOption,
+    unregisterDevOption,
+    devForceShowSuppressedModal,
+    disclaimerShownCount
+  ])
 
   // --- 数据分组与排序 ---
   const groupedServers = useMemo(() => {
@@ -497,7 +606,7 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
         onCancel={() => setModalVisible(false)}
         onConfirm={() => {
           setModalVisible(false)
-          Toast.info(`正在启动 Content Manager 连接至: ${selectedServer?.name}`)
+          proceedJoinServer(selectedServer)
         }}
       />
     </Layout>

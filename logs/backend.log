@@ -15,50 +15,308 @@
 [GIN-debug] POST   /api/lab/echo             --> DHC_Backend/handler.labEcho (4 handlers)
 [GIN-debug] POST   /api/lab/task/start       --> DHC_Backend/handler.labStartTask (4 handlers)
 [GIN-debug] GET    /api/lab/task/status      --> DHC_Backend/handler.labTaskStatus (4 handlers)
-2026/03/23 15:55:27 Backend Server is running on port http://127.0.0.1:19810
-2026/03/23 15:55:27 Frontend login page is running on path http://localhost:11451
+2026/03/24 23:34:29 Backend Server is running on port http://127.0.0.1:19810
+2026/03/24 23:34:29 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-[GIN] 2026/03/23 - 15:55:38 | 200 |      221.25µs |       127.0.0.1 | POST     "/api/lab/task/start"
-[GIN] 2026/03/23 - 15:55:38 | 200 |          45µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:39 | 200 |      15.292µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:39 | 200 |      26.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:39 | 200 |      19.167µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:39 | 200 |       13.75µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:40 | 200 |      14.417µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:40 | 200 |      27.459µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:40 | 200 |      17.375µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:41 | 200 |      14.916µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:41 | 200 |      30.542µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:41 | 200 |      16.375µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:42 | 200 |      14.416µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:42 | 200 |      27.875µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:42 | 200 |        14.5µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:43 | 200 |      14.833µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:43 | 200 |      47.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:43 | 200 |      13.917µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:43 | 200 |      15.792µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:44 | 200 |      13.208µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:44 | 200 |      14.625µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:44 | 200 |      17.958µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:45 | 200 |      14.167µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:45 | 200 |      14.125µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:45 | 200 |      14.917µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:46 | 200 |      13.208µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:46 | 200 |       21.25µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 15:55:46 | 200 |       14.25µs |       127.0.0.1 | GET      "/api/lab/task/status?taskId=lab-1774252538734225000"
-[GIN] 2026/03/23 - 16:41:31 | 200 |          56µs |       127.0.0.1 | GET      "/api/TestPlaygroundHealth"
-[GIN] 2026/03/23 - 16:41:36 | 200 |      97.708µs |       127.0.0.1 | POST     "/api/TestPlaygroundEcho"
-use getGamePath function
-[GIN] 2026/03/23 - 16:41:41 | 200 |     250.333µs |       127.0.0.1 | GET      "/api/GetGamePath"
-[GIN] 2026/03/23 - 16:41:44 | 200 |      61.958µs |       127.0.0.1 | POST     "/api/TestPlaygroundJob/start"
-[GIN] 2026/03/23 - 16:41:44 | 200 |      37.791µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:45 | 200 |      33.416µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:45 | 200 |      17.292µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:46 | 200 |      20.291µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:46 | 200 |      18.042µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:46 | 200 |      37.708µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:47 | 200 |      34.417µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:47 | 200 |      16.666µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
-[GIN] 2026/03/23 - 16:41:48 | 200 |        30.5µs |       127.0.0.1 | GET      "/api/TestPlaygroundJob/progress?jobId=1774255304637183000"
+[GIN] 2026/03/24 - 23:34:40 | 200 |     160.958µs |       127.0.0.1 | GET      "/api/lab/ping"
+[GIN] 2026/03/24 - 23:34:42 | 200 |      68.709µs |       127.0.0.1 | POST     "/api/lab/echo"
+
+
+[31m2026/03/24 23:34:52 [Recovery] 2026/03/24 - 23:34:52 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62365->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:52 | 500 |  5.004476917s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:53 [Recovery] 2026/03/24 - 23:34:53 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62368->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:53 | 500 |  5.003949875s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:54 [Recovery] 2026/03/24 - 23:34:54 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62371->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:54 | 500 |  5.003686958s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:54 [Recovery] 2026/03/24 - 23:34:54 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62374->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:54 | 500 |  5.004596875s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:54 [Recovery] 2026/03/24 - 23:34:54 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62377->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:54 | 500 |  5.003943875s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:54 [Recovery] 2026/03/24 - 23:34:54 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62380->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:54 | 500 |  5.003196666s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+
+
+[31m2026/03/24 23:34:55 [Recovery] 2026/03/24 - 23:34:55 panic recovered:
+GET /api/GetServerInfo?ServerHost=42.51.34.184%3A8081 HTTP/1.1
+Host: 127.0.0.1:19810
+Accept: */*
+Accept-Encoding: gzip, deflate
+Accept-Language: *
+Connection: keep-alive
+Sec-Fetch-Mode: cors
+User-Agent: node
+
+
+Get "http://42.51.34.184:8081/INFO": read tcp 198.18.0.1:62383->42.51.34.184:8081: read: connection reset by peer
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/models/service/gameserver/getinfo.go:202 (0x104c87f4f)
+	GetServerInfo: panic(err)
+/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/handler/init.go:48 (0x104d9b9c3)
+	GetServerInfo: info, err := gameserver.GetServerInfo(req.ServerHost)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d9626b)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x104d9624c)
+	CustomRecoveryWithWriter.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d95613)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x104d955f0)
+	LoggerWithConfig.func1: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x104d94b47)
+	(*Context).Next: c.handlers[c.index](c)
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x104d9487c)
+	(*Engine).handleHTTPRequest: c.Next()
+/Users/wuzitong/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x104d945c3)
+	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+/usr/local/go/src/net/http/server.go:3210 (0x104c7ccdb)
+	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+/usr/local/go/src/net/http/server.go:2092 (0x104c60efb)
+	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+/usr/local/go/src/runtime/asm_arm64.s:1223 (0x104a8b7d3)
+	goexit: MOVD	R0, R0	// NOP
+[0m
+[GIN] 2026/03/24 - 23:34:55 | 500 |  5.004726292s |       127.0.0.1 | GET      "/api/GetServerInfo?ServerHost=42.51.34.184%3A8081"
+[GIN] 2026/03/24 - 23:46:04 | 404 |         833ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:46:04 | 404 |         208ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:47:39 | 404 |         750ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:21 | 404 |         959ns |       127.0.0.1 | PUT      "/api/AppState/ServerDisclaimer"
+[GIN] 2026/03/24 - 23:52:21 | 404 |       1.083µs |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:22 | 404 |       1.084µs |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:24 | 404 |         834ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:24 | 404 |       1.083µs |       127.0.0.1 | PUT      "/api/AppState/ServerDisclaimer"
+[GIN] 2026/03/24 - 23:52:27 | 404 |       1.041µs |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:27 | 404 |         792ns |       127.0.0.1 | PUT      "/api/AppState/ServerDisclaimer"
+[GIN] 2026/03/24 - 23:52:29 | 404 |       1.042µs |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:31 | 404 |         791ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:33 | 404 |         916ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:34 | 404 |         625ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:34 | 404 |       1.042µs |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:35 | 404 |         875ns |       127.0.0.1 | GET      "/api/AppState"
+[GIN] 2026/03/24 - 23:52:35 | 404 |         334ns |       127.0.0.1 | PUT      "/api/AppState/ServerDisclaimer"
+[GIN] 2026/03/24 - 23:52:38 | 404 |         625ns |       127.0.0.1 | GET      "/api/AppState"
