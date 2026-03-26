@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.17 kB
-✓ built in 285ms
+✓ built in 257ms
 
 build the electron main process successfully
 
@@ -41,8 +41,8 @@ Starting backend at: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Ba
 
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
-2026/03/24 23:34:34 Backend Server is running on port http://127.0.0.1:19810
-2026/03/24 23:34:34 Frontend login page is running on path http://localhost:11451
+2026/03/26 22:27:44 Backend Server is running on port http://127.0.0.1:19810
+2026/03/26 22:27:44 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
@@ -53,7 +53,4 @@ Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-23:41:23 [vite] (client) hmr update /src/ServerListPage.tsx, /src/assets/main.css
-23:46:04 [vite] (client) hmr update /src/ServerListPage.tsx, /src/assets/main.css
-23:47:39 [vite] (client) hmr update /src/assets/main.css, /src/ServerListPage.tsx
  ELIFECYCLE  Command failed.

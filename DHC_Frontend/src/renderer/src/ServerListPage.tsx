@@ -19,12 +19,7 @@ import {
 } from '@douyinfe/semi-icons'
 import HomeBreadcrumb from './components/HomeBreadcrumb'
 import { useDevMode } from './contexts/DevModeContext'
-import {
-  DEFAULT_SERVER_DISCLAIMER_STATE,
-  getServerDisclaimerState,
-  setServerDisclaimerState,
-  updateServerDisclaimerDevForceShow
-} from './services/appStateStore'
+import { getServerDisclaimerState, setServerDisclaimerState } from './services/appStateFileStore'
 import ae86Banner from '../../../resources/image/server/banner/ae86_01.jpeg'
 import lightupTopBanner from '../../../resources/image/server/banner/lightup_top_01.png'
 import rb04Banner from '../../../resources/image/server/banner/rb_04.jpg'
@@ -280,12 +275,8 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
   // 弹窗状态
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedServer, setSelectedServer] = useState<Server | null>(null)
-  const [disclaimerShownCount, setDisclaimerShownCount] = useState<number>(
-    DEFAULT_SERVER_DISCLAIMER_STATE.shownCount
-  )
-  const [devForceShowSuppressedModal, setDevForceShowSuppressedModal] = useState<boolean>(
-    DEFAULT_SERVER_DISCLAIMER_STATE.devForceShowSuppressed
-  )
+  const [disclaimerShownCount, setDisclaimerShownCount] = useState<number>(() => getServerDisclaimerState().shownCount)
+  const [devForceShowSuppressedModal, setDevForceShowSuppressedModal] = useState<boolean>(() => getServerDisclaimerState().devForceShowSuppressed)
 
   // 检测用户大洲
   useEffect(() => {
@@ -295,19 +286,9 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
 
   // 从统一状态存储加载 serverDisclaimer 配置
   useEffect(() => {
-    let mounted = true
-    getServerDisclaimerState()
-      .then((state) => {
-        if (!mounted) return
-        setDisclaimerShownCount(state.shownCount)
-        setDevForceShowSuppressedModal(state.devForceShowSuppressed)
-      })
-      .catch(() => {
-        // 使用默认值继续运行，避免因状态读取失败阻断核心流程
-      })
-    return () => {
-      mounted = false
-    }
+    const state = getServerDisclaimerState()
+    setDisclaimerShownCount(state.shownCount)
+    setDevForceShowSuppressedModal(state.devForceShowSuppressed)
   }, [])
 
   // 模拟刷新
@@ -326,12 +307,9 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
   }
 
   // 打开入服警告弹窗
-  const handleJoinClick = async (server: Server): Promise<void> => {
+  const handleJoinClick = (server: Server): void => {
     setSelectedServer(server)
-    const latestState = await getServerDisclaimerState().catch(() => ({
-      shownCount: disclaimerShownCount,
-      devForceShowSuppressed: devForceShowSuppressedModal
-    }))
+    const latestState = getServerDisclaimerState()
     const shouldSuppressDisclaimer =
       latestState.shownCount >= DISCLAIMER_MAX_SHOW_COUNT && !latestState.devForceShowSuppressed
 
@@ -344,9 +322,13 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
       ...latestState,
       shownCount: latestState.shownCount + 1
     }
-    await setServerDisclaimerState(nextState).catch(() => undefined)
-    setDisclaimerShownCount(nextState.shownCount)
-    setDevForceShowSuppressedModal(nextState.devForceShowSuppressed)
+    try {
+      setServerDisclaimerState(nextState)
+      setDisclaimerShownCount(nextState.shownCount)
+      setDevForceShowSuppressedModal(nextState.devForceShowSuppressed)
+    } catch {
+      Toast.error('写入 appState 失败，请检查文件权限/路径')
+    }
     setModalVisible(true)
   }
 
@@ -362,7 +344,15 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
               checked={devForceShowSuppressedModal}
               onChange={(checked) => {
                 setDevForceShowSuppressedModal(checked)
-                updateServerDisclaimerDevForceShow(checked).catch(() => undefined)
+                const latest = getServerDisclaimerState()
+                try {
+                  setServerDisclaimerState({
+                    shownCount: latest.shownCount,
+                    devForceShowSuppressed: checked
+                  })
+                } catch {
+                  Toast.error('写入 appState 失败，请检查文件权限/路径')
+                }
               }}
               size="small"
             />
@@ -376,14 +366,18 @@ export default function ServerListPage({}: ServerListPageProps = {}): React.JSX.
             size="small"
             theme="light"
             type="danger"
-            onClick={async () => {
-              const nextState = {
-                shownCount: 0,
-                devForceShowSuppressed: devForceShowSuppressedModal
-              }
-              await setServerDisclaimerState(nextState).catch(() => undefined)
+            onClick={() => {
+              try {
+                const latest = getServerDisclaimerState()
+                setServerDisclaimerState({
+                  shownCount: 0,
+                  devForceShowSuppressed: latest.devForceShowSuppressed
+                })
               setDisclaimerShownCount(0)
               Toast.success('已重置入服弹窗显示计数')
+              } catch {
+                Toast.error('写入 appState 失败，请检查文件权限')
+              }
             }}
           >
             重置入服弹窗显示计数
