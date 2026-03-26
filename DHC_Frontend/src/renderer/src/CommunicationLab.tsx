@@ -57,6 +57,7 @@ function CommunicationLab(): React.JSX.Element {
     setProgress(0)
   }
 
+// HTTPS请求处理模块 支持 GET/POST
   const request = async (
     method: 'GET' | 'POST',
     path: string,
