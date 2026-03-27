@@ -39,15 +39,26 @@ type installTask struct {
 }
 
 var (
+	// installTasks 是最小实现里的“任务注册表”。
+	// Key 是 installId，Value 是任务当前快照（状态、分类进度、错误等）。
+	// 这里先用内存 map，后续可以替换为持久化存储（文件/DB）。
 	installTasksMu sync.RWMutex
 	installTasks   = map[string]*installTask{}
 )
 
+// registerInstallationRoutes 注册本次最小可用版本的两个核心接口：
+// 1) 创建任务（返回 installId）
+// 2) 按 installId 查询进度（支持按 category 过滤）
 func registerInstallationRoutes(g gin.IRouter) {
 	g.POST("/api/installations", createInstallation)
 	g.GET("/api/installations/:installId/progress", getInstallationProgress)
 }
 
+// createInstallation 负责接收前端“开始安装”请求：
+// - 校验请求参数
+// - 生成 installId
+// - 初始化任务状态并放入注册表
+// - 异步执行安装流程（HTTP 立即返回，不阻塞）
 func createInstallation(c *gin.Context) {
 	var req struct {
 		VersionID string `json:"versionId" binding:"required"`
@@ -75,10 +86,14 @@ func createInstallation(c *gin.Context) {
 		},
 	}
 
+	// 先写入任务注册表，确保前端拿到 installId 后马上轮询不会 404。
+	// 这里用写锁保护 map，避免并发写造成数据竞争。
 	installTasksMu.Lock()
 	installTasks[installID] = task
 	installTasksMu.Unlock()
 
+	// 异步启动安装流程，让创建接口快速返回。
+	// 真实项目中这里会接入实际 CM 安装逻辑，而非模拟步骤。
 	go runSimulatedCMInstall(installID)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -89,10 +104,16 @@ func createInstallation(c *gin.Context) {
 	})
 }
 
+// getInstallationProgress 返回 installId 对应任务的进度快照。
+// category 规则：
+// - all：返回全部类别
+// - cm/core/...：只返回指定类别
 func getInstallationProgress(c *gin.Context) {
+	// 读取路径参数和可选过滤条件。
 	installID := c.Param("installId")
 	category := c.DefaultQuery("category", "all")
 
+	// 读操作使用读锁，允许多个并发查询同时进行。
 	installTasksMu.RLock()
 	task, exists := installTasks[installID]
 	if !exists {
@@ -101,6 +122,9 @@ func getInstallationProgress(c *gin.Context) {
 		return
 	}
 
+	// 组装类别列表：
+	// - all 返回任务下全部 category
+	// - 指定 category 只返回一项（不存在则返回空数组）
 	categories := make([]categoryProgress, 0)
 	if category == "all" {
 		for _, cp := range task.Categories {
@@ -110,6 +134,7 @@ func getInstallationProgress(c *gin.Context) {
 		categories = append(categories, *cp)
 	}
 
+	// 基于当前类别进度计算总进度（最小版本按平均值）。
 	totalProgress := calcTotalProgress(categories)
 	resp := gin.H{
 		"installId":     task.ID,
@@ -125,6 +150,8 @@ func getInstallationProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// runSimulatedCMInstall 是演示用的“后台安装任务”。
+// 它会分阶段更新 cm 进度，模拟真实下载/解压/安装过程。
 func runSimulatedCMInstall(installID string) {
 	steps := []struct {
 		progress float64
@@ -142,6 +169,8 @@ func runSimulatedCMInstall(installID string) {
 		installTasksMu.Lock()
 		task, ok := installTasks[installID]
 		if !ok {
+			// 任务不存在时直接退出协程。
+			// 这通常意味着任务被清理、取消，或服务做了其他管理动作。
 			installTasksMu.Unlock()
 			return
 		}
@@ -152,6 +181,8 @@ func runSimulatedCMInstall(installID string) {
 		cp.CompletedItems = step.done
 		task.Status = installStatusInstalling
 
+		// 最后一个阶段将任务收敛为 completed 并写入结束时间，
+		// 这样前端轮询可以据此停止。
 		if i == len(steps)-1 {
 			cp.Status = "completed"
 			task.Status = installStatusCompleted
@@ -162,6 +193,9 @@ func runSimulatedCMInstall(installID string) {
 	}
 }
 
+// calcTotalProgress 计算总进度。
+// 当前策略是“各类别简单平均”，便于最小版本快速跑通。
+// 后续如需更准确，可引入类别权重或按子项数量加权。
 func calcTotalProgress(categories []categoryProgress) float64 {
 	if len(categories) == 0 {
 		return 0
@@ -173,6 +207,9 @@ func calcTotalProgress(categories []categoryProgress) float64 {
 	return sum / float64(len(categories))
 }
 
+// nilIfEmpty 用于统一 JSON 输出：
+// - 空字符串 -> null（前端更容易判空）
+// - 非空字符串 -> 原样返回错误信息
 func nilIfEmpty(s string) interface{} {
 	if s == "" {
 		return nil
