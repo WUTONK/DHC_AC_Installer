@@ -2,6 +2,6 @@
   "firstLaunchCompleted": false,
   "serverDisclaimer": {
     "shownCount": 1,
-    "devForceShowSuppressed": false
+    "devForceShowSuppressed": true
   }
 }

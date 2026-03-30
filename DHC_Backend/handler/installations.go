@@ -1,6 +1,7 @@
 package handler
 
 import (
+	modinstall "DHC_Backend/models/service/modInstall"
 	"fmt"
 	"net/http"
 	"sync"
@@ -9,15 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ── 安装任务状态枚举 ──
+
 type installStatus string
 
 const (
-	installStatusPreparing installStatus = "preparing"
+	installStatusPreparing  installStatus = "preparing"
 	installStatusInstalling installStatus = "installing"
 	installStatusCompleted  installStatus = "completed"
 	installStatusFailed     installStatus = "failed"
 )
 
+// ── 数据结构 ──
+
+// categoryProgress 是某个安装类别（如 cm、core、shader）的进度快照。
+// 前端通过 GET /api/installations/{installId}/progress 拿到的 categories 数组里，
+// 每一项就是一个 categoryProgress。
 type categoryProgress struct {
 	CategoryID     string  `json:"categoryId"`
 	CategoryName   string  `json:"categoryName"`
@@ -26,8 +34,14 @@ type categoryProgress struct {
 	CurrentItem    string  `json:"currentItem,omitempty"`
 	TotalItems     int     `json:"totalItems,omitempty"`
 	CompletedItems int     `json:"completedItems,omitempty"`
+
+	// SubProgress 是当前阶段内的子进度（0-100），
+	// 例如下载阶段里"已下载 60%"。前端可选展示为二级进度条。
+	SubProgress float64 `json:"subProgress"`
 }
 
+// installTask 代表一个安装任务的完整状态。
+// 通过 installId 唯一标识，存储在内存注册表中。
 type installTask struct {
 	ID         string
 	VersionID  string
@@ -38,27 +52,33 @@ type installTask struct {
 	Categories map[string]*categoryProgress
 }
 
+// ── 任务注册表 ──
+
 var (
-	// installTasks 是最小实现里的“任务注册表”。
-	// Key 是 installId，Value 是任务当前快照（状态、分类进度、错误等）。
-	// 这里先用内存 map，后续可以替换为持久化存储（文件/DB）。
+	// installTasks 是"任务注册表"：installId → 任务当前快照。
+	// 前端调创建接口拿到 installId，后续用它轮询进度。
+	// 目前是内存 map，后续可替换为持久化存储。
 	installTasksMu sync.RWMutex
 	installTasks   = map[string]*installTask{}
 )
 
-// registerInstallationRoutes 注册本次最小可用版本的两个核心接口：
-// 1) 创建任务（返回 installId）
-// 2) 按 installId 查询进度（支持按 category 过滤）
+// ── 路由注册 ──
+
+// registerInstallationRoutes 注册安装任务的两个核心接口：
+//  1. POST /api/installations — 创建任务（返回 installId）
+//  2. GET  /api/installations/:installId/progress — 查询进度（支持 category 过滤）
 func registerInstallationRoutes(g gin.IRouter) {
 	g.POST("/api/installations", createInstallation)
 	g.GET("/api/installations/:installId/progress", getInstallationProgress)
 }
 
-// createInstallation 负责接收前端“开始安装”请求：
-// - 校验请求参数
-// - 生成 installId
-// - 初始化任务状态并放入注册表
-// - 异步执行安装流程（HTTP 立即返回，不阻塞）
+// ── Handler: 创建安装任务 ──
+
+// createInstallation 接收前端"开始安装"请求：
+//  1. 校验请求参数（versionId 必填）
+//  2. 生成唯一 installId
+//  3. 初始化任务状态并写入注册表
+//  4. 异步启动安装流程（HTTP 立即返回，不阻塞前端）
 func createInstallation(c *gin.Context) {
 	var req struct {
 		VersionID string `json:"versionId" binding:"required"`
@@ -81,20 +101,19 @@ func createInstallation(c *gin.Context) {
 				CategoryName: "Content Manager",
 				Status:       "waiting",
 				Progress:     0,
-				TotalItems:   3,
 			},
 		},
 	}
 
-	// 先写入任务注册表，确保前端拿到 installId 后马上轮询不会 404。
-	// 这里用写锁保护 map，避免并发写造成数据竞争。
+	// 先写入注册表，确保前端拿到 installId 后马上轮询不会 404。
 	installTasksMu.Lock()
 	installTasks[installID] = task
 	installTasksMu.Unlock()
 
-	// 异步启动安装流程，让创建接口快速返回。
-	// 真实项目中这里会接入实际 CM 安装逻辑，而非模拟步骤。
-	go runSimulatedCMInstall(installID)
+	// 异步启动安装流程。
+	// 开发/测试环境使用模拟版（不需要网络），生产环境切换为真实版。
+	go runDemoCMInstall(installID)
+	// 生产环境替换为：go runRealCMInstall(installID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":        installID,
@@ -104,16 +123,18 @@ func createInstallation(c *gin.Context) {
 	})
 }
 
+// ── Handler: 查询安装进度 ──
+
 // getInstallationProgress 返回 installId 对应任务的进度快照。
-// category 规则：
-// - all：返回全部类别
-// - cm/core/...：只返回指定类别
+//
+// category 过滤规则：
+//   - all（默认）：返回任务下所有类别的进度
+//   - cm / core / shader / ...：只返回指定类别（不存在则返回空数组）
 func getInstallationProgress(c *gin.Context) {
-	// 读取路径参数和可选过滤条件。
 	installID := c.Param("installId")
 	category := c.DefaultQuery("category", "all")
 
-	// 读操作使用读锁，允许多个并发查询同时进行。
+	// 读操作用读锁，允许多个前端同时轮询不互相阻塞。
 	installTasksMu.RLock()
 	task, exists := installTasks[installID]
 	if !exists {
@@ -122,9 +143,7 @@ func getInstallationProgress(c *gin.Context) {
 		return
 	}
 
-	// 组装类别列表：
-	// - all 返回任务下全部 category
-	// - 指定 category 只返回一项（不存在则返回空数组）
+	// 按 category 过滤类别列表
 	categories := make([]categoryProgress, 0)
 	if category == "all" {
 		for _, cp := range task.Categories {
@@ -134,7 +153,6 @@ func getInstallationProgress(c *gin.Context) {
 		categories = append(categories, *cp)
 	}
 
-	// 基于当前类别进度计算总进度（最小版本按平均值）。
 	totalProgress := calcTotalProgress(categories)
 	resp := gin.H{
 		"installId":     task.ID,
@@ -150,52 +168,131 @@ func getInstallationProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// runSimulatedCMInstall 是演示用的“后台安装任务”。
-// 它会分阶段更新 cm 进度，模拟真实下载/解压/安装过程。
-func runSimulatedCMInstall(installID string) {
-	steps := []struct {
-		progress float64
-		item     string
-		done     int
-	}{
-		{15, "下载 CM 安装包", 0},
-		{55, "解压 CM 文件", 1},
-		{90, "写入配置并收尾", 2},
-		{100, "安装完成", 3},
-	}
+// ── 后台安装流程：演示版（使用 TaskTracker + 模拟延时）──
 
-	for i, step := range steps {
-		time.Sleep(900 * time.Millisecond)
+// runDemoCMInstall 是演示/测试版 CM 安装流程。
+// 使用 TaskTracker 管理进度（和真实版完全一样的模式），但用 time.Sleep 模拟耗时操作。
+// 好处：不需要网络，随时能跑通进度链路。
+func runDemoCMInstall(installID string) {
+	// 创建 tracker：每次进度变化时，通过回调更新任务注册表。
+	// 前端轮询时会读取注册表，于是就能看到实时进度。
+	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
 		installTasksMu.Lock()
+		defer installTasksMu.Unlock()
+
 		task, ok := installTasks[installID]
 		if !ok {
-			// 任务不存在时直接退出协程。
-			// 这通常意味着任务被清理、取消，或服务做了其他管理动作。
-			installTasksMu.Unlock()
 			return
 		}
-		cp := task.Categories["cm"]
-		cp.Status = "active"
-		cp.Progress = step.progress
-		cp.CurrentItem = step.item
-		cp.CompletedItems = step.done
+
 		task.Status = installStatusInstalling
 
-		// 最后一个阶段将任务收敛为 completed 并写入结束时间，
-		// 这样前端轮询可以据此停止。
-		if i == len(steps)-1 {
-			cp.Status = "completed"
-			task.Status = installStatusCompleted
-			now := time.Now().Unix()
-			task.EndTime = &now
+		cp := task.Categories["cm"]
+		cp.Progress = snapshot.TotalProgress
+		cp.CurrentItem = snapshot.PhaseName
+		cp.SubProgress = snapshot.SubProgress
+		if snapshot.PhaseStatus == "active" {
+			cp.Status = "active"
 		}
-		installTasksMu.Unlock()
+	})
+
+	// ── 像 useEffect 一样注册阶段（和 InstallCmWithTracker 内部一致）──
+	tracker.AddPhase("download", "下载CM安装包", 25)
+	tracker.AddPhase("extract", "解压CM文件", 50)
+	tracker.AddPhase("move", "移动到桌面", 25)
+
+	// 模拟下载阶段：子进度 0→20→40→60→80→100，总进度 0→5→10→15→20→25
+	tracker.StartPhase("download")
+	for i := 1; i <= 5; i++ {
+		time.Sleep(200 * time.Millisecond)
+		tracker.SetSubProgress("download", float64(i)*20)
 	}
+	tracker.CompletePhase("download")
+
+	// 模拟解压阶段：子进度 0→20→40→60→80→100，总进度 25→35→45→55→65→75
+	tracker.StartPhase("extract")
+	for i := 1; i <= 5; i++ {
+		time.Sleep(300 * time.Millisecond)
+		tracker.SetSubProgress("extract", float64(i)*20)
+	}
+	tracker.CompletePhase("extract")
+
+	// 模拟移动阶段：一步到位，总进度 75→100
+	tracker.StartPhase("move")
+	time.Sleep(300 * time.Millisecond)
+	tracker.CompletePhase("move")
+
+	// 标记任务完成
+	installTasksMu.Lock()
+	task, ok := installTasks[installID]
+	if ok {
+		task.Status = installStatusCompleted
+		now := time.Now().Unix()
+		task.EndTime = &now
+		task.Categories["cm"].Status = "completed"
+		task.Categories["cm"].Progress = 100
+	}
+	installTasksMu.Unlock()
 }
 
+// ── 后台安装流程：真实版（使用 TaskTracker + 真实 InstallCm）──
+
+// runRealCMInstall 是生产版 CM 安装流程。
+// 通过 TaskTracker 追踪 InstallCmWithTracker 的实际下载/解压/移动进度。
+// 需要网络连接（下载 CM 安装包），适用于生产环境。
+//
+// 使用方法：在 createInstallation 中把 go runDemoCMInstall(installID)
+// 替换为 go runRealCMInstall(installID) 即可。
+func runRealCMInstall(installID string) {
+	// 创建 tracker，回调写入任务注册表（和演示版完全一样）
+	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
+		installTasksMu.Lock()
+		defer installTasksMu.Unlock()
+
+		task, ok := installTasks[installID]
+		if !ok {
+			return
+		}
+
+		task.Status = installStatusInstalling
+
+		cp := task.Categories["cm"]
+		cp.Progress = snapshot.TotalProgress
+		cp.CurrentItem = snapshot.PhaseName
+		cp.SubProgress = snapshot.SubProgress
+		if snapshot.PhaseStatus == "active" {
+			cp.Status = "active"
+		} else if snapshot.PhaseStatus == "failed" {
+			cp.Status = "failed"
+		}
+	})
+
+	// InstallCmWithTracker 内部会自己注册阶段并推进进度，
+	// 这里只需要传入 tracker，所有进度更新都自动完成。
+	_, err := modinstall.InstallCmWithTracker(tracker)
+
+	// 根据结果标记任务最终状态
+	installTasksMu.Lock()
+	task, ok := installTasks[installID]
+	if ok {
+		now := time.Now().Unix()
+		task.EndTime = &now
+		if err != nil {
+			task.Status = installStatusFailed
+			task.Error = err.Error()
+		} else {
+			task.Status = installStatusCompleted
+			task.Categories["cm"].Status = "completed"
+			task.Categories["cm"].Progress = 100
+		}
+	}
+	installTasksMu.Unlock()
+}
+
+// ── 工具函数 ──
+
 // calcTotalProgress 计算总进度。
-// 当前策略是“各类别简单平均”，便于最小版本快速跑通。
-// 后续如需更准确，可引入类别权重或按子项数量加权。
+// 当前策略是"各类别简单平均"，后续可引入权重。
 func calcTotalProgress(categories []categoryProgress) float64 {
 	if len(categories) == 0 {
 		return 0
@@ -207,9 +304,8 @@ func calcTotalProgress(categories []categoryProgress) float64 {
 	return sum / float64(len(categories))
 }
 
-// nilIfEmpty 用于统一 JSON 输出：
-// - 空字符串 -> null（前端更容易判空）
-// - 非空字符串 -> 原样返回错误信息
+// nilIfEmpty 统一 JSON 输出：空字符串 → null，非空 → 原样返回。
+// 这样前端判空更方便（直接 if (error) 而不是 if (error !== "")）。
 func nilIfEmpty(s string) interface{} {
 	if s == "" {
 		return nil
