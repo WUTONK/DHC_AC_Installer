@@ -67,3 +67,8 @@ func RunRealCMInstall(tracker *TaskTracker) error {
 	_, err := InstallCmWithTracker(tracker)
 	return err
 }
+
+// 最小模组集安装 DEMO
+// v0.1 安装一个车包，一个地图，一组光影配置（包含三层文件），全部使用 zip，使用缺省的解压暂存目录
+// v0.2 使用真实模组文件，使用用户指定的解压暂存目录
+// v0.3 进行文件完整性校验

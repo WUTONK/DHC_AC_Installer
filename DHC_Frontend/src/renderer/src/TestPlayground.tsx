@@ -131,7 +131,7 @@ export default function TestPlayground(): React.JSX.Element {
     const addLog = (type: LogType, message: string, data?: unknown): void => {
         const now = new Date();
         const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
-        
+
         setLogs((prev) => [...prev, {
             id: Date.now() + Math.random(),
             time: timeStr,
@@ -162,7 +162,7 @@ export default function TestPlayground(): React.JSX.Element {
     const runTest = async (testCase: TestCase): Promise<void> => {
         setLoadingMap((prev) => ({ ...prev, [testCase.id]: true }));
         addLog('info', `--- 开始执行测试: [${testCase.name}] ---`);
-        
+
         try {
             await testCase.action(addLog);
         } catch (error) {
@@ -193,11 +193,11 @@ export default function TestPlayground(): React.JSX.Element {
             if (!isPollingRef.current) return;
             try {
                 const progress = (await requestBackend(
-                    log, 
-                    'GET', 
+                    log,
+                    'GET',
                     `/api/installations/${installId}/progress?category=all`
                 )) as InstallationProgressResponse;
-                
+
                 setInstallProgress(progress);
 
                 if (progress.status === 'completed' || progress.status === 'failed') {
@@ -211,18 +211,18 @@ export default function TestPlayground(): React.JSX.Element {
                 return;
             }
 
-            // 继续下一轮轮询，间隔 500ms
+            // 继续下一轮轮询，间隔 2ms
             if (isPollingRef.current) {
                 pollingTimerRef.current = setTimeout(() => {
                     void poll();
-                }, 500);
+                }, 2);
             }
         };
 
         // 发起第一次轮询
         pollingTimerRef.current = setTimeout(() => {
             void poll();
-        }, 500);
+        }, 2);
     };
 
     const startInstallationDemo = async (log: Logger): Promise<void> => {
@@ -236,7 +236,7 @@ export default function TestPlayground(): React.JSX.Element {
             })) as InstallationCreateResponse;
 
             log('info', `成功创建安装任务，Install ID: ${response.id}`);
-            
+
             // 开始轮询进度
             await pollInstallationProgress(response.id, log);
         } catch (err: unknown) {
@@ -270,7 +270,7 @@ export default function TestPlayground(): React.JSX.Element {
                 <Card style={{ backgroundColor: '#1a1a1c', border: '1px solid #333' }}>
                     <Title heading={5} style={{ color: '#eee', marginBottom: 16 }}>当前安装任务面板</Title>
                     <Space vertical align="start" style={{ width: '100%' }}>
-                        
+
                         {/* 头部全局状态 */}
                         <Space spacing="loose">
                             <Text style={{ color: '#ccc' }}>
@@ -292,17 +292,17 @@ export default function TestPlayground(): React.JSX.Element {
                                 <Text style={{ color: '#ccc', fontSize: 13 }}>总进度</Text>
                                 <Text style={{ color: '#ccc', fontSize: 13 }}>{installProgress.totalProgress}%</Text>
                             </div>
-                            <Progress 
-                                percent={installProgress.totalProgress} 
-                                style={{ height: 8 }} 
-                                stroke="var(--semi-color-primary)" 
+                            <Progress
+                                percent={installProgress.totalProgress}
+                                style={{ height: 8 }}
+                                stroke="var(--semi-color-primary)"
                             />
                         </div>
-                        
+
                         <Divider style={{ margin: '16px 0', borderColor: '#333' }} />
-                        
+
                         <Title heading={6} style={{ color: '#eee', marginBottom: 12 }}>Categories 列表</Title>
-                        
+
                         {/* Category 卡片列表 */}
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {installProgress.categories?.map(cat => (
@@ -324,7 +324,7 @@ export default function TestPlayground(): React.JSX.Element {
                                             </Space>
                                             <Tag size="small" style={{ backgroundColor: '#333', color: '#ccc', border: 'none' }}>{cat.status}</Tag>
                                         </Space>
-                                        
+
                                         <div style={{ width: '100%', marginTop: 8 }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                                                 <Text style={{ color: '#aaa', fontSize: 12 }}>分类进度</Text>
@@ -358,7 +358,7 @@ export default function TestPlayground(): React.JSX.Element {
     // =================================================================
     // 5. 测试用例配置 (TEST SUITES CONFIG)
     // =================================================================
-    
+
     const TEST_SUITES: TestSuite[] =[
         {
             id: 'install_api',
@@ -369,8 +369,8 @@ export default function TestPlayground(): React.JSX.Element {
                     id: 'architecture_desc',
                     name: '通用安装分发层',
                     desc: '后端提供通用的 /api/installations 接口，统一下发、调度和聚合多 Category。前端按此规范统一处理安装，无需为具体项目绑定强侵入逻辑。',
-                    action: async (log) => { 
-                        log('info', '说明已阅读：请通过下方具体项目安装触发。'); 
+                    action: async (log) => {
+                        log('info', '说明已阅读：请通过下方具体项目安装触发。');
                     }
                 }
             ]
@@ -519,7 +519,7 @@ export default function TestPlayground(): React.JSX.Element {
 
             {/* Main Content (Split View) */}
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                
+
                 {/* 左侧：测试用例面板 (Scrollable) */}
                 <div style={{ flex: 1, padding: '24px 40px', overflowY: 'auto' }}>
                     <div style={{ marginBottom: 24 }}>
@@ -554,9 +554,9 @@ export default function TestPlayground(): React.JSX.Element {
                                                         <Text style={{ fontWeight: 'bold', color: '#eee' }}>{testCase.name}</Text>
                                                         {loadingMap[testCase.id] && <Spin size="small" />}
                                                     </div>
-                                                    <Button 
-                                                        theme="solid" 
-                                                        icon={<IconPlay />} 
+                                                    <Button
+                                                        theme="solid"
+                                                        icon={<IconPlay />}
                                                         style={{ backgroundColor: '#333', color: '#fff', border: '1px solid #555' }}
                                                         onClick={() => runTest(testCase)}
                                                         loading={loadingMap[testCase.id]}
@@ -569,7 +569,7 @@ export default function TestPlayground(): React.JSX.Element {
                                                         <Text style={{ color: '#666', fontSize: 12 }}>{testCase.desc}</Text>
                                                     </div>
                                                 )}
-                                                
+
                                                 {/* 如果用例自定义了渲染面板，则渲染在下方 */}
                                                 {testCase.renderCustomUI && testCase.renderCustomUI()}
 
@@ -586,7 +586,7 @@ export default function TestPlayground(): React.JSX.Element {
 
                 {/* 右侧：实时日志控制台 (Fixed Width) */}
                 <div style={{ width: 450, background: CONSOLE_BG, borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column' }}>
-                    
+
                     {/* Console Header */}
                     <div style={{ padding: '12px 16px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text strong style={{ color: '#ccc' }}>Real-time Console</Text>
@@ -611,14 +611,14 @@ export default function TestPlayground(): React.JSX.Element {
                                     {log.message}
                                 </div>
                                 {log.data !== undefined && log.data !== null && (
-                                    <pre style={{ 
-                                        margin: '4px 0 0 0', 
-                                        padding: 8, 
-                                        background: 'rgba(255,255,255,0.05)', 
-                                        borderRadius: 4, 
+                                    <pre style={{
+                                        margin: '4px 0 0 0',
+                                        padding: 8,
+                                        background: 'rgba(255,255,255,0.05)',
+                                        borderRadius: 4,
                                         color: '#aaddff',
                                         fontSize: 11,
-                                        overflowX: 'auto' 
+                                        overflowX: 'auto'
                                     }}>
                                         {JSON.stringify(log.data, null, 2)}
                                     </pre>
