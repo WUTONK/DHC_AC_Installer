@@ -341,8 +341,9 @@ app.whenReady().then(() => {
 
   createMenu()
 
-  // 启动后端服务
-  if (!is.dev || process.env['START_BACKEND'] !== 'false') {
+  // 启动后端服务：生产环境始终拉起；开发环境默认不拉（只跑前端时请自行 go run / 或先编 main），需联调时设 DHC_START_BACKEND=true
+  const startBackendInDev = process.env['DHC_START_BACKEND'] === 'true'
+  if (!is.dev || startBackendInDev) {
     startBackend()
   }
 

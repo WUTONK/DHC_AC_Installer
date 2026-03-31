@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Layout, Button, Card, Typography, Row, Col, Tag, Divider, Spin } from '@douyinfe/semi-ui';
+import { Layout, Button, Card, Typography, Row, Col, Tag, Divider, Spin, Progress, Space } from '@douyinfe/semi-ui';
 import {
     IconCode, IconServer, IconPlay, IconDelete, IconBox, IconLink
 } from '@douyinfe/semi-icons';
@@ -11,19 +11,30 @@ import HomeBreadcrumb from './components/HomeBreadcrumb';
 
 type LogType = 'info' | 'success' | 'error' | 'warning' | 'req' | 'res';
 
+// eslint-disable-next-line no-unused-vars
+interface Logger {
+    (type: LogType, message: string, data?: unknown): void;
+}
+
+// eslint-disable-next-line no-unused-vars
+interface TestAction {
+    (log: Logger): Promise<void>;
+}
+
 interface LogEntry {
     id: number;
     time: string;
     type: LogType;
     message: string;
-    data?: any; // 可选的详细数据对象
+    data?: unknown; // 可选的详细数据对象
 }
 
 interface TestCase {
     id: string;
     name: string;
     desc?: string;
-    action: (logger: (type: LogType, msg: string, data?: any) => void) => Promise<void>;
+    action: TestAction;
+    renderCustomUI?: () => React.ReactNode; // 允许渲染自定义交互面板
 }
 
 interface TestSuite {
@@ -33,13 +44,40 @@ interface TestSuite {
     cases: TestCase[];
 }
 
-const { Header, Content } = Layout;
+// --- 安装通用任务接口模型 ---
+export interface InstallationCreateResponse {
+    id: string;
+    versionId: string;
+    status: string;
+    startTime: number;
+}
+
+export interface InstallationCategoryProgress {
+    categoryId: string;
+    categoryName: string;
+    status: 'waiting' | 'active' | 'completed' | 'failed' | string;
+    progress: number;
+    currentItem: string;
+    totalItems: number;
+    completedItems: number;
+    subProgress: number;
+}
+
+export interface InstallationProgressResponse {
+    installId: string;
+    status: 'preparing' | 'installing' | 'completed' | 'failed' | string;
+    totalProgress: number;
+    categories: InstallationCategoryProgress[];
+    startTime: number;
+    endTime: number | null;
+    error: string | null;
+}
+
+const { Header } = Layout;
 const { Title, Text } = Typography;
 
 /** 与 DHC_Backend/cmd/main.go 监听端口一致 */
 const BACKEND_BASE = 'http://127.0.0.1:19810';
-
-type Logger = (type: LogType, msg: string, data?: any) => void;
 
 /**
  * 经主进程 fetch 代理请求本地后端（与 OpenAPI 客户端同源路径）。
@@ -84,12 +122,17 @@ export default function TestPlayground(): React.JSX.Element {
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
     const logEndRef = useRef<HTMLDivElement>(null);
 
+    // 安装状态存储
+    const [installProgress, setInstallProgress] = useState<InstallationProgressResponse | null>(null);
+    const isPollingRef = useRef<boolean>(false);
+    const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     // --- 日志系统 ---
-    const addLog = (type: LogType, message: string, data?: any) => {
+    const addLog = (type: LogType, message: string, data?: unknown): void => {
         const now = new Date();
         const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
         
-        setLogs(prev => [...prev, {
+        setLogs((prev) => [...prev, {
             id: Date.now() + Math.random(),
             time: timeStr,
             type,
@@ -98,16 +141,26 @@ export default function TestPlayground(): React.JSX.Element {
         }]);
     };
 
-    const clearLogs = () => setLogs([]);
+    const clearLogs = (): void => setLogs([]);
 
     // 自动滚动到底部
     useEffect(() => {
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [logs]);
 
-    // --- 执行测试 ---
-    const runTest = async (testCase: TestCase) => {
-        setLoadingMap(prev => ({ ...prev, [testCase.id]: true }));
+    // 组件卸载时停止轮询
+    useEffect(() => {
+        return () => {
+            isPollingRef.current = false;
+            if (pollingTimerRef.current) {
+                clearTimeout(pollingTimerRef.current);
+            }
+        };
+    }, []);
+
+    // --- 执行常规测试 ---
+    const runTest = async (testCase: TestCase): Promise<void> => {
+        setLoadingMap((prev) => ({ ...prev, [testCase.id]: true }));
         addLog('info', `--- 开始执行测试: [${testCase.name}] ---`);
         
         try {
@@ -116,60 +169,256 @@ export default function TestPlayground(): React.JSX.Element {
             addLog('error', `执行异常: ${error}`);
             console.error(error);
         } finally {
-            setLoadingMap(prev => ({ ...prev, [testCase.id]: false }));
+            setLoadingMap((prev) => ({ ...prev, [testCase.id]: false }));
             addLog('info', `--- 测试结束 ---`);
         }
     };
 
     // =================================================================
-    // 3. 测试用例配置 (TEST SUITES CONFIG) - 在这里添加新功能！
+    // 3. 安装流程专属方法
+    // =================================================================
+
+    const stopPolling = (): void => {
+        isPollingRef.current = false;
+        if (pollingTimerRef.current) {
+            clearTimeout(pollingTimerRef.current);
+            pollingTimerRef.current = null;
+        }
+    };
+
+    const pollInstallationProgress = async (installId: string, log: Logger): Promise<void> => {
+        isPollingRef.current = true;
+
+        const poll = async (): Promise<void> => {
+            if (!isPollingRef.current) return;
+            try {
+                const progress = (await requestBackend(
+                    log, 
+                    'GET', 
+                    `/api/installations/${installId}/progress?category=all`
+                )) as InstallationProgressResponse;
+                
+                setInstallProgress(progress);
+
+                if (progress.status === 'completed' || progress.status === 'failed') {
+                    stopPolling();
+                    log(progress.status === 'completed' ? 'success' : 'error', `安装任务已${progress.status === 'completed' ? '完成' : '失败'}`, progress);
+                    return; // 结束轮询
+                }
+            } catch (err: unknown) {
+                log('error', `获取安装进度失败: ${err}`);
+                stopPolling();
+                return;
+            }
+
+            // 继续下一轮轮询，间隔 500ms
+            if (isPollingRef.current) {
+                pollingTimerRef.current = setTimeout(() => {
+                    void poll();
+                }, 500);
+            }
+        };
+
+        // 发起第一次轮询
+        pollingTimerRef.current = setTimeout(() => {
+            void poll();
+        }, 500);
+    };
+
+    const startInstallationDemo = async (log: Logger): Promise<void> => {
+        // 先重置旧状态与轮询
+        stopPolling();
+        setInstallProgress(null);
+
+        try {
+            const response = (await requestBackend(log, 'POST', '/api/installations', {
+                versionId: 'cm-demo-v1'
+            })) as InstallationCreateResponse;
+
+            log('info', `成功创建安装任务，Install ID: ${response.id}`);
+            
+            // 开始轮询进度
+            await pollInstallationProgress(response.id, log);
+        } catch (err: unknown) {
+            log('error', `创建安装任务请求失败: ${err}`);
+            throw err;
+        }
+    };
+
+    // =================================================================
+    // 4. 自定义面板渲染
+    // =================================================================
+
+    const getCategoryStatusColor = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return '#52c41a';
+            case 'failed':
+                return '#ff4d4f';
+            case 'completed':
+                return '#22d3ee';
+            default:
+                return '#8c8c8c';
+        }
+    };
+
+    const renderInstallationDemoPanel = (): React.ReactNode => {
+        if (!installProgress) return null;
+
+        return (
+            <div style={{ marginTop: 16 }}>
+                <Card style={{ backgroundColor: '#1a1a1c', border: '1px solid #333' }}>
+                    <Title heading={5} style={{ color: '#eee', marginBottom: 16 }}>当前安装任务面板</Title>
+                    <Space vertical align="start" style={{ width: '100%' }}>
+                        
+                        {/* 头部全局状态 */}
+                        <Space spacing="loose">
+                            <Text style={{ color: '#ccc' }}>
+                                Install ID: <Text strong style={{ color: '#fff', userSelect: 'all' }}>{installProgress.installId}</Text>
+                            </Text>
+                            <Space>
+                                <Text style={{ color: '#ccc' }}>全局状态:</Text>
+                                <Tag color={
+                                    installProgress.status === 'completed' ? 'green' :
+                                    installProgress.status === 'failed' ? 'red' :
+                                    installProgress.status === 'installing' ? 'blue' : 'grey'
+                                }>{installProgress.status}</Tag>
+                            </Space>
+                        </Space>
+
+                        {/* 全局进度 */}
+                        <div style={{ width: '100%', marginTop: 8 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <Text style={{ color: '#ccc', fontSize: 13 }}>总进度</Text>
+                                <Text style={{ color: '#ccc', fontSize: 13 }}>{installProgress.totalProgress}%</Text>
+                            </div>
+                            <Progress 
+                                percent={installProgress.totalProgress} 
+                                style={{ height: 8 }} 
+                                stroke="var(--semi-color-primary)" 
+                            />
+                        </div>
+                        
+                        <Divider style={{ margin: '16px 0', borderColor: '#333' }} />
+                        
+                        <Title heading={6} style={{ color: '#eee', marginBottom: 12 }}>Categories 列表</Title>
+                        
+                        {/* Category 卡片列表 */}
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            {installProgress.categories?.map(cat => (
+                                <Card key={cat.categoryId} style={{ backgroundColor: '#232326', border: '1px solid #444', padding: 12 }} bodyStyle={{ padding: 0 }}>
+                                    <Space vertical align="start" style={{ width: '100%' }}>
+                                        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                                            <Space>
+                                                <span
+                                                    style={{
+                                                        width: 10,
+                                                        height: 10,
+                                                        borderRadius: '50%',
+                                                        display: 'inline-block',
+                                                        backgroundColor: getCategoryStatusColor(cat.status)
+                                                    }}
+                                                />
+                                                <Text strong style={{ color: '#fff' }}>{cat.categoryName}</Text>
+                                                <Text type="tertiary" size="small">({cat.categoryId})</Text>
+                                            </Space>
+                                            <Tag size="small" style={{ backgroundColor: '#333', color: '#ccc', border: 'none' }}>{cat.status}</Tag>
+                                        </Space>
+                                        
+                                        <div style={{ width: '100%', marginTop: 8 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                                <Text style={{ color: '#aaa', fontSize: 12 }}>分类进度</Text>
+                                                <Text style={{ color: '#aaa', fontSize: 12 }}>{cat.progress}%</Text>
+                                            </div>
+                                            <Progress percent={cat.progress} style={{ height: 6 }} stroke="var(--semi-color-success)" />
+                                        </div>
+
+                                        {cat.currentItem && (
+                                            <div style={{ width: '100%', marginTop: 12, background: 'rgba(255,255,255,0.03)', padding: 10, borderRadius: 6, border: '1px solid #333' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                                    <Text style={{ color: '#ddd', fontSize: 12 }}>当前阶段: {cat.currentItem}</Text>
+                                                    <Text style={{ color: '#ddd', fontSize: 12 }}>{cat.subProgress}%</Text>
+                                                </div>
+                                                <Progress percent={cat.subProgress} style={{ height: 4 }} stroke="var(--semi-color-warning)" />
+                                            </div>
+                                        )}
+                                    </Space>
+                                </Card>
+                            ))}
+                            {(!installProgress.categories || installProgress.categories.length === 0) && (
+                                <Text type="tertiary">暂无 Category 数据</Text>
+                            )}
+                        </div>
+                    </Space>
+                </Card>
+            </div>
+        );
+    };
+
+    // =================================================================
+    // 5. 测试用例配置 (TEST SUITES CONFIG)
     // =================================================================
     
-    const TEST_SUITES: TestSuite[] = [
+    const TEST_SUITES: TestSuite[] =[
+        {
+            id: 'install_api',
+            title: 'Installations API (通用架构)',
+            icon: <IconServer />,
+            cases:[
+                {
+                    id: 'architecture_desc',
+                    name: '通用安装分发层',
+                    desc: '后端提供通用的 /api/installations 接口，统一下发、调度和聚合多 Category。前端按此规范统一处理安装，无需为具体项目绑定强侵入逻辑。',
+                    action: async (log) => { 
+                        log('info', '说明已阅读：请通过下方具体项目安装触发。'); 
+                    }
+                }
+            ]
+        },
+        {
+            id: 'install_targets',
+            title: 'Install Targets (具体安装项目)',
+            icon: <IconBox />,
+            cases:[
+                {
+                    id: 'cm_install_demo',
+                    name: '安装 CM DEMO',
+                    desc: '调用 POST /api/installations 分配任务，获得 installId 后持续轮询 GET /progress，实时在下方渲染进度',
+                    action: async (log) => {
+                        await startInstallationDemo(log);
+                    },
+                    renderCustomUI: renderInstallationDemoPanel
+                }
+            ]
+        },
         {
             id: 'install',
-            title: '安装流程测试',
+            title: '旧版安装流程测试 (Stub)',
             icon: <IconBox />,
-            cases: [
+            cases:[
                 {
                     id: 'test_car_install',
                     name: '测试车包安装 (模拟)',
                     desc: '模拟前端发送安装指令 -> 后端解压 -> 返回进度 -> 完成',
                     action: async (log) => {
-                        // 1. 模拟发送请求
                         log('req', 'POST /api/install/car', { packId: 'car_jdm_vol1', targetPath: 'D:/AssettoCorsa' });
-                        
-                        // 模拟网络延迟
                         await new Promise(r => setTimeout(r, 800));
-                        
-                        // 2. 模拟后端返回确认
                         log('res', '200 OK: 任务已创建 (TaskID: 1024)', { status: 'pending' });
-
-                        // 3. 模拟进度推送 (WebSocket / IPC)
                         log('info', '开始监听进度...');
                         for (let i = 10; i <= 100; i += 30) {
                             await new Promise(r => setTimeout(r, 600));
                             log('info', `[IPC] 进度更新: ${i}%`, { file: `extracting_file_${i}.kn5` });
                         }
-
-                        // 4. 完成
                         log('success', '✅ 安装流程模拟完成');
                     }
-                },
-                // --- 在这里添加新的安装测试 ---
-                // --- 在这里添加新的安装测试 ---
-                // {
-                //     id: 'test_map_install',
-                //     name: '测试地图安装',
-                //     action: async (log) => { ... }
-                // }
+                }
             ]
         },
         {
             id: 'real_demo',
             title: '真实端到端 DEMO（需后端 19810 已启动）',
             icon: <IconLink />,
-            cases: [
+            cases:[
                 {
                     id: 'real_health',
                     name: '连通性：GET /api/TestPlaygroundHealth',
@@ -237,7 +486,7 @@ export default function TestPlayground(): React.JSX.Element {
             id: 'system',
             title: '系统/环境测试 (示例拓展)',
             icon: <IconServer />,
-            cases: [
+            cases:[
                 {
                     id: 'check_disk',
                     name: '检查磁盘空间',
@@ -253,7 +502,7 @@ export default function TestPlayground(): React.JSX.Element {
     ];
 
     // =================================================================
-    // 4. 渲染逻辑
+    // 6. 渲染结构
     // =================================================================
 
     // 样式常量
@@ -320,6 +569,10 @@ export default function TestPlayground(): React.JSX.Element {
                                                         <Text style={{ color: '#666', fontSize: 12 }}>{testCase.desc}</Text>
                                                     </div>
                                                 )}
+                                                
+                                                {/* 如果用例自定义了渲染面板，则渲染在下方 */}
+                                                {testCase.renderCustomUI && testCase.renderCustomUI()}
+
                                                 <Divider style={{ margin: '12px 0', borderColor: '#333' }} />
                                             </div>
                                         ))}
@@ -357,7 +610,7 @@ export default function TestPlayground(): React.JSX.Element {
                                 <div style={{ color: '#ddd', paddingLeft: 0, marginTop: 2 }}>
                                     {log.message}
                                 </div>
-                                {log.data && (
+                                {log.data !== undefined && log.data !== null && (
                                     <pre style={{ 
                                         margin: '4px 0 0 0', 
                                         padding: 8, 
@@ -381,7 +634,7 @@ export default function TestPlayground(): React.JSX.Element {
 }
 
 // --- 辅助函数：渲染日志标签 ---
-function renderLogBadge(type: LogType) {
+function renderLogBadge(type: LogType): React.JSX.Element {
     switch (type) {
         case 'req': return <Tag color="blue" size="small" style={{ height: 18, lineHeight: '16px' }}>REQ &gt;&gt;</Tag>;
         case 'res': return <Tag color="cyan" size="small" style={{ height: 18, lineHeight: '16px' }}>&lt;&lt; RES</Tag>;
@@ -391,4 +644,3 @@ function renderLogBadge(type: LogType) {
         default: return <Tag color="grey" size="small" style={{ height: 18, lineHeight: '16px' }}>INFO</Tag>;
     }
 }
-
