@@ -6,6 +6,9 @@ import (
 	"DHC_Backend/models/service/types"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -103,14 +106,60 @@ func TestMultiModInstall(t *testing.T) {
 
 // TestResetSimEnvModDirectories 测试 simenv 模组目录重置功能（垃圾回收）
 func TestResetSimEnvModDirectories(t *testing.T) {
-	// 设置开发模式，确保使用模拟环境
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		t.Fatalf("获取后端根目录失败: %v", err)
+	}
+
+	// 在临时目录中构造一份可被重置的游戏目录，避免污染 git 跟踪的 simenv 骨架目录。
+	tempGamePath := filepath.Join(t.TempDir(), "Assetto Corsa")
+	dirtyContentPath := filepath.Join(tempGamePath, "content", "cars", "temp_mod")
+	if err := os.MkdirAll(dirtyContentPath, 0o755); err != nil {
+		t.Fatalf("创建临时 content 目录失败: %v", err)
+	}
+	dirtyFilePath := filepath.Join(dirtyContentPath, "temp.txt")
+	if err := os.WriteFile(dirtyFilePath, []byte("dirty"), 0o644); err != nil {
+		t.Fatalf("写入脏文件失败: %v", err)
+	}
+
+	err = modinstall.ResetSimEnvModDirectoriesAtPath(tempGamePath)
+	if err != nil {
+		t.Fatalf("ResetSimEnvModDirectoriesAtPath 执行失败: %v", err)
+	}
+
+	// 脏文件应该被清掉，说明 reset 确实删除了旧 content。
+	if _, err := os.Stat(dirtyFilePath); !os.IsNotExist(err) {
+		t.Fatalf("期望脏文件被清理，但仍存在: %s", dirtyFilePath)
+	}
+
+	// 备份中的基线文件应该被恢复到临时目录。
+	restoredWeatherFile := filepath.Join(tempGamePath, "content", "weather", "4_mid_clear", "weather.ini")
+	if _, err := os.Stat(restoredWeatherFile); err != nil {
+		t.Fatalf("期望基线文件已恢复，但未找到: %s err=%v", restoredWeatherFile, err)
+	}
+
+	expectedWeatherFile := filepath.Join(
+		backendRootPath,
+		"test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC",
+		"content", "weather", "4_mid_clear", "weather.ini",
+	)
+	if _, err := os.Stat(expectedWeatherFile); err != nil {
+		t.Fatalf("备份基线文件不存在，测试前提不成立: %s err=%v", expectedWeatherFile, err)
+	}
+
+	fmt.Println("ResetSimEnvModDirectoriesAtPath 执行成功，临时游戏目录已重置")
+}
+
+func TestResetSimEnvModDirectoriesRejectsTrackedSkeleton(t *testing.T) {
+	t.Setenv("DHC_DEV", "true")
 	infoGet.SetDev(true)
 	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
 
 	err := modinstall.ResetSimEnvModDirectories()
-	if err != nil {
-		t.Errorf("ResetSimEnvModDirectories 执行失败: %v", err)
-		return
+	if err == nil {
+		t.Fatal("期望拒绝直接操作 git 跟踪的 simenv 骨架目录，但返回了 nil")
 	}
-	fmt.Println("ResetSimEnvModDirectories 执行成功，simenv 模组目录已重置")
+	if !strings.Contains(err.Error(), "拒绝直接操作 git 跟踪的 simenv 骨架目录") {
+		t.Fatalf("期望返回安全护栏错误，实际: %v", err)
+	}
 }

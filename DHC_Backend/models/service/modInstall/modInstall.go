@@ -519,49 +519,57 @@ func findModFileInDir(dirPath string) string {
 	return ""
 }
 
-// ResetSimEnvModDirectories 重置 simenv 模组目录，实现垃圾回收
-// 该函数会清理 acRoot 下安装的模组，并从 envBackup 恢复原始状态
-// 主要用于测试环境的清理和重置
+// ResetSimEnvModDirectories 重置 simenv 模组目录，实现垃圾回收。
+// 该入口只允许操作"临时复制出来的游戏目录"，避免误改 git 跟踪的骨架目录。
 func ResetSimEnvModDirectories() error {
 	funcIdt := "-modInstall.ResetSimEnvModDirectories-"
-
-	backendRootPath, err := infoGet.GetBackendRootPath()
-	if err != nil {
-		return fmt.Errorf("%s获取根目录失败: %v", funcIdt, err)
-	}
 
 	isDevMode := infoGet.IsDevModeGet()
 	if !isDevMode {
 		return fmt.Errorf("%s此函数仅在开发模式下可用", funcIdt)
 	}
 
-	// 获取游戏路径（simenv 环境）
 	gamePath, err := infoGet.GetGamePathAuto()
 	if err != nil {
 		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
 	}
 
-	// 备份路径（备份目录在 acRoot/envBackup 下，直接是 AC_SKELETON_HASDLC/content）
-	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC")
+	return ResetSimEnvModDirectoriesAtPath(gamePath)
+}
 
-	// 获取 content 目录路径
+// ResetSimEnvModDirectoriesAtPath 将指定游戏目录的 content 重置为 envBackup 中的基线内容。
+// 这个函数适合测试时传入 t.TempDir() 下的临时目录，避免污染仓库内的骨架数据。
+func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
+	funcIdt := "-modInstall.ResetSimEnvModDirectoriesAtPath-"
+
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("%s获取根目录失败: %v", funcIdt, err)
+	}
+
+	trackedSkeletonGamePath := filepath.Join(
+		backendRootPath,
+		"test", "simEnv", "acRoot", "AC_SKELETON_HASDLC", "Assetto Corsa",
+	)
+	if filepath.Clean(gamePath) == filepath.Clean(trackedSkeletonGamePath) {
+		return fmt.Errorf("%s拒绝直接操作 git 跟踪的 simenv 骨架目录: %s，请先复制到临时目录后再重置", funcIdt, gamePath)
+	}
+
+	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC")
 	contentPath := filepath.Join(gamePath, "content")
 	backupContentPath := filepath.Join(backupPath, "content")
 
 	fmt.Printf("%s开始重置 simenv 模组目录...\n", funcIdt)
 
-	// 检查备份 content 目录是否存在
 	if _, err := os.Stat(backupContentPath); os.IsNotExist(err) {
 		return fmt.Errorf("%s备份 content 目录不存在: %s", funcIdt, backupContentPath)
 	}
 
-	// 删除游戏目录中的 content 目录
 	if err := os.RemoveAll(contentPath); err != nil {
 		return fmt.Errorf("%s删除 content 目录失败: %s, 错误: %v", funcIdt, contentPath, err)
 	}
 	fmt.Printf("%s已删除 content 目录: %s\n", funcIdt, contentPath)
 
-	// 从备份复制整个 content 目录
 	if err := copyDir(backupContentPath, contentPath); err != nil {
 		return fmt.Errorf("%s从备份恢复 content 目录失败: %s -> %s, 错误: %v", funcIdt, backupContentPath, contentPath, err)
 	}
