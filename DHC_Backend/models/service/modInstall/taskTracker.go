@@ -47,6 +47,8 @@ import "sync"
 type ProgressSnapshot struct {
 	// TotalProgress 是自动换算后的总进度（0-100）。
 	// 换算公式：已完成阶段权重之和 + 当前阶段权重 × (子进度 / 100)
+	//   例如："下载"权重=25，子进度=50%
+	//         → 总进度 = 0（前面没有已完成阶段） + 25 × 0.5 = 12.5%
 	TotalProgress float64
 
 	// CurrentPhase 是当前正在执行的阶段 ID（例如 "download"）。
@@ -243,7 +245,7 @@ func (t *TaskTracker) buildSnapshotLocked() ProgressSnapshot {
 		case "completed":
 			// 已完成阶段，贡献全部权重
 			totalProgress += p.Weight
-			// 记录最后一个完成的阶段，
+			// 最终快照记录的会是最后一个 completed 的阶段，
 			// 这样当所有阶段都完成时，快照的状态是 completed 而不是 waiting
 			currentPhase = p.ID
 			phaseName = p.Name

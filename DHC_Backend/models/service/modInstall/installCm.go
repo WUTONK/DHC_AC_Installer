@@ -16,9 +16,9 @@ import (
 // ProgressWriter 包装一个 io.Reader，在每次 Read 时计算已读百分比。
 // 通过 OnProgress 回调，可以把下载进度实时同步给 TaskTracker。
 type ProgressWriter struct {
-	io.Reader                          // 底层数据源（例如 HTTP Response Body）
-	Total      int64                   // 总大小（字节），-1 表示未知
-	Current    int64                   // 已读取大小（字节）
+	io.Reader                           // 底层数据源（例如 HTTP Response Body）
+	Total      int64                    // 总大小（字节），-1 表示未知
+	Current    int64                    // 已读取大小（字节）
 	OnProgress func(percentage float64) // 可选回调：每次 Read 后触发，参数是 0-100 百分比
 }
 
@@ -67,6 +67,7 @@ func InstallCm() (string, error) {
 //	下载进度 50% → 总进度 = 25 × 0.5 = 12.5%
 //	解压完成      → 总进度 = 25 + 50 = 75%
 //	移动完成      → 总进度 = 100%
+
 func InstallCmWithTracker(tracker *TaskTracker) (string, error) {
 	// 如果没有传入 tracker，创建一个静默的（不会报错，只是没有回调）
 	if tracker == nil {

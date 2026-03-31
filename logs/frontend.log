@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.17 kB
-✓ built in 51ms
+✓ built in 257ms
 
 build the electron main process successfully
 
@@ -19,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 10ms
+✓ built in 6ms
 
 build the electron preload files successfully
 
@@ -41,8 +41,8 @@ Starting backend at: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Ba
 
 [GIN-debug] GET    /                         --> main.main.func1 (4 handlers)
 [GIN-debug] GET    /api/GetGamePath          --> DHC_Backend/handler.getGamePath (4 handlers)
-2026/03/30 23:15:14 Backend Server is running on port http://127.0.0.1:19810
-2026/03/30 23:15:14 Frontend login page is running on path http://localhost:11451
+2026/03/31 12:02:20 Backend Server is running on port http://127.0.0.1:19810
+2026/03/31 12:02:20 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810

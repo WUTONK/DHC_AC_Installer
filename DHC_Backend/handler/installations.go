@@ -111,9 +111,10 @@ func createInstallation(c *gin.Context) {
 	installTasksMu.Unlock()
 
 	// 异步启动安装流程。
-	// 开发/测试环境使用模拟版（不需要网络），生产环境切换为真实版。
-	go runDemoCMInstall(installID)
-	// 生产环境替换为：go runRealCMInstall(installID)
+	// 具体安装逻辑由执行器决定，handler 只负责调度。
+	// 开发/测试环境使用 Demo 版，生产环境切换为 Real 版。
+	go runInstallExecutor(installID, "cm", modinstall.RunDemoCMInstall)
+	// 生产环境替换为：go runInstallExecutor(installID, "cm", modinstall.RunRealCMInstall)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":        installID,
@@ -168,12 +169,22 @@ func getInstallationProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// ── 后台安装流程：演示版（使用 TaskTracker + 模拟延时）──
+// ── 通用执行桥接 ──
 
-// runDemoCMInstall 是演示/测试版 CM 安装流程。
-// 使用 TaskTracker 管理进度（和真实版完全一样的模式），但用 time.Sleep 模拟耗时操作。
-// 好处：不需要网络，随时能跑通进度链路。
-func runDemoCMInstall(installID string) {
+// runInstallExecutor 是安装任务的通用执行框架（在后台 goroutine 中运行）。
+//
+// 它把"handler 的任务注册表"和"执行器的 TaskTracker"桥接起来：
+//  1. 创建 TaskTracker，回调里把进度写入任务注册表
+//  2. 调用 executorFn 执行具体安装流程
+//  3. 根据返回值标记任务最终状态（completed / failed）
+//
+// handler 不关心执行器内部做了什么（是 demo 模拟还是真实下载），
+// 执行器也不知道进度数据最终去了哪里（注册表、日志、前端）。
+//
+// 未来扩展 shader / map / carPack 时，只需要：
+//
+//	go runInstallExecutor(installID, "shader", modinstall.RunShaderInstall)
+func runInstallExecutor(installID string, categoryID string, executorFn func(*modinstall.TaskTracker) error) {
 	// 创建 tracker：每次进度变化时，通过回调更新任务注册表。
 	// 前端轮询时会读取注册表，于是就能看到实时进度。
 	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
@@ -187,76 +198,10 @@ func runDemoCMInstall(installID string) {
 
 		task.Status = installStatusInstalling
 
-		cp := task.Categories["cm"]
-		cp.Progress = snapshot.TotalProgress
-		cp.CurrentItem = snapshot.PhaseName
-		cp.SubProgress = snapshot.SubProgress
-		if snapshot.PhaseStatus == "active" {
-			cp.Status = "active"
-		}
-	})
-
-	// ── 像 useEffect 一样注册阶段（和 InstallCmWithTracker 内部一致）──
-	tracker.AddPhase("download", "下载CM安装包", 25)
-	tracker.AddPhase("extract", "解压CM文件", 50)
-	tracker.AddPhase("move", "移动到桌面", 25)
-
-	// 模拟下载阶段：子进度 0→20→40→60→80→100，总进度 0→5→10→15→20→25
-	tracker.StartPhase("download")
-	for i := 1; i <= 5; i++ {
-		time.Sleep(200 * time.Millisecond)
-		tracker.SetSubProgress("download", float64(i)*20)
-	}
-	tracker.CompletePhase("download")
-
-	// 模拟解压阶段：子进度 0→20→40→60→80→100，总进度 25→35→45→55→65→75
-	tracker.StartPhase("extract")
-	for i := 1; i <= 5; i++ {
-		time.Sleep(300 * time.Millisecond)
-		tracker.SetSubProgress("extract", float64(i)*20)
-	}
-	tracker.CompletePhase("extract")
-
-	// 模拟移动阶段：一步到位，总进度 75→100
-	tracker.StartPhase("move")
-	time.Sleep(300 * time.Millisecond)
-	tracker.CompletePhase("move")
-
-	// 标记任务完成
-	installTasksMu.Lock()
-	task, ok := installTasks[installID]
-	if ok {
-		task.Status = installStatusCompleted
-		now := time.Now().Unix()
-		task.EndTime = &now
-		task.Categories["cm"].Status = "completed"
-		task.Categories["cm"].Progress = 100
-	}
-	installTasksMu.Unlock()
-}
-
-// ── 后台安装流程：真实版（使用 TaskTracker + 真实 InstallCm）──
-
-// runRealCMInstall 是生产版 CM 安装流程。
-// 通过 TaskTracker 追踪 InstallCmWithTracker 的实际下载/解压/移动进度。
-// 需要网络连接（下载 CM 安装包），适用于生产环境。
-//
-// 使用方法：在 createInstallation 中把 go runDemoCMInstall(installID)
-// 替换为 go runRealCMInstall(installID) 即可。
-func runRealCMInstall(installID string) {
-	// 创建 tracker，回调写入任务注册表（和演示版完全一样）
-	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
-		installTasksMu.Lock()
-		defer installTasksMu.Unlock()
-
-		task, ok := installTasks[installID]
-		if !ok {
+		cp := task.Categories[categoryID]
+		if cp == nil {
 			return
 		}
-
-		task.Status = installStatusInstalling
-
-		cp := task.Categories["cm"]
 		cp.Progress = snapshot.TotalProgress
 		cp.CurrentItem = snapshot.PhaseName
 		cp.SubProgress = snapshot.SubProgress
@@ -267,11 +212,10 @@ func runRealCMInstall(installID string) {
 		}
 	})
 
-	// InstallCmWithTracker 内部会自己注册阶段并推进进度，
-	// 这里只需要传入 tracker，所有进度更新都自动完成。
-	_, err := modinstall.InstallCmWithTracker(tracker)
+	// 调用执行器：具体安装逻辑全在这里面
+	err := executorFn(tracker)
 
-	// 根据结果标记任务最终状态
+	// 根据执行结果标记任务最终状态
 	installTasksMu.Lock()
 	task, ok := installTasks[installID]
 	if ok {
@@ -282,8 +226,10 @@ func runRealCMInstall(installID string) {
 			task.Error = err.Error()
 		} else {
 			task.Status = installStatusCompleted
-			task.Categories["cm"].Status = "completed"
-			task.Categories["cm"].Progress = 100
+			if cp := task.Categories[categoryID]; cp != nil {
+				cp.Status = "completed"
+				cp.Progress = 100
+			}
 		}
 	}
 	installTasksMu.Unlock()
