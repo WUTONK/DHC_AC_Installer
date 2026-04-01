@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 47ms
+✓ built in 289ms
 
 build the electron main process successfully
 
@@ -32,44 +32,9 @@ dev server running for the electron renderer process at:
 
 start electron app...
 
-16:18:03 [vite] (client) Pre-transform error: Failed to resolve import "./components/OneClickInstaller/PreCheckPage" from "src/renderer/src/OneClickInstaller.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/OneClickInstaller.tsx:22:25
-  45 |  import CleanInstallWizard from "./components/OneClickInstaller/CleanInstallWizard";
-  46 |  import NormalInstaller from "./components/OneClickInstaller/NormalInstaller";
-  47 |  import PreCheckPage from "./components/OneClickInstaller/PreCheckPage";
-     |                            ^
-  48 |  const BACKEND_BASE = "http://127.0.0.1:19810";
-  49 |  async function requestBackend(method, pathAndQuery, body) {
-Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   npx update-browserslist-db@latest
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-16:18:05 [vite] Internal server error: Failed to resolve import "./components/OneClickInstaller/PreCheckPage" from "src/renderer/src/OneClickInstaller.tsx". Does the file exist?
-  Plugin: vite:import-analysis
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/OneClickInstaller.tsx:22:25
-  45 |  import CleanInstallWizard from "./components/OneClickInstaller/CleanInstallWizard";
-  46 |  import NormalInstaller from "./components/OneClickInstaller/NormalInstaller";
-  47 |  import PreCheckPage from "./components/OneClickInstaller/PreCheckPage";
-     |                            ^
-  48 |  const BACKEND_BASE = "http://127.0.0.1:19810";
-  49 |  async function requestBackend(method, pathAndQuery, body) {
-      at TransformPluginContext._formatLog (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31185:43)
-      at TransformPluginContext.error (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:31182:14)
-      at normalizeUrl (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29665:18)
-      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
-      at async file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29723:32
-      at async Promise.all (index 13)
-      at async TransformPluginContext.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:29691:4)
-      at async EnvironmentPluginContainer.transform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:30984:14)
-      at async loadAndTransform (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26116:26)
-      at async viteTransformMiddleware (file:///Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_jiti@1.21.7_sass@1.93.3_tsx@4.20.5_yaml@2.8.1/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:27187:20)
-2026-03-31 16:21:17.834 Electron[46944:2825896] error messaging the mach port for IMKCFRunLoopWakeUpReliable
-16:23:33 [vite] (client) hmr update /src/App.tsx
-16:24:29 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-16:24:52 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-16:25:53 [vite] (client) hmr update /src/components/OneClickInstaller/PreCheckPage.tsx, /src/assets/main.css
-16:26:16 [vite] (client) hmr update /src/components/OneClickInstaller/PreCheckPage.tsx, /src/assets/main.css
-16:26:51 [vite] (client) hmr update /src/components/OneClickInstaller/PreCheckPage.tsx, /src/assets/main.css
  ELIFECYCLE  Command failed.

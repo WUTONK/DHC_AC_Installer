@@ -22,8 +22,8 @@
 [GIN-debug] GET    /api/lab/task/status      --> DHC_Backend/handler.labTaskStatus (4 handlers)
 [GIN-debug] POST   /api/installations        --> DHC_Backend/handler.createInstallation (4 handlers)
 [GIN-debug] GET    /api/installations/:installId/progress --> DHC_Backend/handler.getInstallationProgress (4 handlers)
-2026/03/31 16:17:59 Backend Server is running on port http://127.0.0.1:19810
-2026/03/31 16:17:59 Frontend login page is running on path http://localhost:11451
+2026/04/01 10:37:26 Backend Server is running on port http://127.0.0.1:19810
+2026/04/01 10:37:26 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
