@@ -314,8 +314,8 @@ func DecompressionWithOptions(opts DecompressionOptions) (unDecompressionPath, e
 
 // 解压功能 支持.zip / .7z / .rar压缩格式 支持分卷格式：传入任意序号的分卷压缩文件 函数会自动查找第一个分卷压缩文件并从其开始解压
 // 解压后暂存在中间目录： rootpath/resources/(模组标记类型)/(文件名) 目录 例:rootpath/resources/mod/shutokoMap 然后再复制
-// 参数：- 来源路径 文件密码 是否为模组 目标路径 dft文件路径或dfc文件获取方式(从模组目录还是从压缩包内获取)
-//   - 覆盖控制文件地址（为空则从sourceFile的DhcFileTag.json中读取）
+// 参数：- 来源路径 文件密码 是否为模组 目标路径 dft文件路径或dft文件获取方式(从模组目录还是从压缩包内获取)
+//   - dft 是 dhcFileTag 的缩写，模组类型与覆盖规则统一从 dft.json 读取
 //
 // 返回值：-解压目录 错误时机（nil:未发生错误 | "before":复制完成中间文件前 | "after":复制完成中间文件后 ），错误信息
 func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath string, dftPathGetModOrPath types.DftPathGetModOrPath) (unDecompressionPath, errorTiming string, error error) {
@@ -341,14 +341,14 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 	var dhcFileTag DhcFileTag
 
 	if isMod {
-		// 获取dhcFileTag.json路径
+		// dft 是 dhcFileTag 的缩写，缓存目录和覆盖规则统一读取 dft.json。
 		fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
 		switch dftPathGetModOrPath {
 		case types.DftPathFromDir:
-			dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dhcFileTag.json")
+			dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dft.json")
 			dhcFileTag, err = DhcFileTagIdentify(dstJsonPath)
 		case types.DftPathFromCompressRoot:
-			// TODO: 从压缩包根目录文件中读取 dhcFileTag.json（可能需要删除该逻辑 因为mod安装可能永远都不会需要从压缩包根目录文件中读取 dhcFileTag.json）
+			// TODO: 从压缩包根目录文件中读取 dft.json
 		default:
 			fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
 			dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
@@ -357,7 +357,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 			if err.Error() == "notFound" {
 				dhcFileTag.ModType = "undefined"
 			} else {
-				return "", "before", fmt.Errorf("%s 获取DhcFileTag时发生错误:%s", funcIdt, err)
+				return "", "before", fmt.Errorf("%s 获取dft配置中的ModType时发生错误:%s", funcIdt, err)
 			}
 		}
 	}

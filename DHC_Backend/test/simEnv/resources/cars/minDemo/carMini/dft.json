@@ -1,0 +1,6 @@
+{
+    "modType": "car",
+    "defaultAction": { "action": "overwrite", "backup": false },
+    "rules": [],
+    "overwriteStartingDir": "content/cars"
+}

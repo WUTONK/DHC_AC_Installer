@@ -13,6 +13,8 @@ import (
 )
 
 func TestSingleModInstall(t *testing.T) {
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
 	srcPath := "/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/testModFile/car/ddm_toyota_corolla_levin_ae86_1.1/ddm_toyota_corolla_levin_ae86_1.1.rar"
 	modinstall.SingleModInstall(srcPath, types.DftPathFromDir)
 }
@@ -102,6 +104,35 @@ func TestMultiModInstall(t *testing.T) {
 	}
 
 	fmt.Println("MultiModInstall 执行完成")
+}
+
+// TestMinimalModsetInstallV01 最小模组集（cars/tracks/shaders 各一）安装 Demo
+func TestMinimalModsetInstallV01(t *testing.T) {
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
+	var snapshots []modinstall.ProgressSnapshot
+	tracker := modinstall.NewTaskTracker(func(s modinstall.ProgressSnapshot) {
+		snapshots = append(snapshots, s)
+	})
+
+	err := modinstall.RunMinimalModsetInstall(tracker)
+	if err != nil {
+		t.Fatalf("RunMinimalModsetInstall: %v", err)
+	}
+
+	if len(snapshots) == 0 {
+		t.Fatal("期望 tracker 至少收到一次进度回调")
+	}
+
+	last := snapshots[len(snapshots)-1]
+	if last.TotalProgress < 99.99 {
+		t.Fatalf("期望最终进度到达 100%%，实际 %.2f%%", last.TotalProgress)
+	}
+
+	if last.PhaseStatus != "completed" {
+		t.Fatalf("期望最终阶段状态为 completed，实际 %s", last.PhaseStatus)
+	}
 }
 
 // TestResetSimEnvModDirectories 测试 simenv 模组目录重置功能（垃圾回收）

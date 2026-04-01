@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     Layout, Button, Typography, Tag, Tabs, TabPane,
     Collapse, Row, Col, Card, Empty, Modal, Badge, Radio, Upload, Banner, Tooltip, Toast,
-    Slider, InputNumber
+    Slider, InputNumber, Select
 } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle, IconTickCircle,
@@ -24,7 +24,7 @@ interface ResourceItem {
     fileName: string;
     size: string;
     requiredFor: string[];
-    status: 'imported' | 'missing';
+    status: 'imported' | 'partial' | 'missing' | 'included';
     desc?: string;
     cars?: Car[];
 }
@@ -37,7 +37,7 @@ const RESOURCES_DB: ResourceItem[] = [
         name: '首都高主地图包 (SRP Main)',
         fileName: 'SRP_0.9.3_Main.7z',
         size: '2.4 GB',
-        requiredFor: ['minimal', 'full'], // 最小包和完整包都需要
+        requiredFor: ['basic', 'standard', 'premium'],
         status: 'imported', // 已导入
         desc: '包含 C1, 湾岸线等核心道路'
     },
@@ -47,7 +47,7 @@ const RESOURCES_DB: ResourceItem[] = [
         name: '地图扩展包 (SRP Extras)',
         fileName: 'SRP_0.9.3_Extras.7z',
         size: '500 MB',
-        requiredFor: ['full'],
+        requiredFor: ['premium'],
         status: 'missing', // 缺失
         desc: '包含更多停车场和纹理细节'
     },
@@ -58,8 +58,8 @@ const RESOURCES_DB: ResourceItem[] = [
         name: 'SHMC 基础联机车包',
         fileName: 'SHMC_Car_Pack_v2.0.rar',
         size: '1.8 GB',
-        requiredFor: ['minimal', 'full'],
-        status: 'imported',
+        requiredFor: ['basic', 'standard', 'premium'],
+        status: 'partial', // 导入但文件缺失
         cars: [
             { name: 'Nissan GTR R34', thumb: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=200&q=80' },
             { name: 'Toyota Supra MK4', thumb: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=200&q=80' },
@@ -72,8 +72,8 @@ const RESOURCES_DB: ResourceItem[] = [
         name: 'AI 慢车包 (Traffic)',
         fileName: 'SRP_Traffic_Pack.7z',
         size: '800 MB',
-        requiredFor: ['full'],
-        status: 'missing',
+        requiredFor: ['standard', 'premium'],
+        status: 'included', // 已包含在其他包中
         cars: [
             { name: 'Toyota Prius Traffic', thumb: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=200&q=80' },
             { name: 'Bus / Truck', thumb: 'https://images.unsplash.com/photo-1580273916550-e323be2ed5d6?w=200&q=80' }
@@ -86,7 +86,7 @@ const RESOURCES_DB: ResourceItem[] = [
         name: 'CSP 0.1.79 (预览版)',
         fileName: 'lights-patch-v0.1.79.zip',
         size: '150 MB',
-        requiredFor: ['minimal', 'full'],
+        requiredFor: ['basic', 'standard', 'premium'],
         status: 'imported',
         desc: '核心补丁'
     },
@@ -96,7 +96,7 @@ const RESOURCES_DB: ResourceItem[] = [
         name: 'Sol 2.2.9 天气',
         fileName: 'Sol_2.2.9.7z',
         size: '200 MB',
-        requiredFor: ['minimal', 'full'],
+        requiredFor: ['standard', 'premium'],
         status: 'missing',
         desc: '基础天气控制'
     },
@@ -107,7 +107,7 @@ const RESOURCES_DB: ResourceItem[] = [
         name: 'HKS 涡轮表',
         fileName: 'HKS_Boost_Gauge.rar',
         size: '5 MB',
-        requiredFor: ['full'],
+        requiredFor: ['premium'],
         status: 'missing',
         desc: 'HUD 增强显示'
     }
@@ -130,10 +130,11 @@ const getResourceSize = (item: ResourceItem): number => {
 
 export default function ResourceImportManager(): React.JSX.Element {
     // --- 状态管理 ---
-    const [viewMode, setViewMode] = useState<'minimal' | 'full'>('minimal'); // 'minimal' | 'full'
+    const [viewMode, setViewMode] = useState<'basic' | 'standard' | 'premium'>('standard');
     const [activeTab, setActiveTab] = useState<string>('map');
     const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
     const [clearModalVisible, setClearModalVisible] = useState<boolean>(false);
+    const [detailsVisible, setDetailsVisible] = useState<boolean>(false);
 
     const { registerDevOption, unregisterDevOption } = useDevMode();
 
@@ -143,16 +144,30 @@ export default function ResourceImportManager(): React.JSX.Element {
         return saved !== null ? Number(saved) : 424; // 默认 424GB
     });
 
+    // [新增] 开发者调试：资源状态覆盖
+    const [statusOverrides, setStatusOverrides] = useState<Record<string, ResourceItem['status']>>(() => {
+        const saved = localStorage.getItem('devResourceStatusOverrides');
+        return saved ? JSON.parse(saved) : {};
+    });
+
     // 持久化磁盘空间设置
     useEffect(() => {
         localStorage.setItem('devDiskFreeGB_resource', String(devDiskFreeGB));
     }, [devDiskFreeGB]);
 
+    // 持久化资源状态覆盖设置
+    useEffect(() => {
+        localStorage.setItem('devResourceStatusOverrides', JSON.stringify(statusOverrides));
+    }, [statusOverrides]);
+
     // --- 计算逻辑 ---
-    // 1. 根据当前模式过滤资源
+    // 1. 根据当前模式过滤资源，并应用开发者状态覆盖
     const filteredResources = useMemo(() => {
-        return RESOURCES_DB.filter(r => r.requiredFor.includes(viewMode));
-    }, [viewMode]);
+        return RESOURCES_DB.filter(r => r.requiredFor.includes(viewMode)).map(r => ({
+            ...r,
+            status: statusOverrides[r.id] || r.status
+        }));
+    }, [viewMode, statusOverrides]);
 
     // 2. 根据 Tab 分类资源
     const currentTabResources = useMemo(() => {
@@ -210,10 +225,41 @@ export default function ResourceImportManager(): React.JSX.Element {
             order: 7
         });
 
+        registerDevOption({
+            id: 'resource-status-debug',
+            label: '模拟资源包状态',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+                        <Button size="small" type="danger" theme="borderless" onClick={() => setStatusOverrides({})}>重置所有状态</Button>
+                    </div>
+                    {RESOURCES_DB.map(r => (
+                        <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 12, width: 140 }} ellipsis={{ showTooltip: true }}>{r.name}</Text>
+                            <Select
+                                size="small"
+                                style={{ width: 130 }}
+                                value={statusOverrides[r.id] || r.status}
+                                onChange={(val) => setStatusOverrides(prev => ({ ...prev, [r.id]: val as ResourceItem['status'] }))}
+                                optionList={[
+                                    { label: '已导入', value: 'imported' },
+                                    { label: '导入但缺失', value: 'partial' },
+                                    { label: '未导入', value: 'missing' },
+                                    { label: '已包含在其他包中', value: 'included' },
+                                ]}
+                            />
+                        </div>
+                    ))}
+                </div>
+            ),
+            order: 8
+        });
+
         return () => {
             unregisterDevOption('resource-import-disk-space');
+            unregisterDevOption('resource-status-debug');
         };
-    }, [registerDevOption, unregisterDevOption, devDiskFreeGB]);
+    }, [registerDevOption, unregisterDevOption, devDiskFreeGB, statusOverrides]);
 
     // --- 处理清除逻辑 ---
     const handleClearAll = (): void => {
@@ -226,6 +272,8 @@ export default function ResourceImportManager(): React.JSX.Element {
     const BG_DARK = '#16161a';
     const THEME_GREEN = '#6bc786';
     const THEME_RED = '#ff4d4f';
+    const THEME_ORANGE = '#ffa940';
+    const THEME_BLUE = '#4facfe';
 
     // --- 渲染辅助函数：文件状态条 ---
     const renderStatusTag = (status: string, fileName: string): React.ReactNode => {
@@ -233,7 +281,25 @@ export default function ResourceImportManager(): React.JSX.Element {
             return (
                 <Tag color="green" type="solid">
                     <IconTickCircle style={{ marginRight: 4 }} />
-                    已就绪
+                    已导入
+                </Tag>
+            );
+        }
+        if (status === 'partial') {
+            return (
+                <Tooltip content={`部分文件缺失，请重新导入: ${fileName}`}>
+                    <Tag color="orange" type="solid">
+                        <IconAlertTriangle style={{ marginRight: 4 }} />
+                        导入但缺失
+                    </Tag>
+                </Tooltip>
+            );
+        }
+        if (status === 'included') {
+            return (
+                <Tag color="blue" type="solid">
+                    <IconTickCircle style={{ marginRight: 4 }} />
+                    已包含在其他包中
                 </Tag>
             );
         }
@@ -241,7 +307,7 @@ export default function ResourceImportManager(): React.JSX.Element {
             <Tooltip content={`请下载并拖入: ${fileName}`}>
                 <Tag color="red" type="solid">
                     <IconAlertTriangle style={{ marginRight: 4 }} />
-                    缺失: {fileName}
+                    未导入: {fileName}
                 </Tag>
             </Tooltip>
         );
@@ -354,80 +420,137 @@ export default function ResourceImportManager(): React.JSX.Element {
                     </div>
                 </Header>
                 <Content style={{ padding: '20px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                    {/* 顶部工具栏：模式切换 */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    {/* 顶部工具栏：模式切换，居中显示 */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
                         <Radio.Group
                             type="button"
                             buttonSize="large"
                             value={viewMode}
-                            onChange={(e) => setViewMode(e.target.value as 'minimal' | 'full')}
+                            onChange={(e) => setViewMode(e.target.value as 'basic' | 'standard' | 'premium')}
                         >
-                            <Radio value="minimal">最小包 (仅主图+联机车)</Radio>
-                            <Radio value="full">完整包 (全资源)</Radio>
+                            <Radio value="basic">基础极速版</Radio>
+                            <Radio value="standard">标准推荐版</Radio>
+                            <Radio value="premium">豪华全享版</Radio>
                         </Radio.Group>
-                        <div style={{ display: 'flex', gap: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: THEME_GREEN }}></div>
-                                <Text style={{color:'#ccc'}}>已导入</Text>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: THEME_RED }}></div>
-                                <Text style={{color:'#ccc'}}>缺失资源</Text>
-                            </div>
+                    </div>
+
+                    {/* 状态图例 */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_GREEN }}></div>
+                            <Text style={{color:'#ccc'}}>已导入</Text>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_ORANGE }}></div>
+                            <Text style={{color:'#ccc'}}>导入但文件缺失</Text>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_RED }}></div>
+                            <Text style={{color:'#ccc'}}>未导入</Text>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_BLUE }}></div>
+                            <Text style={{color:'#ccc'}}>已包含在其他包中</Text>
                         </div>
                     </div>
-                    {/* 分类 Tabs */}
-                    <Tabs
-                        type="card"
-                        activeKey={activeTab}
-                        onChange={setActiveTab}
-                        style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}
-                        contentStyle={{ flex: 1, overflowY: 'auto', backgroundColor: '#1b1b1f', borderRadius: '0 0 12px 12px' }}
+
+                    {/* 显著的拖拽安装区域 */}
+                    <div style={{ marginBottom: 32 }}>
+                        <Upload
+                            action="#"
+                            draggable={true}
+                            dragIcon={<IconUpload size="extra-large" style={{ color: THEME_GREEN, fontSize: 48 }} />}
+                            accept=".7z,.rar,.zip"
+                            disabled={isSpaceLow}
+                            style={{
+                                backgroundColor: isSpaceLow ? '#2a2a2a' : '#1a1a1d',
+                                border: `2px dashed ${isSpaceLow ? '#555' : THEME_GREEN}`,
+                                borderRadius: 16,
+                                padding: '40px 0',
+                                opacity: isSpaceLow ? 0.6 : 1,
+                                cursor: isSpaceLow ? 'not-allowed' : 'pointer'
+                            }}
+                            dragMainText={<span style={{color: isSpaceLow ? '#666' : '#fff', fontSize: 20, fontWeight: 'bold'}}>将下载的资源包拖入到这里完成导入</span>}
+                            dragSubText={<span style={{color: '#888', fontSize: 14, marginTop: 8}}>{isSpaceLow ? '请先清理磁盘空间' : '支持 .7z, .rar, .zip 格式，系统将自动识别并分拣文件'}</span>}
+                        >
+                        </Upload>
+                        {isSpaceLow && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+                                <IconAlertTriangle style={{ color: '#ff4d4f', fontSize: 20 }} />
+                                <Text style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+                                    磁盘空间不足！请清理磁盘或切换到更小的版本
+                                </Text>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 详细文件展示 (默认隐藏) */}
+                    <Collapse
+                        activeKey={detailsVisible ? ['details'] : []}
+                        onChange={(k) => {
+                            const keys = Array.isArray(k) ? k : [k];
+                            setDetailsVisible(keys.includes('details'));
+                        }}
+                        style={{ backgroundColor: 'transparent', border: 'none', marginTop: 'auto' }}
                     >
-                        {[
-                            { key: 'map', label: '地图类', icon: <IconFolder /> },
-                            { key: 'car', label: '车辆类', icon: <IconFile /> },
-                            { key: 'shader', label: '光影类', icon: <IconFile /> },
-                            { key: 'dash', label: '仪表盘', icon: <IconSetting /> },
-                        ].map(tab => {
-                            const missingCount = getMissingCount(tab.key);
-                            return (
-                                <TabPane
-                                    tab={
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            {tab.icon} {tab.label}
-                                            {missingCount > 0 && <Badge count={missingCount} type='danger' style={{ marginLeft: 4 }} />}
-                                        </div>
-                                    }
-                                    itemKey={tab.key}
-                                    key={tab.key}
-                                >
-                                    {/* 列表内容区域 */}
-                                    <div style={{ minHeight: 300 }}>
-                                        {currentTabResources.length === 0 ? (
-                                            <Empty
-                                                image={<IconFolder style={{ fontSize: 48, color: '#333' }} />}
-                                                description="当前模式下该分类无必需资源"
-                                                style={{ marginTop: 60 }}
-                                            />
-                                        ) : (
-                                            activeTab === 'car' ? (
-                                                <Collapse accordion style={{ border: 'none' }}>
-                                                    {currentTabResources.map(renderCarPack)}
-                                                </Collapse>
-                                            ) : (
-                                                <div>
-                                                    {currentTabResources.map(renderNormalItem)}
+                        <Collapse.Panel
+                            header={<Text style={{ color: '#fff', fontWeight: 'bold' }}>{detailsVisible ? '收起详细资源列表' : '查看详细资源列表'}</Text>}
+                            itemKey="details"
+                            style={{ backgroundColor: '#1b1b1f', borderRadius: 8, border: '1px solid #333' }}
+                        >
+                            <Tabs
+                                type="card"
+                                activeKey={activeTab}
+                                onChange={setActiveTab}
+                                style={{ display: 'flex', flexDirection: 'column' }}
+                                contentStyle={{ maxHeight: 400, overflowY: 'auto', backgroundColor: '#1b1b1f', borderRadius: '0 0 12px 12px' }}
+                            >
+                                {[
+                                    { key: 'map', label: '地图类', icon: <IconFolder /> },
+                                    { key: 'car', label: '车辆类', icon: <IconFile /> },
+                                    { key: 'shader', label: '光影类', icon: <IconFile /> },
+                                    { key: 'dash', label: '仪表盘', icon: <IconSetting /> },
+                                ].map(tab => {
+                                    const missingCount = getMissingCount(tab.key);
+                                    return (
+                                        <TabPane
+                                            tab={
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    {tab.icon} {tab.label}
+                                                    {missingCount > 0 && <Badge count={missingCount} type='danger' style={{ marginLeft: 4 }} />}
                                                 </div>
-                                            )
-                                        )}
-                                    </div>
-                                </TabPane>
-                            )
-                        })}
-                    </Tabs>
+                                            }
+                                            itemKey={tab.key}
+                                            key={tab.key}
+                                        >
+                                            {/* 列表内容区域 */}
+                                            <div style={{ minHeight: 300 }}>
+                                                {currentTabResources.length === 0 ? (
+                                                    <Empty
+                                                        image={<IconFolder style={{ fontSize: 48, color: '#333' }} />}
+                                                        description="当前模式下该分类无必需资源"
+                                                        style={{ marginTop: 60 }}
+                                                    />
+                                                ) : (
+                                                    activeTab === 'car' ? (
+                                                        <Collapse accordion style={{ border: 'none' }}>
+                                                            {currentTabResources.map(renderCarPack)}
+                                                        </Collapse>
+                                                    ) : (
+                                                        <div>
+                                                            {currentTabResources.map(renderNormalItem)}
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
+                                        </TabPane>
+                                    )
+                                })}
+                            </Tabs>
+                        </Collapse.Panel>
+                    </Collapse>
                 </Content>
-                {/* 底部：一键导入入口 */}
+                {/* 底部：磁盘空间信息 */}
                 <Footer style={{
                     padding: '16px 40px',
                     background: '#232326',
@@ -473,37 +596,21 @@ export default function ResourceImportManager(): React.JSX.Element {
                         )}
                     </div>
 
-                    <Upload
-                        action="#"
-                        draggable={true}
-                        dragIcon={<IconUpload />}
-                        accept=".7z,.rar,.zip"
+                    <Button
+                        theme="solid"
+                        type="primary"
+                        size="large"
+                        block
                         disabled={isSpaceLow}
                         style={{
-                            backgroundColor: isSpaceLow ? '#2a2a2a' : '#1a1a1d',
-                            border: `1px dashed ${isSpaceLow ? '#555' : '#444'}`,
-                            opacity: isSpaceLow ? 0.6 : 1,
+                            marginTop: 16,
+                            backgroundColor: isSpaceLow ? '#555' : THEME_GREEN,
+                            color: '#fff',
                             cursor: isSpaceLow ? 'not-allowed' : 'pointer'
                         }}
-                        dragMainText={<span style={{color: isSpaceLow ? '#666' : '#fff'}}>点击或拖拽资源包到此处 (支持批量)</span>}
-                        dragSubText={<span style={{color: '#666'}}>{isSpaceLow ? '请先清理磁盘空间' : '系统将自动识别并分拣地图、车辆和光影文件'}</span>}
                     >
-                        <Button
-                            theme="solid"
-                            type="primary"
-                            size="large"
-                            block
-                            disabled={isSpaceLow}
-                            style={{
-                                marginTop: 12,
-                                backgroundColor: isSpaceLow ? '#555' : THEME_GREEN,
-                                color: '#fff',
-                                cursor: isSpaceLow ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            {isSpaceLow ? '磁盘空间不足，无法安装' : '一键扫描并安装选中资源'}
-                        </Button>
-                    </Upload>
+                        {isSpaceLow ? '磁盘空间不足，无法安装' : '一键扫描并安装选中资源'}
+                    </Button>
                 </Footer>
                 {/* 资源获取指引 Modal */}
                 <Modal

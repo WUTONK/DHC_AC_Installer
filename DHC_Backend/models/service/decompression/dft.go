@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-// DhcFileTag 文件Tag结构体，用于识别模组类型
+// DhcFileTag 文件Tag结构体，用于识别模组类型。
+// 历史上 dft 是 dhcFileTag 的缩写，现统一落在 dft.json 中。
 type DhcFileTag struct {
-	ModType string `json:"ModType"`
+	ModType string `json:"modType"`
 }
 
 // DhcFileTagConfig dft配置结构体
@@ -90,42 +90,6 @@ func DecodeDhcFileTagConfig(dftJsonPath string) (*DhcFileTagConfig, error) {
 	}
 
 	return &config, nil
-}
-
-var supportedResourceTypes = map[string]struct{}{
-	"cars":      {},
-	"tracks":    {},
-	"shaders":   {},
-	"dashboard": {},
-}
-
-// ResolveModType 优先使用 dft.json 中显式填写的 modType，否则根据 dft.json 所在目录向上推导资源类型。
-func ResolveModType(config *DhcFileTagConfig, dftJsonPath string) (string, error) {
-	if config != nil {
-		modType := strings.TrimSpace(config.ModType)
-		if modType != "" {
-			return modType, nil
-		}
-	}
-
-	dirPath := filepath.Clean(filepath.Dir(dftJsonPath))
-	for {
-		baseName := strings.ToLower(filepath.Base(dirPath))
-		if _, ok := supportedResourceTypes[baseName]; ok {
-			return baseName, nil
-		}
-
-		parentPath := filepath.Dir(dirPath)
-		if parentPath == dirPath || parentPath == "." || parentPath == "" {
-			break
-		}
-		dirPath = parentPath
-	}
-
-	return "", fmt.Errorf(
-		"无法从 dft.json 所在目录自动识别 modType: %s。请将 dft.json 放在标准资源目录（如 resources/cars、resources/tracks、resources/shaders、resources/dashboard）下，或在 dft.json 中显式填写 modType",
-		dftJsonPath,
-	)
 }
 
 // GetDftPath 根据 DftPathGetModOrPath 类型获取 dft 文件路径

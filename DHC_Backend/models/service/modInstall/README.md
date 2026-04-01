@@ -116,29 +116,31 @@ err := modinstall.MultiModInstall(paths, dftFilePath)
 `MultiModInstall` 在处理目录时，使用的 `findModFileInDir` 函数只会返回它找到的**第一个**压缩包。如果一个模组（如 `cars/shmc/r34`）目录下放了 `part1.zip` 和 `part2.zip`，系统只会安装其中一个。
 **正确做法**: 将它们合并为一个压缩包，或者作为已解压的普通文件夹存放在该目录下。
 
-### 3.3 `dft.json` (dhcFileTag) 放在哪？
+### 3.3 `dft.json` 放在哪？
+`dft` 是历史命名 `dhcFileTag` 的缩写。现在系统在安装时统一读取 `dft.json`，用它决定：
+- 模组类型 `modType`
+- 覆盖规则 `rules`
+- 目标目录 `overwriteStartingDir`
+
 系统在安装时会寻找 `dft.json` 来决定覆盖规则和目标目录（`OverwriteStartingDir`）。
 - **优先级 1**: 模组压缩包内部的根目录或源文件夹根目录。
 - **优先级 2**: 调用 `MultiModInstall` 时传入的 fallback 路径。
 
 ### 3.4 `modType` 还需要手写吗？
-现在 `dft.json` 里的 `modType` 是**可选字段**：
+需要。当前 `dft.json` 里的 `modType` 是**必填字段**，系统不会根据目录自动推导资源类型。
 
-- 如果显式填写了 `modType`，系统直接使用该值。
-- 如果没有填写，系统会根据 `dft.json` 所在目录向上查找，自动识别 `cars`、`tracks`、`shaders`、`dashboard`。
+这样做的原因是：
 
-可自动识别的典型路径：
+- 配置语义更明确，排查问题时不用再反推目录规则。
+- 避免为少量填写便利引入额外的隐式推导逻辑。
+- 当前工作流下通常由 AI 生成 `dft.json`，显式填写 `modType` 的成本很低。
 
-- `resources/cars/dft.json`
-- `resources/cars/shmc/dft.json`
-- `resources/cars/shmc/r34/dft.json`
+建议始终显式填写标准资源类型值，例如：
 
-无法自动识别的典型路径：
-
-- `test/testModFile/minimumModSet/dft.json`
-- 任意不在标准资源目录层级下的临时测试目录
-
-如果自动识别失败，安装会报错，并提示你在 `dft.json` 中显式填写 `modType`。
+- `cars`
+- `tracks`
+- `shaders`
+- `dashboard`
 
 ### 3.5 测试环境的重置
 开发过程中如果游戏目录（`content/`）被污染，可以使用以下函数恢复到骨架状态：

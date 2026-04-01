@@ -2,6 +2,7 @@ package decompression
 
 import (
 	decompression "DHC_Backend/models/service/decompression"
+	"DHC_Backend/models/service/types"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,15 +39,15 @@ func TestVolumeDetection(t *testing.T) {
 		file.WriteString("test content")
 		file.Close()
 
-		// 创建dhcFileTag.json文件
-		tagPath := filepath.Join(tempDir, "dhcFileTag.json")
-		if err := os.WriteFile(tagPath, []byte(`{"ModType":"Map"}`), 0644); err != nil {
-			t.Errorf("创建dhcFileTag.json失败: %v", err)
+		// 创建 dft.json 文件；dft 是 dhcFileTag 的缩写。
+		tagPath := filepath.Join(tempDir, "dft.json")
+		if err := os.WriteFile(tagPath, []byte(`{"modType":"Map"}`), 0644); err != nil {
+			t.Errorf("创建dft.json失败: %v", err)
 			continue
 		}
 
 		// 测试Decompression函数
-		unDecompressionPath, errorTiming, err := decompression.Decompression(filePath, "", "")
+		unDecompressionPath, errorTiming, err := decompression.Decompression(filePath, "", true, "", types.DftPathFromDir)
 
 		fmt.Printf("测试文件: %s\n", filename)
 		fmt.Printf("解压目录: %s\n", unDecompressionPath)

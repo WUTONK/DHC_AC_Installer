@@ -1,6 +1,9 @@
 package modinstall
 
-import "time"
+import (
+	"DHC_Backend/models/service/types"
+	"time"
+)
 
 // ============================================================================
 // 安装执行器（Install Executor）
@@ -71,4 +74,29 @@ func RunRealCMInstall(tracker *TaskTracker) error {
 // 最小模组集安装 DEMO
 // v0.1 安装一个车包，一个地图，一组光影配置（包含三层文件），全部使用 zip，使用缺省的解压暂存目录
 // v0.2 使用真实模组文件，使用用户指定的解压暂存目录
-// v0.3 进行文件完整性校验
+// v0.3 进行文件完整性校验, 添加 tracker
+
+// MinimalModsetInstall v0.1：一次安装「车 + 图 + 光影」三个模组，均为 zip，解压走默认 cache。
+//
+// 资源必须放在开发环境资源库 test/simEnv/resources/{cars|tracks|shaders}/{pkg}/{mod}/，
+// 且每个模组目录内各自一份 dft.json（不得放在 cars/、tracks/ 等大类根目录）。
+// dft 查找方式：与 zip 同目录（DftPathFromDir → FindDftJsonWithPriority）。
+//
+// 调用方需已开启开发模式（infoGet.SetDev(true)）以便使用 simEnv 资源库与模拟游戏路径。
+
+// RunMinimalModsetInstall 是最小模组集安装的执行器版本。
+// v0.3 起接入 TaskTracker，并复用 MultiModInstallWithTracker 的完整性校验。
+func RunMinimalModsetInstall(tracker *TaskTracker) error {
+	paths := []string{
+		"cars/minDemo/carMini",
+		"tracks/minDemo/mapMini",
+		"shaders/minDemo/shadowMini",
+	}
+	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
+}
+
+// MinimalModsetInstall 保留为兼容入口。
+// 旧调用方不关心进度时，使用静默 tracker 执行同一套 v0.3 流程。
+func MinimalModsetInstall() error {
+	return RunMinimalModsetInstall(NewTaskTracker(nil))
+}

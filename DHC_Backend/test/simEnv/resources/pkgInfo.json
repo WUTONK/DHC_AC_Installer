@@ -1,12 +1,15 @@
 {
-    "categorys": { 
-        "cars": { 
+    "categorys": {
+        "cars": {
             "SHMC": {
                 "r34": 8,
                 "r32": 4
             },
             "DDM": {
                 "SUPRA": 1024
+            },
+            "minDemo": {
+                "carMini": 1
             }
         },
         "tracks": {
@@ -16,6 +19,14 @@
             "sub": {
                 "SRP_C1": 20000,
                 "NEW_LOOP": 30000
+            },
+            "minDemo": {
+                "mapMini": 1
+            }
+        },
+        "shaders": {
+            "minDemo": {
+                "shadowMini": 1
             }
         }
     }

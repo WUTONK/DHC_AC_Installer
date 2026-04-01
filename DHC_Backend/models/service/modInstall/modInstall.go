@@ -89,7 +89,8 @@ SingleModInstallFromDir (目录):
 
 【配置文件】
 ─────────────────────────────────────────────────────────────────────────────
-dhcFileTag.json: {ModType, OverwriteStartingDir, OverrideRules}
+dft.json: {modType, defaultAction, rules, overwriteStartingDir}
+说明: dft 是 dhcFileTag 的缩写，模组类型与覆盖规则统一存放在 dft.json 中
 查找位置: DftPathFromDir (源目录) | DftPathFromCompressRoot (解压根目录)
 
 ================================================================================
@@ -364,6 +365,95 @@ func MultiModInstall(paths []string, dftFilePath string) error {
 	fmt.Printf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
 	for _, path := range expandedPaths {
 		fmt.Printf("%s待安装路径: %s\n", funcIdt, path)
+	}
+
+	return nil
+}
+
+// MultiModInstallWithTracker 带进度追踪的多模组安装。
+// 阶段划分：validate（完整性校验，10%）+ 每个模组均分剩余 90%。
+// tracker 为 nil 时退化为 MultiModInstall。
+func MultiModInstallWithTracker(paths []string, dftFilePath string, tracker *TaskTracker) error {
+	if tracker == nil {
+		return MultiModInstall(paths, dftFilePath)
+	}
+
+	funcIdt := "-modInstall.MultiModInstallWithTracker-"
+
+	var localResouceDir string
+	isDevMode := infoGet.IsDevModeGet()
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取根目录失败 error:%s", err)
+	}
+	if isDevMode {
+		localResouceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+	} else {
+		localResouceDir = filepath.Join(backendRootPath, "resources")
+	}
+
+	// ── validate 阶段 ──
+	tracker.AddPhase("validate", "校验资源完整性", 10)
+	tracker.StartPhase("validate")
+
+	rm, err := ImportResourceDetection(All, Local)
+	if err != nil {
+		tracker.FailPhase("validate")
+		return fmt.Errorf("%s获取资源状态失败: %v", funcIdt, err)
+	}
+	tracker.SetSubProgress("validate", 30)
+
+	expandedPaths, err := expandPaths(rm, paths)
+	if err != nil {
+		tracker.FailPhase("validate")
+		return fmt.Errorf("%s在展开需安装模组路径列表时 发现了不支持的路径: %v", funcIdt, err)
+	}
+	tracker.SetSubProgress("validate", 60)
+
+	err = PathCorresponModIntegrityCheck(expandedPaths)
+	if err != nil {
+		tracker.FailPhase("validate")
+		return fmt.Errorf("%s完整性检查未通过: %v", funcIdt, err)
+	}
+	tracker.CompletePhase("validate")
+
+	// ── 动态注册每个模组为独立阶段，均分 90% ──
+	modCount := len(expandedPaths)
+	if modCount == 0 {
+		return nil
+	}
+	perModWeight := 90.0 / float64(modCount)
+
+	for i, path := range expandedPaths {
+		phaseID := fmt.Sprintf("mod_%d", i)
+		tracker.AddPhase(phaseID, fmt.Sprintf("安装 %s", filepath.Base(path)), perModWeight)
+	}
+
+	// ── 逐个安装 ──
+	for i, path := range expandedPaths {
+		phaseID := fmt.Sprintf("mod_%d", i)
+		tracker.StartPhase(phaseID)
+
+		currentModPath := filepath.Join(localResouceDir, path)
+		fileInfo, err := os.Stat(currentModPath)
+		if err != nil {
+			fmt.Printf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
+			tracker.FailPhase(phaseID)
+			continue
+		}
+
+		if fileInfo.IsDir() {
+			modFilePath := findModFileInDir(currentModPath)
+			if modFilePath != "" {
+				SingleModInstall(modFilePath, types.DftPathGetModOrPath(dftFilePath))
+			} else {
+				SingleModInstallFromDir(currentModPath, types.DftPathGetModOrPath(dftFilePath))
+			}
+		} else {
+			SingleModInstall(currentModPath, types.DftPathGetModOrPath(dftFilePath))
+		}
+
+		tracker.CompletePhase(phaseID)
 	}
 
 	return nil
