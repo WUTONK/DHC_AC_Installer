@@ -307,7 +307,10 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	// 分离出指定默认属性
 	rulesUndefined := false
 	defaultAction := config.DefaultAction
-	modType := config.ModType
+	modType, err := ResolveModType(config, dftJsonPath)
+	if err != nil {
+		return fmt.Errorf("解析 modType 失败: %v", err)
+	}
 	rules := config.Rules
 	if rules == nil {
 		rulesUndefined = true
@@ -386,7 +389,7 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	}
 
 	// 阶段5: 执行计划
-	ComplyTask(srcDirPath, config.ModType, tasks)
+	ComplyTask(srcDirPath, modType, tasks)
 
 	return nil
 }

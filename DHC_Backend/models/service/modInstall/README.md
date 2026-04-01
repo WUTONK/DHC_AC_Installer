@@ -121,7 +121,26 @@ err := modinstall.MultiModInstall(paths, dftFilePath)
 - **优先级 1**: 模组压缩包内部的根目录或源文件夹根目录。
 - **优先级 2**: 调用 `MultiModInstall` 时传入的 fallback 路径。
 
-### 3.4 测试环境的重置
+### 3.4 `modType` 还需要手写吗？
+现在 `dft.json` 里的 `modType` 是**可选字段**：
+
+- 如果显式填写了 `modType`，系统直接使用该值。
+- 如果没有填写，系统会根据 `dft.json` 所在目录向上查找，自动识别 `cars`、`tracks`、`shaders`、`dashboard`。
+
+可自动识别的典型路径：
+
+- `resources/cars/dft.json`
+- `resources/cars/shmc/dft.json`
+- `resources/cars/shmc/r34/dft.json`
+
+无法自动识别的典型路径：
+
+- `test/testModFile/minimumModSet/dft.json`
+- 任意不在标准资源目录层级下的临时测试目录
+
+如果自动识别失败，安装会报错，并提示你在 `dft.json` 中显式填写 `modType`。
+
+### 3.5 测试环境的重置
 开发过程中如果游戏目录（`content/`）被污染，可以使用以下函数恢复到骨架状态：
 ```go
 // 将 simEnv/acRoot/Assetto Corsa/content 重置为 envBackup 中的状态
