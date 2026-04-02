@@ -2,6 +2,7 @@ package decompression
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"DHC_Backend/models/service/types"
 	"encoding/json"
 	"errors"
@@ -49,7 +50,7 @@ func DhcFileTagIdentify(dftJsonPath string) (DhcFileTag, error) {
 
 	dhcFileTagJsonFile, err := os.Open(dftJsonPath)
 	if err != nil {
-		fmt.Printf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
+		servicelog.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
 		return DhcFileTag{}, fmt.Errorf("%s在os.Open()%s出现错误:\n%s", funcIdt, dftJsonPath, err)
 	}
 	defer dhcFileTagJsonFile.Close()

@@ -2,6 +2,7 @@ package decompression
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -297,10 +298,10 @@ func AutoSetResouceDirLocal() (string, string, bool, error) {
 
 	// 检查最终选择的盘符是否为可拔插设备，如果是则提示
 	if isRemovable, err := infoGet.IsRemovable(recommendedResourceDrive); err == nil && isRemovable {
-		fmt.Printf("警告：资源文件夹选择了可拔插设备 %s，建议使用固定硬盘以获得更好的性能\n", recommendedResourceDrive)
+		servicelog.Warnf("警告：资源文件夹选择了可拔插设备 %s，建议使用固定硬盘以获得更好的性能\n", recommendedResourceDrive)
 	}
 	if isRemovable, err := infoGet.IsRemovable(recommendedCacheDrive); err == nil && isRemovable {
-		fmt.Printf("警告：缓存文件夹选择了可拔插设备 %s，建议使用固定硬盘以获得更好的性能\n", recommendedCacheDrive)
+		servicelog.Warnf("警告：缓存文件夹选择了可拔插设备 %s，建议使用固定硬盘以获得更好的性能\n", recommendedCacheDrive)
 	}
 
 	return recommendedResourceDrive, recommendedCacheDrive, recommendChangeGameDir, nil

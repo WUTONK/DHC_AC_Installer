@@ -3,6 +3,7 @@ package modinstall
 import (
 	"DHC_Backend/models/service/decompression"
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"DHC_Backend/models/service/types"
 	"fmt"
 	"io"
@@ -160,7 +161,7 @@ func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 		return nil, fmt.Errorf("%s重要错误: 引入资源包时资源包缓存清除失败: err:%s", funcIdt, err)
 	}
 
-	fmt.Println("资源引入成功")
+	servicelog.Infof("资源引入成功\n")
 	return rm, nil
 
 }
@@ -177,33 +178,33 @@ func SingleModInstall(srcPath string, d types.DftPathGetModOrPath) {
 	}
 	unDecompressionPath, errorTiming, err := decompression.DecompressionWithOptions(opts)
 	if err != nil {
-		fmt.Printf("%s在调用decompression.DecompressionWithOptions()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
+		servicelog.Errorf("%s在调用decompression.DecompressionWithOptions()时发生错误:%s,errorTiming:%s\n", funcIdt, err, errorTiming)
 		return
 	}
-	fmt.Printf("%s解压完成,解压目录: %s\n", funcIdt, unDecompressionPath)
+	servicelog.Debugf("%s解压完成,解压目录: %s\n", funcIdt, unDecompressionPath)
 	// 检测覆盖规则
 
 	dftPath := decompression.GetDftPath(srcPath, unDecompressionPath, d)
 	gamePath, err := infoGet.GetGamePathAuto()
 	if err != nil {
-		fmt.Printf("%s获取游戏路径失败:%s\n", funcIdt, err)
+		servicelog.Errorf("%s获取游戏路径失败:%s\n", funcIdt, err)
 		return
 	}
 
 	config, err := decompression.DecodeDhcFileTagConfig(dftPath)
 	if err != nil {
-		fmt.Printf("%s解码配置文件失败:%s\n", funcIdt, err)
+		servicelog.Errorf("%s解码配置文件失败:%s\n", funcIdt, err)
 		return
 	}
 
 	// 处理 OverwriteStartingDir 为空的情况（使用默认值）
 	overwriteDir := config.OverwriteStartingDir
 	overrideDstFile := filepath.Join(gamePath, overwriteDir)
-	fmt.Printf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
+	servicelog.Debugf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
 
 	err = decompression.OverrideControl(unDecompressionPath, overrideDstFile, dftPath)
 	if err != nil {
-		fmt.Printf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
+		servicelog.Errorf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
 		return
 	}
 	// 进行安装
@@ -221,30 +222,30 @@ func SingleModInstallFromDir(srcDirPath string, d types.DftPathGetModOrPath) {
 	// 获取游戏路径
 	gamePath, err := infoGet.GetGamePathAuto()
 	if err != nil {
-		fmt.Printf("%s获取游戏路径失败:%s\n", funcIdt, err)
+		servicelog.Errorf("%s获取游戏路径失败:%s\n", funcIdt, err)
 		return
 	}
 
 	// 读取配置文件
 	config, err := decompression.DecodeDhcFileTagConfig(dftPath)
 	if err != nil {
-		fmt.Printf("%s解码配置文件失败:%s\n", funcIdt, err)
+		servicelog.Errorf("%s解码配置文件失败:%s\n", funcIdt, err)
 		return
 	}
 
 	// 处理 OverwriteStartingDir 为空的情况（使用默认值）
 	overwriteDir := config.OverwriteStartingDir
 	overrideDstFile := filepath.Join(gamePath, overwriteDir)
-	fmt.Printf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
+	servicelog.Debugf("%s目标覆盖目录: %s\n", funcIdt, overrideDstFile)
 
 	// 直接从源目录复制到游戏目录（跳过中间目录和解压步骤）
 	err = decompression.OverrideControl(srcDirPath, overrideDstFile, dftPath)
 	if err != nil {
-		fmt.Printf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
+		servicelog.Errorf("%s执行OverrideControl时发生错误:%s\n", funcIdt, err)
 		return
 	}
 
-	fmt.Printf("%s从目录安装完成: %s -> %s\n", funcIdt, srcDirPath, overrideDstFile)
+	servicelog.Debugf("%s从目录安装完成: %s -> %s\n", funcIdt, srcDirPath, overrideDstFile)
 }
 
 // copyDir 递归复制目录及其内容
@@ -339,7 +340,7 @@ func MultiModInstall(paths []string, dftFilePath string) error {
 		// 检查路径是文件还是目录
 		fileInfo, err := os.Stat(currentModPath)
 		if err != nil {
-			fmt.Printf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
+			servicelog.Warnf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
 			continue
 		}
 
@@ -348,23 +349,23 @@ func MultiModInstall(paths []string, dftFilePath string) error {
 			modFilePath := findModFileInDir(currentModPath)
 			if modFilePath != "" {
 				// 找到压缩包，使用压缩包安装流程
-				fmt.Printf("%s在目录中找到压缩包: %s\n", funcIdt, modFilePath)
+				servicelog.Debugf("%s在目录中找到压缩包: %s\n", funcIdt, modFilePath)
 				SingleModInstall(modFilePath, types.DftPathGetModOrPath(dftFilePath))
 			} else {
 				// 目录中没有压缩包，说明是已解压目录，直接处理目录
-				fmt.Printf("%s检测到已解压目录，直接安装: %s\n", funcIdt, currentModPath)
+				servicelog.Debugf("%s检测到已解压目录，直接安装: %s\n", funcIdt, currentModPath)
 				SingleModInstallFromDir(currentModPath, types.DftPathGetModOrPath(dftFilePath))
 			}
 		} else {
 			// 如果是文件，直接使用（应该是压缩包）
-			fmt.Printf("%s检测到压缩包文件: %s\n", funcIdt, currentModPath)
+			servicelog.Debugf("%s检测到压缩包文件: %s\n", funcIdt, currentModPath)
 			SingleModInstall(currentModPath, types.DftPathGetModOrPath(dftFilePath))
 		}
 	}
 
-	fmt.Printf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
+	servicelog.Debugf("%s需要安装的路径数量: %d\n", funcIdt, len(expandedPaths))
 	for _, path := range expandedPaths {
-		fmt.Printf("%s待安装路径: %s\n", funcIdt, path)
+		servicelog.Debugf("%s待安装路径: %s\n", funcIdt, path)
 	}
 
 	return nil
@@ -437,7 +438,7 @@ func MultiModInstallWithTracker(paths []string, dftFilePath string, tracker *Tas
 		currentModPath := filepath.Join(localResouceDir, path)
 		fileInfo, err := os.Stat(currentModPath)
 		if err != nil {
-			fmt.Printf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
+			servicelog.Warnf("%s警告: 无法访问路径 %s: %v\n", funcIdt, currentModPath, err)
 			tracker.FailPhase(phaseID)
 			continue
 		}
@@ -649,7 +650,7 @@ func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
 	contentPath := filepath.Join(gamePath, "content")
 	backupContentPath := filepath.Join(backupPath, "content")
 
-	fmt.Printf("%s开始重置 simenv 模组目录...\n", funcIdt)
+	servicelog.Infof("%s开始重置 simenv 模组目录...\n", funcIdt)
 
 	if _, err := os.Stat(backupContentPath); os.IsNotExist(err) {
 		return fmt.Errorf("%s备份 content 目录不存在: %s", funcIdt, backupContentPath)
@@ -658,13 +659,13 @@ func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
 	if err := os.RemoveAll(contentPath); err != nil {
 		return fmt.Errorf("%s删除 content 目录失败: %s, 错误: %v", funcIdt, contentPath, err)
 	}
-	fmt.Printf("%s已删除 content 目录: %s\n", funcIdt, contentPath)
+	servicelog.Infof("%s已删除 content 目录: %s\n", funcIdt, contentPath)
 
 	if err := copyDir(backupContentPath, contentPath); err != nil {
 		return fmt.Errorf("%s从备份恢复 content 目录失败: %s -> %s, 错误: %v", funcIdt, backupContentPath, contentPath, err)
 	}
-	fmt.Printf("%s已从备份恢复 content 目录: %s -> %s\n", funcIdt, backupContentPath, contentPath)
+	servicelog.Infof("%s已从备份恢复 content 目录: %s -> %s\n", funcIdt, backupContentPath, contentPath)
 
-	fmt.Printf("%s simenv 模组目录重置完成\n", funcIdt)
+	servicelog.Infof("%s simenv 模组目录重置完成\n", funcIdt)
 	return nil
 }

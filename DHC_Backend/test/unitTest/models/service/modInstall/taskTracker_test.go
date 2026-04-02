@@ -2,7 +2,6 @@ package modinstall
 
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
-	"fmt"
 	"testing"
 )
 
@@ -20,8 +19,7 @@ func TestTaskTrackerSubProgressMapping(t *testing.T) {
 
 	tracker := modinstall.NewTaskTracker(func(s modinstall.ProgressSnapshot) {
 		lastSnapshot = s
-		// 把每次进度变化打印出来，方便肉眼确认
-		fmt.Printf("  [回调] 总进度=%.1f%% | 阶段=%s | 子进度=%.0f%% | 状态=%s\n",
+		t.Logf("[细节] 回调 总进度=%.1f%% | 阶段=%s | 子进度=%.0f%% | 状态=%s",
 			s.TotalProgress, s.PhaseName, s.SubProgress, s.PhaseStatus)
 	})
 
@@ -31,7 +29,7 @@ func TestTaskTrackerSubProgressMapping(t *testing.T) {
 	tracker.AddPhase("move", "移动到桌面", 25)       // 占 75% ~ 100%
 
 	// ── 阶段 1: 下载 ──
-	fmt.Println("=== 阶段1: 下载（权重25%） ===")
+	t.Logf("[细节] === 阶段1: 下载（权重25%%） ===")
 
 	tracker.StartPhase("download")
 	assertProgress(t, "下载开始", lastSnapshot.TotalProgress, 0)
@@ -45,7 +43,7 @@ func TestTaskTrackerSubProgressMapping(t *testing.T) {
 	assertProgress(t, "下载完成", lastSnapshot.TotalProgress, 25)
 
 	// ── 阶段 2: 解压 ──
-	fmt.Println("=== 阶段2: 解压（权重50%） ===")
+	t.Logf("[细节] === 阶段2: 解压（权重50%%） ===")
 
 	tracker.StartPhase("extract")
 	assertProgress(t, "解压开始", lastSnapshot.TotalProgress, 25)
@@ -58,7 +56,7 @@ func TestTaskTrackerSubProgressMapping(t *testing.T) {
 	assertProgress(t, "解压完成", lastSnapshot.TotalProgress, 75)
 
 	// ── 阶段 3: 移动 ──
-	fmt.Println("=== 阶段3: 移动（权重25%） ===")
+	t.Logf("[细节] === 阶段3: 移动（权重25%%） ===")
 
 	tracker.StartPhase("move")
 	assertProgress(t, "移动开始", lastSnapshot.TotalProgress, 75)
@@ -67,13 +65,13 @@ func TestTaskTrackerSubProgressMapping(t *testing.T) {
 	assertProgress(t, "移动完成", lastSnapshot.TotalProgress, 100)
 
 	// ── 快照字段验证 ──
-	fmt.Println("=== 快照字段验证 ===")
+	t.Logf("[细节] === 快照字段验证 ===")
 
 	snapshot := tracker.GetSnapshot()
 	if snapshot.PhaseStatus != "completed" {
 		t.Fatalf("期望最终状态 completed，实际 %s", snapshot.PhaseStatus)
 	}
-	fmt.Printf("  最终快照: TotalProgress=%.0f%% PhaseStatus=%s\n",
+	t.Logf("[核心] TaskTracker 子进度映射：TotalProgress=%.0f%% PhaseStatus=%s",
 		snapshot.TotalProgress, snapshot.PhaseStatus)
 }
 
@@ -101,7 +99,7 @@ func TestTaskTrackerFailPhase(t *testing.T) {
 		t.Fatalf("期望状态 failed，实际 %s", lastSnapshot.PhaseStatus)
 	}
 
-	fmt.Printf("  失败场景验证通过: TotalProgress=%.0f%% PhaseStatus=%s\n",
+	t.Logf("[核心] TaskTracker 失败阶段：TotalProgress=%.0f%% PhaseStatus=%s",
 		lastSnapshot.TotalProgress, lastSnapshot.PhaseStatus)
 }
 
@@ -117,7 +115,7 @@ func TestTaskTrackerNilOnChange(t *testing.T) {
 	snapshot := tracker.GetSnapshot()
 	assertProgress(t, "nil回调+完成", snapshot.TotalProgress, 100)
 
-	fmt.Println("  nil 回调测试通过（无 panic）")
+	t.Logf("[核心] TaskTracker nil 回调：无 panic，总进度=%.0f%%", snapshot.TotalProgress)
 }
 
 // ── 测试辅助函数 ──

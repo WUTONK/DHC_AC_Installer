@@ -1,7 +1,7 @@
 package infoGet
 
 import (
-	"fmt"
+	"DHC_Backend/models/service/servicelog"
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -21,13 +21,13 @@ func GetSysInfo() sysInfo {
 	// 获取系统信息
 	hInfo, err := host.Info()
 	if err == nil {
-		fmt.Printf("操作系统平台: \"%s\"\n", hInfo.Platform)
-		fmt.Printf("操作系统版本: \"%s\"\n", hInfo.PlatformVersion) // 尝试获取版本
-		fmt.Printf("内核版本: \"%s\"\n", hInfo.KernelVersion)
+		servicelog.Debugf("操作系统平台: \"%s\"\n", hInfo.Platform)
+		servicelog.Debugf("操作系统版本: \"%s\"\n", hInfo.PlatformVersion) // 尝试获取版本
+		servicelog.Debugf("内核版本: \"%s\"\n", hInfo.KernelVersion)
 		userSysInfo.OsType = hInfo.Platform
 		userSysInfo.OsVersion = hInfo.PlatformVersion
 	} else {
-		fmt.Printf("无法获取系统信息: %v\n", err)
+		servicelog.Warnf("无法获取系统信息: %v\n", err)
 	}
 
 	return userSysInfo
@@ -40,7 +40,7 @@ func GetDiskUsage(path string) (int, error) {
 		return 0, err
 	}
 	percentage := (float64(di.Total-di.Free) / float64(di.Total)) * 100
-	fmt.Printf("%s of %s disk space used (%0.2f%%)\n",
+	servicelog.Debugf("%s of %s disk space used (%0.2f%%)\n",
 		humanize.Bytes(di.Total-di.Free),
 		humanize.Bytes(di.Total),
 		percentage,

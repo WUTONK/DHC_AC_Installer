@@ -2,6 +2,7 @@ package modinstall
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -158,11 +159,11 @@ func BuildCompleteResourceCatalog() ResourceCatalog {
 	var res ResourceJson
 	resourceJsonFileDecode := json.NewDecoder(resourceJsonFile)
 	if err := resourceJsonFileDecode.Decode(&res); err != nil {
-		fmt.Println("decode pkgInfo.json failed:", err)
+		servicelog.Errorf("decode pkgInfo.json failed: %v\n", err)
 		return ResourceCatalog{}
 	}
 
-	fmt.Println(res.Catalog)
+	servicelog.Debugf("%v\n", res.Catalog)
 
 	// 把最外层 catalog 包装去掉
 	return res.Catalog
@@ -334,7 +335,7 @@ func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath)
 			_, err := GetModSizeFromPath(resCl, modPath)
 			if err != nil {
 				// 路径不在 catalog 中，报警
-				fmt.Printf("警告: 检测到不在 catalog 中的资源路径: %s\n", modPath)
+				servicelog.Warnf("检测到不在 catalog 中的资源路径: %s\n", modPath)
 				// 不添加到 modDirs，跳过该路径
 			} else {
 				modDirs[modPath] += info.Size()

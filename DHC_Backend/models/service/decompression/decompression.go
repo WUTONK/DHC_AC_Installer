@@ -2,6 +2,7 @@ package decompression
 
 import (
 	infoGet "DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"DHC_Backend/models/service/types"
 	sevenZipBootStrapSimple "DHC_Backend/pkg/sevenzipbootstrap_simple"
 	"bytes"
@@ -44,11 +45,11 @@ type DecompressionOptions struct {
 
 func SzInstall() {
 	targetFolder := infoGet.GetSysInfo().OsType
-	fmt.Printf("系统类型: %+v\n", targetFolder)
+	servicelog.Debugf("系统类型: %+v\n", targetFolder)
 
 	backendAbsPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
-		fmt.Printf("获取根目录失败 error:%s", err)
+		servicelog.Errorf("获取根目录失败 error:%s", err)
 		return
 	}
 
@@ -64,11 +65,11 @@ func Get7zPath(isTestSz bool) string {
 	// 检测7z目录下是否有和系统类型符合的版本 不存在就安装
 
 	targetFolder := infoGet.GetSysInfo().OsType
-	fmt.Printf("系统类型: %+v\n", targetFolder)
+	servicelog.Debugf("系统类型: %+v\n", targetFolder)
 
 	backendAbsPath, err := infoGet.GetBackendRootPath()
 	if err != nil {
-		fmt.Printf("获取根目录失败 error:%s", err)
+		servicelog.Errorf("获取根目录失败 error:%s", err)
 		return ""
 	}
 
@@ -76,20 +77,20 @@ func Get7zPath(isTestSz bool) string {
 	_, pathStatErr := os.Stat(szPath)
 
 	if pathStatErr != nil {
-		fmt.Printf("目标目录不存在 开始安装")
+		servicelog.Debugf("目标目录不存在 开始安装")
 		SzInstall()
 	}
 
 	// 完整性检测 检查目录下所有文件的总大小
 	dirSize, err := infoGet.GetDirSize(szPath)
 	if err != nil || dirSize < 5000000 {
-		fmt.Printf("目标目录存在但完整性检查未通过 开始安装")
-		fmt.Printf("now szpath:%s, dirSize:%d", szPath, dirSize)
+		servicelog.Debugf("目标目录存在但完整性检查未通过 开始安装")
+		servicelog.Debugf("now szpath:%s, dirSize:%d", szPath, dirSize)
 		SzInstall()
 	}
 
 	// 通过检测后调用进行简单解压缩测试并且捕获异常
-	fmt.Printf("7z路径: %s\n", szPath)
+	servicelog.Debugf("7z路径: %s\n", szPath)
 
 	if isTestSz {
 		szTestResult := SzTest()
@@ -98,7 +99,7 @@ func Get7zPath(isTestSz bool) string {
 			// 有异常 处理
 		}
 
-		fmt.Printf("7z解压缩测试通过")
+		servicelog.Debugf("7z解压缩测试通过")
 		// 无异常 打印日志 返回绝对路径并写入
 
 	}
@@ -206,23 +207,23 @@ func SzTest() string {
 	// 写入 1.txt 和 2.txt , 内容分别为 lena 和 wutonk
 	backendAbsPath, getBackendAbsPathErr := infoGet.GetBackendRootPath()
 	if getBackendAbsPathErr != nil {
-		fmt.Printf("获取后端根目录失败,errInfo:%s", getBackendAbsPathErr)
+		servicelog.Errorf("获取后端根目录失败,errInfo:%s", getBackendAbsPathErr)
 	}
 	szPath := Get7zPath(false)
 	szTestPath := filepath.Join(backendAbsPath, "models", "tools", "7z", "szFunctionTestFile")
 
 	// 确保测试目录存在
 	if err := os.MkdirAll(szTestPath, 0755); err != nil {
-		fmt.Printf("创建测试目录失败,errInfo:%s", err)
+		servicelog.Errorf("创建测试目录失败,errInfo:%s", err)
 		return "FAIL"
 	}
 
 	if err := os.WriteFile(filepath.Join(szTestPath, "1.txt"), []byte("lena"), 0666); err != nil {
-		fmt.Printf("创建1.txt压缩测试文件失败,errInfo:%s", err)
+		servicelog.Errorf("创建1.txt压缩测试文件失败,errInfo:%s", err)
 		return "FAIL"
 	}
 	if err := os.WriteFile(filepath.Join(szTestPath, "2.txt"), []byte("wutonk"), 0666); err != nil {
-		fmt.Printf("创建2.txt压缩测试文件失败,errInfo:%s", err)
+		servicelog.Errorf("创建2.txt压缩测试文件失败,errInfo:%s", err)
 		return "FAIL"
 	}
 
@@ -244,7 +245,7 @@ func SzTest() string {
 	if err1 == nil {
 		errStr1 = "无错误输出"
 	}
-	fmt.Printf("7z压缩命令1输出: %s, 错误: %s\n", outStr1, errStr1)
+	servicelog.Debugf("7z压缩命令1输出: %s, 错误: %s\n", outStr1, errStr1)
 
 	// 创建压缩命令2：创建zip格式压缩包
 	cmd2 := exec.Command(szExecutable, "a", "-tzip", "szTest_zip.zip", "1.txt", "2.txt")
@@ -255,11 +256,11 @@ func SzTest() string {
 
 	err2 := cmd2.Run()
 	outStr2, errStr2 := stdout2.String(), stderr2.String()
-	fmt.Printf("7z压缩命令2输出: %s, 错误: %s\n", outStr2, errStr2)
+	servicelog.Debugf("7z压缩命令2输出: %s, 错误: %s\n", outStr2, errStr2)
 
 	// 检查命令执行结果
 	if err1 != nil || err2 != nil {
-		fmt.Printf("压缩测试失败: cmd1错误=%v, cmd2错误=%v\n", err1, err2)
+		servicelog.Errorf("压缩测试失败: cmd1错误=%v, cmd2错误=%v\n", err1, err2)
 		return "FAIL"
 	}
 
@@ -342,7 +343,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 
 	if isMod {
 		// dft 是 dhcFileTag 的缩写，缓存目录和覆盖规则统一读取 dft.json。
-		fmt.Printf("%s开始识别模组标记类型\n", funcIdt)
+		servicelog.Debugf("%s开始识别模组标记类型\n", funcIdt)
 		switch dftPathGetModOrPath {
 		case types.DftPathFromDir:
 			dstJsonPath := filepath.Join(filepath.Dir(srcPath), "dft.json")
@@ -350,7 +351,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		case types.DftPathFromCompressRoot:
 			// TODO: 从压缩包根目录文件中读取 dft.json
 		default:
-			fmt.Printf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
+			servicelog.Debugf("%s 正在从指定的dftJsonPath获取信息\n", funcIdt)
 			dhcFileTag, err = DhcFileTagIdentify(string(dftPathGetModOrPath))
 		}
 		if err != nil {
@@ -370,7 +371,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 	// zip分卷格式：file.z01, file.z02
 	// 7z分卷格式： file.7z.001, file.7z.002
 	// rar分卷格式 file.part1.rar, file.part2.rar
-	fmt.Printf("开始识别文件类型\n")
+	servicelog.Debugf("开始识别文件类型\n")
 	switch lastSuffix {
 	case "zip":
 		comparableType = "zip"
@@ -417,7 +418,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		midDirPath = dstFilePath
 	}
 
-	fmt.Printf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
+	servicelog.Debugf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
 
 	// 确保中间目录存在
 	if err := os.MkdirAll(midDirPath, 0755); err != nil {
@@ -462,14 +463,14 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		if err == nil {
 			errStr = "无错误输出"
 		}
-		fmt.Printf("7z解压命令输出: %s\n 7z解压命令错误: %s\n", outStr, errStr)
+		servicelog.Debugf("7z解压命令输出: %s\n 7z解压命令错误: %s\n", outStr, errStr)
 
 		if err != nil {
-			fmt.Printf("%s解压失败: 错误=%v\n", funcIdt, err)
+			servicelog.Errorf("%s解压失败: 错误=%v\n", funcIdt, err)
 			return "", "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
 		}
 
-		fmt.Printf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
+		servicelog.Debugf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	} else {
 
 		// 获取分卷文件的目录
@@ -481,7 +482,7 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 			return "", "before", fmt.Errorf("%s查找第一个分卷文件失败: %v", funcIdt, err)
 		}
 
-		fmt.Printf("%s找到第一个分卷文件: %s\n", funcIdt, firstVolumePath)
+		servicelog.Debugf("%s找到第一个分卷文件: %s\n", funcIdt, firstVolumePath)
 
 		// 创建7z可执行文件路径
 		szExecutable := filepath.Join(szPath, "7zz")
@@ -502,14 +503,14 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		if err == nil {
 			errStr = "无错误输出"
 		}
-		fmt.Printf("7z分卷解压命令输出: %s\n 7z分卷解压命令错误: %s\n", outStr, errStr)
+		servicelog.Debugf("7z分卷解压命令输出: %s\n 7z分卷解压命令错误: %s\n", outStr, errStr)
 
 		if err != nil {
-			fmt.Printf("%s分卷解压失败: 错误=%v\n", funcIdt, err)
+			servicelog.Errorf("%s分卷解压失败: 错误=%v\n", funcIdt, err)
 			return "", "before", fmt.Errorf("%s分卷解压失败: %v", funcIdt, err)
 		}
 
-		fmt.Printf("%s解压分卷压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
+		servicelog.Debugf("%s解压分卷压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
 	}
 
 	return midDirPath, "", nil

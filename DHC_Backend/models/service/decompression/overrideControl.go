@@ -2,6 +2,7 @@ package decompression
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"fmt"
 	"io"
 	"os"
@@ -149,7 +150,7 @@ func (o OverrideStruct) Overwrite(srcPath, dstPath string) error {
 			return fmt.Errorf("%s递归复制目录失败: %s -> %s, err:%v", funcIdt, srcPath, dstPath, err)
 		}
 
-		fmt.Printf("%s成功复制目录从 %s 到 %s\n", funcIdt, srcPath, dstPath)
+		servicelog.Debugf("%s成功复制目录从 %s 到 %s\n", funcIdt, srcPath, dstPath)
 		return nil
 	}
 
@@ -176,7 +177,7 @@ func (o OverrideStruct) Overwrite(srcPath, dstPath string) error {
 		return fmt.Errorf("%s无法复制并覆盖srcFile:%s 到 dstFile:%s ,err:%v", funcIdt, srcPath, dstPath, err)
 	}
 
-	fmt.Printf("%s成功复制 %d 字节从 %s 到 %s\n", funcIdt, bytesWritten, srcPath, dstPath)
+	servicelog.Debugf("%s成功复制 %d 字节从 %s 到 %s\n", funcIdt, bytesWritten, srcPath, dstPath)
 	return nil
 }
 func (o OverrideStruct) Skip() error {
@@ -313,20 +314,20 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 		rulesUndefined = true
 	}
 	// 根据开发/生产模式自动获取游戏路径
-	fmt.Printf("%s正在获取游戏路径...\n", funcIdt)
+	servicelog.Debugf("%s正在获取游戏路径...\n", funcIdt)
 	_, err = infoGet.GetGamePathAuto()
 	if err != nil {
 		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
 	}
-	fmt.Printf("%s游戏路径获取成功\n", funcIdt)
+	servicelog.Debugf("%s游戏路径获取成功\n", funcIdt)
 
 	// 打印调试信息
-	fmt.Printf("模组类型: %s\n", modType)
-	fmt.Printf("默认操作: %s, 备份: %t\n", defaultAction.Action, defaultAction.Backup)
+	servicelog.Debugf("模组类型: %s\n", modType)
+	servicelog.Debugf("默认操作: %s, 备份: %t\n", defaultAction.Action, defaultAction.Backup)
 	if !rulesUndefined {
-		fmt.Printf("规则数量: %d\n", len(rules))
+		servicelog.Debugf("规则数量: %d\n", len(rules))
 		for i, rule := range rules {
-			fmt.Printf("规则 %d: 模式=%s, 操作=%s, 备份=%t\n", i+1, rule.Pattern, rule.Action, rule.Backup)
+			servicelog.Debugf("规则 %d: 模式=%s, 操作=%s, 备份=%t\n", i+1, rule.Pattern, rule.Action, rule.Backup)
 		}
 	}
 
@@ -334,7 +335,7 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	if defaultAction.Backup || func() bool {
 		for _, rule := range rules {
 			if rule.Backup {
-				fmt.Printf("规则模式 '%s' 需要备份\n", rule.Pattern)
+				servicelog.Debugf("规则模式 '%s' 需要备份\n", rule.Pattern)
 				return true
 			}
 		}
@@ -380,9 +381,9 @@ func OverrideControl(srcDirPath string, dstDirPath string, dftJsonPath string) e
 	tasks := generateExecutionPlan(root, dstDirPath, srcDirName)
 
 	// 打印计划摘要
-	fmt.Printf("%s规划完成：共生成 %d 个任务\n", funcIdt, len(tasks))
+	servicelog.Debugf("%s规划完成：共生成 %d 个任务\n", funcIdt, len(tasks))
 	for _, t := range tasks {
-		fmt.Printf("%s计划: [%s] %s -> %s (dir=%t)\n", funcIdt, t.Action, t.Path, t.Target, t.IsDir)
+		servicelog.Debugf("%s计划: [%s] %s -> %s (dir=%t)\n", funcIdt, t.Action, t.Path, t.Target, t.IsDir)
 	}
 
 	// 阶段5: 执行计划
@@ -447,7 +448,7 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 		targetFileName := filepath.Base(targetPath)
 		matched, err := filepath.Match(rulePath, targetFileName)
 		if err != nil {
-			fmt.Printf("路径匹配错误: %v\n", err)
+			servicelog.Warnf("路径匹配错误: %v\n", err)
 			return false
 		}
 		return matched
@@ -456,7 +457,7 @@ func DirectoryMatching(rulePath, targetPath string) bool {
 	// 使用 filepath.Match 进行标准的 glob 匹配
 	matched, err := filepath.Match(rulePath, targetPath)
 	if err != nil {
-		fmt.Printf("路径匹配错误: %v\n", err)
+		servicelog.Warnf("路径匹配错误: %v\n", err)
 		return false
 	}
 
@@ -481,7 +482,7 @@ func buildTree(srcRoot string) (*Node, error) {
 	err := filepath.WalkDir(srcRoot, func(p string, d os.DirEntry, err error) error {
 		if err != nil {
 			// 记录并继续
-			fmt.Printf("%s遍历文件时出错: %s, 错误: %v\n", funcIdt, p, err)
+			servicelog.Warnf("%s遍历文件时出错: %s, 错误: %v\n", funcIdt, p, err)
 			return nil
 		}
 		// 获取对于srcRoot的相对路径

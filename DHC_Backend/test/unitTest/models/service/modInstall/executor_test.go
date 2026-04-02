@@ -2,7 +2,6 @@ package modinstall
 
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
-	"fmt"
 	"testing"
 )
 
@@ -40,7 +39,7 @@ func TestRunDemoCMInstall(t *testing.T) {
 		t.Fatal("进度回调从未被触发")
 	}
 
-	fmt.Printf("  Demo 执行器测试通过: TotalProgress=%.0f%% PhaseStatus=%s callCount=%d\n",
+	t.Logf("[核心] Demo CM 执行器：总进度=%.0f%% 阶段=%s 回调次数=%d",
 		lastSnapshot.TotalProgress, lastSnapshot.PhaseStatus, callCount)
 }
 
@@ -61,5 +60,5 @@ func TestDemoCMInstallProgressMonotonicity(t *testing.T) {
 		t.Fatalf("RunDemoCMInstall 返回错误: %v", err)
 	}
 
-	fmt.Printf("  单调递增验证通过: 最终进度=%.0f%%\n", prevProgress)
+	t.Logf("[核心] Demo CM 进度单调性：最终进度=%.0f%%", prevProgress)
 }
