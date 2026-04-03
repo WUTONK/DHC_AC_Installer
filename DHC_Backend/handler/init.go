@@ -22,6 +22,7 @@ func InitGin(g gin.IRouter) {
 	registerTestPlaygroundRoutes(g)
 	registerCommunicationLabRoutes(g)
 	registerInstallationRoutes(g)
+	registerDemoPrecheckRoutes(g)
 }
 
 func GetServerInfo(c *gin.Context) {

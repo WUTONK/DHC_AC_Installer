@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Layout, Button, Typography, Modal, Toast, Switch, Slider, InputNumber } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle,
-    IconSetting
+    IconSetting,
+    IconDownload
 } from '@douyinfe/semi-icons';
 import InstallProgressPage from './InstallProgressPage';
 import { useDevMode } from './contexts/DevModeContext';
@@ -11,7 +12,8 @@ import { DEFAULT_DISK_INFO, INSTALL_MODES, EXISTING_RESOURCES } from './componen
 import {
     DiskInfo, InstallationCreateResponse,
     InstallationProgressResponse, InstallStep,
-    OneClickInstallerProps
+    OneClickInstallerProps,
+    InstallMode
 } from './components/OneClickInstaller/types';
 import PostInstallPage from './components/OneClickInstaller/PostInstallPage';
 import CleanInstallWizard from './components/OneClickInstaller/CleanInstallWizard';
@@ -59,6 +61,13 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     // 开发者调试：模拟启动时检测到光影冲突
     const [devSimulateConflict, setDevSimulateConflict] = useState<boolean>(() => {
         const saved = localStorage.getItem('devSimulateConflict');
+        return saved !== null ? saved === 'true' : false;
+    });
+
+    // [新增] 开发者调试：安装 DEMO 测试 toggle
+    // 打开后会把“一键式安装”卡片中的“豪华全享版”替换为“安装DEMO”
+    const [devInstallDemo, setDevInstallDemo] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devInstallDemo');
         return saved !== null ? saved === 'true' : false;
     });
 
@@ -110,6 +119,10 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     }, [devSimulateConflict]);
 
     useEffect(() => {
+        localStorage.setItem('devInstallDemo', String(devInstallDemo));
+    }, [devInstallDemo]);
+
+    useEffect(() => {
         localStorage.setItem('devResourceImported', String(devResourceImported));
     }, [devResourceImported]);
 
@@ -159,6 +172,25 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                 </div>
             ),
             order: 3
+        });
+
+        // [新增] 选项 3.1: 安装 DEMO 测试 toggle
+        registerDevOption({
+            id: 'oneclick-installer-demo',
+            label: '安装DEMO测试toggle',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devInstallDemo}
+                        onChange={(checked) => setDevInstallDemo(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devInstallDemo ? '开启：豪华全享版->安装DEMO' : '关闭'}
+                    </span>
+                </div>
+            ),
+            order: 7
         });
 
         // [新增] 选项 3: 资源已导入模拟
@@ -238,11 +270,12 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         return () => {
             unregisterDevOption('oneclick-installer-region');
             unregisterDevOption('oneclick-installer-conflict');
+            unregisterDevOption('oneclick-installer-demo');
             unregisterDevOption('oneclick-resource-imported');
             unregisterDevOption('oneclick-resource-complete');
             unregisterDevOption('oneclick-disk-space');
         };
-    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devResourceImported, devResourceComplete, devDiskFreeGB]);
+    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devInstallDemo, devResourceImported, devResourceComplete, devDiskFreeGB]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);
@@ -263,15 +296,26 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     const [cmInstalling, setCmInstalling] = useState<boolean>(false);
     const [cmInstallProgress, setCmInstallProgress] = useState<number>(0);
     const [cmInstallStatusText, setCmInstallStatusText] = useState<string>('');
+
+    // DEMO 安装任务 id（用于 InstallProgressPage 轮询真实 tracker 进度）
+    const [demoInstallId, setDemoInstallId] = useState<string | null>(null);
     const isPollingRef = useRef<boolean>(false);
     const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // DEMO 资源校验（导入进度条）轮询
+    const isResourcePollingRef = useRef<boolean>(false);
+    const resourcePollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // 组件卸载时清理定时器
     useEffect(() => {
         return () => {
             isPollingRef.current = false;
+            isResourcePollingRef.current = false;
             if (pollingTimerRef.current) {
                 clearTimeout(pollingTimerRef.current);
+            }
+            if (resourcePollingTimerRef.current) {
+                clearTimeout(resourcePollingTimerRef.current);
             }
         };
     }, []);
@@ -291,8 +335,39 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         return saved !== null ? saved === 'true' : false;
     });
 
+    // 根据开发者 toggle 动态替换 “豪华全享版” 卡片为 “安装DEMO”
+    const demoInstallMode = useMemo<InstallMode>(() => {
+        return {
+            id: 'demo',
+            name: '安装DEMO',
+            icon: <IconDownload size="extra-large" />,
+            size: 5 * 1024 * 1024 * 1024,
+            desc: '开发者调试版：资源校验/DLC模拟 + 写入模拟 .txt 文件，并接入后端 tracker。',
+            color: '#a06cd5'
+        };
+    }, []);
+
+    const installModesForUI = useMemo<InstallMode[]>(() => {
+        if (!devInstallDemo) return INSTALL_MODES;
+        // 只替换 full 卡片，不改变其它卡片的样式结构
+        return INSTALL_MODES.map(m => (m.id === 'full' ? demoInstallMode : m));
+    }, [devInstallDemo, demoInstallMode]);
+
     // 获取当前选中的模式对象
-    const currentMode = useMemo(() => INSTALL_MODES.find(m => m.id === selectedModeId) || INSTALL_MODES[1], [selectedModeId]);
+    const currentMode = useMemo(() => {
+        const found = installModesForUI.find(m => m.id === selectedModeId);
+        return found || installModesForUI[1];
+    }, [selectedModeId, installModesForUI]);
+
+    // 当 devInstallDemo 切换时，保证 selectedModeId 与 UI 列表一致
+    useEffect(() => {
+        if (devInstallDemo && selectedModeId === 'full') {
+            setSelectedModeId('demo');
+        }
+        if (!devInstallDemo && selectedModeId === 'demo') {
+            setSelectedModeId('standard');
+        }
+    }, [devInstallDemo, selectedModeId]);
 
     // --- 1. 启动时检测逻辑 (修改后：受开发者模式控制) ---
     useEffect(() => {
@@ -310,23 +385,60 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     // 进入预检查后自动检测 CM、DLC 和资源状态（可替换为后端接口）
     useEffect(() => {
         if (currentStep !== 'PRE_CHECK') return;
+
+        let cancelled = false;
         setCheckingEnv(true);
         setCheckingResources(true);
-        // 模拟并行检测
-        const timer = setTimeout(() => {
-            setCmInstalled(false); // TODO: 替换为后端返回
-            setHasAllDLC(false);   // TODO: 替换为后端返回
-            setCheckingEnv(false);
 
-            // 资源检测结果 (基于 DevMode)
-            setResourceState({
-                imported: devResourceImported,
-                complete: devResourceComplete
-            });
-            setCheckingResources(false);
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [currentStep, devResourceImported, devResourceComplete]);
+        const run = async (): Promise<void> => {
+            try {
+                if (currentMode.id === 'demo') {
+                    // DEMO 模式：直接读取后端检测结果
+                    const [res, dlc, cm] = await Promise.all([
+                        requestBackend('GET', '/api/demo/precheck/resources') as Promise<{ imported: boolean; complete: boolean }>,
+                        requestBackend('GET', '/api/demo/precheck/dlc-carpack') as Promise<{ hasAllDLC: boolean }>,
+                        requestBackend('GET', '/api/demo/precheck/cm') as Promise<{ cmInstalled: boolean }>
+                    ]);
+
+                    if (cancelled) return;
+                    setResourceState({
+                        imported: Boolean(res?.imported),
+                        complete: Boolean(res?.complete)
+                    });
+                    setHasAllDLC(Boolean(dlc?.hasAllDLC));
+                    setCmInstalled(Boolean(cm?.cmInstalled));
+                } else {
+                    // 非 DEMO：保留原有 DevMode 模拟行为（TODO：未来可全面替换为后端接口）
+                    await new Promise<void>((resolve) => setTimeout(resolve, 600));
+
+                    if (cancelled) return;
+                    setCmInstalled(false);
+                    setHasAllDLC(false);
+                    setResourceState({
+                        imported: devResourceImported,
+                        complete: devResourceComplete
+                    });
+                }
+            } catch (err) {
+                console.error('PRE_CHECK 检测失败:', err);
+                if (cancelled) return;
+                setCmInstalled(false);
+                setHasAllDLC(false);
+                setResourceState({ imported: false, complete: false });
+            } finally {
+                if (!cancelled) {
+                    setCheckingEnv(false);
+                    setCheckingResources(false);
+                }
+            }
+        };
+
+        void run();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currentStep, currentMode.id, devResourceImported, devResourceComplete]);
 
     // --- 辅助函数：格式化大小 ---
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
@@ -439,6 +551,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
 
     const handleInstallComplete = (): void => {
         setCurrentStep('POST_INSTALL');
+        setDemoInstallId(null);
         Toast.success('安装完成！');
         // 可以在这里添加其他完成后的逻辑，比如刷新页面或跳转
     };
@@ -471,6 +584,26 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     };
 
     const startRealInstall = (): void => {
+        if (currentMode.id === 'demo') {
+            // DEMO：创建后端安装任务，让 InstallProgressPage 轮询 tracker 真实进度
+            Toast.info('开始 DEMO 安装，一切准备就绪');
+            void (async () => {
+                try {
+                    const response = (await requestBackend('POST', '/api/installations', {
+                        versionId: 'demo-install-v1'
+                    })) as InstallationCreateResponse;
+
+                    setDemoInstallId(response.id);
+                    setCurrentStep('INSTALLING');
+                } catch (err: unknown) {
+                    console.error('创建 DEMO 安装任务失败:', err);
+                    Toast.error('无法启动 DEMO 安装任务，请检查后端服务');
+                }
+            })();
+            return;
+        }
+
+        // 非 DEMO：保留原有前端模拟行为
         setCurrentStep('INSTALLING');
         Toast.info('开始安装，一切准备就绪');
     };
@@ -481,6 +614,73 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             clearTimeout(pollingTimerRef.current);
             pollingTimerRef.current = null;
         }
+    };
+
+    const stopResourcePolling = (): void => {
+        isResourcePollingRef.current = false;
+        if (resourcePollingTimerRef.current) {
+            clearTimeout(resourcePollingTimerRef.current);
+            resourcePollingTimerRef.current = null;
+        }
+    };
+
+    const pollResourceVerifyProgress = async (installId: string): Promise<void> => {
+        isResourcePollingRef.current = true;
+
+        const poll = async (): Promise<void> => {
+            if (!isResourcePollingRef.current) return;
+            try {
+                const progress = (await requestBackend(
+                    'GET',
+                    `/api/installations/${installId}/progress?category=resource`
+                )) as InstallationProgressResponse;
+
+                // DEMO 资源校验只有一个类别，所以 totalProgress 与 resource.progress 等价
+                setImportingProgress(Math.floor(progress.totalProgress));
+
+                if (progress.status === 'completed' || progress.status === 'failed') {
+                    stopResourcePolling();
+
+                    if (progress.status === 'completed') {
+                        // 成功后再读取一次最终判定（imported/complete）
+                        const res = (await requestBackend(
+                            'GET',
+                            '/api/demo/precheck/resources'
+                        )) as { imported: boolean; complete: boolean };
+
+                        setResourceState({
+                            imported: Boolean(res.imported),
+                            complete: Boolean(res.complete)
+                        });
+                        setImportingProgress(0);
+                        Toast.success('资源包校验通过！');
+                    } else {
+                        setImportingProgress(0);
+                        setResourceState({ imported: false, complete: false });
+                        Toast.error('资源包校验失败，请检查资源完整性');
+                    }
+                    return;
+                }
+            } catch (err: unknown) {
+                console.error(`获取资源校验进度失败: ${err}`);
+                stopResourcePolling();
+                setImportingProgress(0);
+                setResourceState({ imported: false, complete: false });
+                Toast.error('获取资源校验进度失败，请检查后端服务');
+                return;
+            }
+
+            // 下一轮轮询
+            if (isResourcePollingRef.current) {
+                resourcePollingTimerRef.current = setTimeout(() => {
+                    void poll();
+                }, 100);
+            }
+        };
+
+        resourcePollingTimerRef.current = setTimeout(() => {
+            void poll();
+        }, 100);
     };
 
     const pollCMInstallationProgress = async (installId: string): Promise<void> => {
@@ -575,6 +775,29 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
 
     // [新增] 模拟导入资源文件动作
     const handleImportResource = (): void => {
+        // DEMO：导入按钮在这里等价于“后端资源包校验”，并把 tracker 进度同步到 importingProgress。
+        if (currentMode.id === 'demo') {
+            stopResourcePolling();
+            setImportingProgress(0);
+
+            void (async () => {
+                try {
+                    const response = (await requestBackend('POST', '/api/installations', {
+                        versionId: 'demo-resource-verify-v1'
+                    })) as InstallationCreateResponse;
+
+                    // 启动轮询，进度由后端 tracker 驱动
+                    await pollResourceVerifyProgress(response.id);
+                } catch (err: unknown) {
+                    console.error('创建资源校验任务失败:', err);
+                    setImportingProgress(0);
+                    setResourceState({ imported: false, complete: false });
+                    Toast.error('无法启动资源校验任务，请检查后端服务');
+                }
+            })();
+            return;
+        }
+
         setImportingProgress(1);
         const timer = setInterval(() => {
             setImportingProgress(prev => {
@@ -656,7 +879,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                         DISK_INFO={DISK_INFO}
                         devRegionCN={devRegionCN}
                         setDevRegionCN={setDevRegionCN}
-                        INSTALL_MODES={INSTALL_MODES}
+                        INSTALL_MODES={installModesForUI}
                         selectedModeId={selectedModeId}
                         setSelectedModeId={setSelectedModeId}
                         formatSize={formatSize}
@@ -701,7 +924,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                     />
                 );
             case 'INSTALLING':
-                return <InstallProgressPage onComplete={handleInstallComplete} />;
+                return <InstallProgressPage installId={demoInstallId || undefined} onComplete={handleInstallComplete} />;
             case 'POST_INSTALL':
                 return <PostInstallPage onNavigate={onNavigate} setCurrentStep={setCurrentStep} />;
             default:
@@ -711,7 +934,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                         DISK_INFO={DISK_INFO}
                         devRegionCN={devRegionCN}
                         setDevRegionCN={setDevRegionCN}
-                        INSTALL_MODES={INSTALL_MODES}
+                        INSTALL_MODES={installModesForUI}
                         selectedModeId={selectedModeId}
                         setSelectedModeId={setSelectedModeId}
                         formatSize={formatSize}

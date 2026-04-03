@@ -349,7 +349,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
         aboutUs: isCN ? '关于我们' : 'About Us',
         aboutUsDesc: isCN ? '赞助与开发日志' : 'Sponsors and dev logs',
         tutorial: isCN ? '新手必看' : 'Tutorial',
-        tutorialTitle: isCN ? '首都高模组安装教程 2024版' : 'Shutoko Install Guide 2024',
+        tutorialTitle: isCN ? '本安装器视频教程' : 'Shutoko Install Guide 2024',
         tutorialAuthor: isCN ? 'Bilibili @东濠涌车队' : 'YouTube @ShutokoRevival',
         watchNow: isCN ? '点击观看' : 'Watch Now',
         environmentConfig: isCN ? '环境自检与配置' : 'Environment & Config',

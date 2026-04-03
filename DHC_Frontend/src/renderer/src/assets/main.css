@@ -150,3 +150,18 @@ body[theme-mode='dark'] .dark-nav .semi-nav-item:hover .semi-icon {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
+
+/* 服务器推荐页面“进入服务器须知”弹窗：覆盖 semi-ui Modal 默认边框/阴影 */
+.server-disclaimer-modal .semi-modal,
+.server-disclaimer-modal .semi-modal-container,
+.server-disclaimer-modal .semi-modal-content {
+  background-color: #232326 !important;
+  border: 1px solid #444 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.server-disclaimer-modal .semi-modal-close {
+  color: #ccc !important;
+}

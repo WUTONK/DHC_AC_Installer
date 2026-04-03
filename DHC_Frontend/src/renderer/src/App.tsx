@@ -165,7 +165,7 @@ function App(): React.JSX.Element {
 
   return (
     <NavigationProvider onNavigate={setActiveKey}>
-      <Layout className="border border-[var(--semi-color-border)] h-screen flex flex-col overflow-hidden">
+      <Layout className="h-screen flex flex-col overflow-hidden">
         {headerVisible && (
           <Header className="h-16 leading-[64px] px-4 flex items-center justify-between app-header">
           <div className="flex items-center gap-4 shrink-0">

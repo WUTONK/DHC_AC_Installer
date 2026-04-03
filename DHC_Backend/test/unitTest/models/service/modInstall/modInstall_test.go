@@ -14,12 +14,12 @@ import (
 )
 
 func init() {
-	// 本包测试默认仅输出 [warn] 及以上；若已设置 DHC_LOG_LEVEL 则尊重环境变量（勿覆盖）。
+	// 本包测试默认仅输出 [debug] 及以上；若已设置 DHC_LOG_LEVEL 则尊重环境变量（勿覆盖）。
 	// 需要完整服务日志时：DHC_LOG_LEVEL=debug go test -v ./...（在 DHC_Backend 目录执行）
 	if strings.TrimSpace(os.Getenv("DHC_LOG_LEVEL")) != "" {
 		return
 	}
-	servicelog.SetLevel(servicelog.LevelWarn)
+	servicelog.SetLevel(servicelog.LevelDebug)
 }
 
 func TestSingleModInstall(t *testing.T) {
@@ -124,6 +124,7 @@ func TestMinimalModsetInstallV01(t *testing.T) {
 	var snapshots []modinstall.ProgressSnapshot
 	tracker := modinstall.NewTaskTracker(func(s modinstall.ProgressSnapshot) {
 		snapshots = append(snapshots, s)
+		servicelog.Infof(fmt.Sprint(s))
 	})
 
 	err := modinstall.RunMinimalModsetInstall(tracker)
@@ -143,8 +144,8 @@ func TestMinimalModsetInstallV01(t *testing.T) {
 	if last.PhaseStatus != "completed" {
 		t.Fatalf("期望最终阶段状态为 completed，实际 %s", last.PhaseStatus)
 	}
-
-	t.Logf("[核心] 最小模组集安装：进度回调 %d 条，最终总进度 %.2f%%，阶段状态 %s",
+	// servicelog.
+	servicelog.Infof("[核心] 最小模组集安装：进度回调 %d 条，最终总进度 %.2f%%，阶段状态 %s",
 		len(snapshots), last.TotalProgress, last.PhaseStatus)
 }
 

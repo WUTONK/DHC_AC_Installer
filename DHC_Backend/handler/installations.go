@@ -95,14 +95,58 @@ func createInstallation(c *gin.Context) {
 		VersionID: req.VersionID,
 		Status:    installStatusPreparing,
 		StartTime: now,
-		Categories: map[string]*categoryProgress{
+	}
+
+	// 根据 versionId 初始化分类列表。
+	// - 默认版本：仅提供 cm 类别（保持旧单元测试行为不变）
+	// - DEMO 资源校验：提供 resource 类别
+	// - DEMO 安装：提供 core/weather/map/cars 类别
+	switch req.VersionID {
+	case "demo-resource-verify-v1":
+		task.Categories = map[string]*categoryProgress{
+			"resource": {
+				CategoryID:   "resource",
+				CategoryName: "资源包校验",
+				Status:       "waiting",
+				Progress:     0,
+			},
+		}
+	case "demo-install-v1":
+		task.Categories = map[string]*categoryProgress{
+			"core": {
+				CategoryID:   "core",
+				CategoryName: "基础环境 (CSP)",
+				Status:       "waiting",
+				Progress:     0,
+			},
+			"weather": {
+				CategoryID:   "weather",
+				CategoryName: "天气系统 (Sol & Pure)",
+				Status:       "waiting",
+				Progress:     0,
+			},
+			"map": {
+				CategoryID:   "map",
+				CategoryName: "地图包 (首都高)",
+				Status:       "waiting",
+				Progress:     0,
+			},
+			"cars": {
+				CategoryID:   "cars",
+				CategoryName: "车辆包 (JDM Pack)",
+				Status:       "waiting",
+				Progress:     0,
+			},
+		}
+	default:
+		task.Categories = map[string]*categoryProgress{
 			"cm": {
 				CategoryID:   "cm",
 				CategoryName: "Content Manager",
 				Status:       "waiting",
 				Progress:     0,
 			},
-		},
+		}
 	}
 
 	// 先写入注册表，确保前端拿到 installId 后马上轮询不会 404。
@@ -112,9 +156,38 @@ func createInstallation(c *gin.Context) {
 
 	// 异步启动安装流程。
 	// 具体安装逻辑由执行器决定，handler 只负责调度。
-	// 开发/测试环境使用 Demo 版，生产环境切换为 Real 版。
-	go runInstallExecutor(installID, "cm", modinstall.RunDemoCMInstall)
-	// 生产环境替换为：go runInstallExecutor(installID, "cm", modinstall.RunRealCMInstall)
+	switch req.VersionID {
+	case "demo-resource-verify-v1":
+		go func() {
+			_ = runInstallExecutor(installID, "resource", modinstall.RunDemoResourceVerify, true)
+		}()
+	case "demo-install-v1":
+		// DEMO 安装：按类别顺序执行 core -> weather -> map -> cars。
+		go func() {
+			if err := runInstallExecutor(installID, "core", modinstall.RunDemoCoreInstall, false); err != nil {
+				finalizeInstallTask(installID, err)
+				return
+			}
+			if err := runInstallExecutor(installID, "weather", modinstall.RunDemoWeatherInstall, false); err != nil {
+				finalizeInstallTask(installID, err)
+				return
+			}
+			if err := runInstallExecutor(installID, "map", modinstall.RunDemoMapInstall, false); err != nil {
+				finalizeInstallTask(installID, err)
+				return
+			}
+			if err := runInstallExecutor(installID, "cars", modinstall.RunDemoCarsInstall, true); err != nil {
+				finalizeInstallTask(installID, err)
+				return
+			}
+		}()
+	default:
+		// 兼容旧版本：默认只跑 CM demo。
+		go func() {
+			_ = runInstallExecutor(installID, "cm", modinstall.RunDemoCMInstall, true)
+		}()
+		// 生产环境替换为：go runInstallExecutor(installID, "cm", modinstall.RunRealCMInstall, true)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":        installID,
@@ -184,7 +257,12 @@ func getInstallationProgress(c *gin.Context) {
 // 未来扩展 shader / map / carPack 时，只需要：
 //
 //	go runInstallExecutor(installID, "shader", modinstall.RunShaderInstall)
-func runInstallExecutor(installID string, categoryID string, executorFn func(*modinstall.TaskTracker) error) {
+func runInstallExecutor(
+	installID string,
+	categoryID string,
+	executorFn func(*modinstall.TaskTracker) error,
+	finalizeTask bool,
+) error {
 	// 创建 tracker：每次进度变化时，通过回调更新任务注册表。
 	// 前端轮询时会读取注册表，于是就能看到实时进度。
 	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
@@ -215,24 +293,61 @@ func runInstallExecutor(installID string, categoryID string, executorFn func(*mo
 	// 调用执行器：具体安装逻辑全在这里面
 	err := executorFn(tracker)
 
-	// 根据执行结果标记任务最终状态
+	// 根据执行结果标记类别状态。
+	// finalizeTask=true：同时写入任务 EndTime，并把全局状态收敛到 completed/failed。
 	installTasksMu.Lock()
 	task, ok := installTasks[installID]
 	if ok {
-		now := time.Now().Unix()
-		task.EndTime = &now
-		if err != nil {
-			task.Status = installStatusFailed
-			task.Error = err.Error()
-		} else {
-			task.Status = installStatusCompleted
-			if cp := task.Categories[categoryID]; cp != nil {
+		// 类别完成/失败
+		if cp := task.Categories[categoryID]; cp != nil {
+			if err != nil {
+				cp.Status = "failed"
+			} else {
 				cp.Status = "completed"
 				cp.Progress = 100
 			}
 		}
+
+		// 任务结束逻辑（用于 demo-install-v1 分段执行）
+		if finalizeTask {
+			now := time.Now().Unix()
+			task.EndTime = &now
+			if err != nil {
+				task.Status = installStatusFailed
+				task.Error = err.Error()
+			} else {
+				task.Status = installStatusCompleted
+			}
+		} else if err != nil {
+			// 分段执行出错：先标记失败状态，但 EndTime 由 finalizeInstallTask 统一写入
+			task.Status = installStatusFailed
+			task.Error = err.Error()
+		}
 	}
 	installTasksMu.Unlock()
+
+	return err
+}
+
+// finalizeInstallTask 用于 demo-install-v1 的分段执行收尾。
+// 它会写入 EndTime，并把全局状态收敛到 completed/failed。
+func finalizeInstallTask(installID string, err error) {
+	installTasksMu.Lock()
+	defer installTasksMu.Unlock()
+
+	task, ok := installTasks[installID]
+	if !ok {
+		return
+	}
+
+	now := time.Now().Unix()
+	task.EndTime = &now
+	if err != nil {
+		task.Status = installStatusFailed
+		task.Error = err.Error()
+	} else {
+		task.Status = installStatusCompleted
+	}
 }
 
 // ── 工具函数 ──

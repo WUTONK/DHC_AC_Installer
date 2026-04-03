@@ -805,12 +805,22 @@ const ServerDisclaimerModal: React.FC<ServerDisclaimerModalProps> = ({
 
   return (
     <Modal
+      className="server-disclaimer-modal"
       visible={visible}
       onCancel={onCancel}
       closeOnEsc={false}
       maskClosable={false}
+      closable={false}
       width={700}
-      style={{ backgroundColor: '#232326', border: '1px solid #444', padding: 0 }}
+      style={{
+        backgroundColor: '#232326',
+        border: '1px solid #444',
+        padding: 0,
+        borderRadius: 12,
+        boxShadow: 'none',
+        outline: 'none'
+      }}
+      bodyStyle={{ padding: 0, backgroundColor: '#232326' }}
       header={null} // 自定义 Header
       footer={
         <div

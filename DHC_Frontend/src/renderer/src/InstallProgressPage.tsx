@@ -4,6 +4,35 @@ import {
     IconBolt, IconFile, IconFolder, IconTickCircle, IconLoading
 } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
+import type { InstallationCategoryProgress, InstallationProgressResponse } from './components/OneClickInstaller/types';
+
+const BACKEND_BASE = 'http://127.0.0.1:19810';
+
+async function requestBackend(
+    method: string,
+    pathAndQuery: string,
+    body?: Record<string, unknown>
+): Promise<unknown> {
+    const url = `${BACKEND_BASE}${pathAndQuery}`;
+    const hasBody = body !== undefined;
+    const result = await window.api.requestApi(
+        url,
+        hasBody
+            ? {
+                  method,
+                  body: JSON.stringify(body),
+                  headers: { 'Content-Type': 'application/json' }
+              }
+            : { method }
+    );
+    if (!result.success) {
+        throw new Error(result.error || 'request failed');
+    }
+    if (!result.ok) {
+        throw new Error(`HTTP ${result.status}`);
+    }
+    return result.data;
+}
 
 // --- 1. 定义安装队列结构 ---
 interface InstallCategory {
@@ -49,11 +78,12 @@ const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 interface InstallProgressPageProps {
+    installId?: string;
     onComplete?: () => void;
     onCancel?: () => void;
 }
 
-export default function InstallProgressPage({ onComplete, onCancel }: InstallProgressPageProps): React.JSX.Element {
+export default function InstallProgressPage({ installId, onComplete, onCancel }: InstallProgressPageProps): React.JSX.Element {
     // --- 状态管理 ---
     const { isDevMode } = useDevMode();
     const [activeCategoryIdx, setActiveCategoryIdx] = useState<number>(0); // 当前正在安装的大类索引
@@ -63,6 +93,9 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
     const [logs, setLogs] = useState<string[]>([]);                          // 底部日志
     const [isFinished, setIsFinished] = useState<boolean>(false);
 
+    // DEMO/后端模式：按 categoryId 存储后端类别进度
+    const [backendCategoryMap, setBackendCategoryMap] = useState<Record<string, InstallationCategoryProgress>>({});
+
     // 滚动日志到底部的 Ref
     const logEndRef = useRef<HTMLDivElement>(null);
     // 跟踪每个类别是否已初始化日志
@@ -70,6 +103,8 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
 
     // --- 模拟安装逻辑 (Effect) ---
     useEffect(() => {
+        // 后端模式：使用轮询 tracker 真实进度，禁用本地模拟定时器
+        if (installId) return;
         if (isFinished) return;
         if (activeCategoryIdx >= INSTALL_QUEUE.length) return;
 
@@ -135,7 +170,7 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
         return () => {
             clearInterval(timer);
         };
-    }, [activeCategoryIdx, activeItemIdx, isFinished, isDevMode]);
+    }, [activeCategoryIdx, activeItemIdx, isFinished, isDevMode, installId]);
 
     // 自动滚动日志
     useEffect(() => {
@@ -148,6 +183,82 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
         const time = new Date().toLocaleTimeString('en-US', { hour12: false });
         setLogs(prev => [...prev, `[${time}] ${msg}`]);
     };
+
+    // --- 后端 tracker 驱动逻辑（DEMO） ---
+    useEffect(() => {
+        // 后端模式才启用；否则走上面“模拟安装逻辑”
+        if (!installId) return;
+        if (isFinished) return;
+
+        let cancelled = false;
+
+        const lastPhaseByCategoryRef = { current: {} as Record<string, string> };
+        const initializedCategoriesRef = new Set<string>();
+
+        const poll = async (): Promise<void> => {
+            if (cancelled) return;
+
+            try {
+                const progress = (await requestBackend(
+                    'GET',
+                    `/api/installations/${installId}/progress?category=all`
+                )) as InstallationProgressResponse;
+
+                setTotalProgress(progress.totalProgress);
+
+                const map: Record<string, InstallationCategoryProgress> = {};
+                for (const cp of progress.categories || []) {
+                    map[cp.categoryId] = cp;
+                }
+                setBackendCategoryMap(map);
+
+                // 生成日志：阶段变化时写入一条
+                for (const cp of progress.categories || []) {
+                    if (cp.status === 'active' && !initializedCategoriesRef.has(cp.categoryId)) {
+                        addLog(`正在初始化模块: ${cp.categoryName}...`);
+                        initializedCategoriesRef.add(cp.categoryId);
+                    }
+
+                    const phaseName = cp.currentItem || '';
+                    if (phaseName && lastPhaseByCategoryRef.current[cp.categoryId] !== phaseName) {
+                        addLog(phaseName);
+                        lastPhaseByCategoryRef.current[cp.categoryId] = phaseName;
+                    }
+                }
+
+                if (progress.status === 'completed' || progress.status === 'failed') {
+                    if (cancelled) return;
+                    setIsFinished(true);
+
+                    if (progress.status === 'completed') {
+                        addLog('所有安装任务已完成。环境配置更新完毕。');
+                        if (onComplete) {
+                            setTimeout(() => onComplete(), 1000);
+                        }
+                    } else {
+                        addLog(`安装失败: ${progress.error || '未知错误'}`);
+                    }
+                    return;
+                }
+
+                // 轮询间隔：开发模式更快一些
+                const intervalMs = isDevMode ? 120 : 220;
+                setTimeout(() => {
+                    void poll();
+                }, intervalMs);
+            } catch (err: unknown) {
+                console.error('获取安装进度失败:', err);
+                setIsFinished(true);
+                addLog('获取安装进度失败，请检查后端连接');
+            }
+        };
+
+        void poll();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [installId, isFinished, isDevMode, onComplete]);
 
     const handleCategoryComplete = (): void => {
         const currentIdx = activeCategoryIdx;
@@ -251,9 +362,12 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
                 {/* 2. 中间：分步安装列表 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {INSTALL_QUEUE.map((category, index) => {
-                        const status = index < activeCategoryIdx ? 'done' : (index === activeCategoryIdx ? 'active' : 'waiting');
-                        const isDone = status === 'done';
-                        const isActive = status === 'active';
+                        const isBackendMode = Boolean(installId);
+                        const cp = backendCategoryMap[category.id];
+                        const isDone = isBackendMode ? cp?.status === 'completed' : index < activeCategoryIdx;
+                        const isActive = isBackendMode ? cp?.status === 'active' : index === activeCategoryIdx;
+                        const isWaiting = isBackendMode ? !isDone && !isActive : index > activeCategoryIdx;
+                        const activePercent = isBackendMode ? Math.floor(cp?.progress || 0) : Math.floor(categoryProgress);
 
                         return (
                             <div 
@@ -264,7 +378,7 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
                                     borderRadius: 12,
                                     padding: '16px 24px',
                                     transition: 'all 0.3s',
-                                    opacity: status === 'waiting' ? 0.5 : 1
+                                    opacity: isWaiting ? 0.5 : 1
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -284,16 +398,16 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
                                                 {category.name}
                                             </Text>
                                             {/* 状态文字 */}
-                                            {isActive && category.items && category.items.length > 0 && (
+                                            {isActive && (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                                                     <IconLoading style={{ color: '#6bc786' }} spin />
                                                     <Text style={{ color: '#6bc786', fontSize: 13 }}>
-                                                        正在安装: {category.items[Math.min(activeItemIdx, category.items.length - 1)]}
+                                                        正在安装: {isBackendMode ? (cp?.currentItem || category.name) : category.items[Math.min(activeItemIdx, category.items.length - 1)]}
                                                     </Text>
                                                 </div>
                                             )}
                                             {isDone && <Text style={{ color: '#666', fontSize: 13 }}>安装完成</Text>}
-                                            {status === 'waiting' && <Text style={{ color: '#555', fontSize: 13 }}>等待中...</Text>}
+                                            {isWaiting && <Text style={{ color: '#555', fontSize: 13 }}>等待中...</Text>}
                                         </div>
                                     </div>
 
@@ -303,7 +417,7 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
                                             <IconTickCircle style={{ color: '#6bc786', fontSize: 20 }} />
                                         ) : isActive ? (
                                             <Text style={{ color: '#6bc786', fontWeight: 'bold', fontSize: 18 }}>
-                                                {Math.floor(categoryProgress)}%
+                                                {activePercent}%
                                             </Text>
                                         ) : (
                                             <Text style={{ color: '#444' }}>---</Text>
@@ -314,7 +428,7 @@ export default function InstallProgressPage({ onComplete, onCancel }: InstallPro
                                 {/* 仅在活动状态显示底部细进度条 */}
                                 {isActive && (
                                     <div style={{ marginTop: 16, height: 4, background: '#333', borderRadius: 2, overflow: 'hidden' }}>
-                                        <div style={{ width: `${categoryProgress}%`, background: '#6bc786', height: '100%', transition: 'width 0.2s linear' }}></div>
+                                        <div style={{ width: `${activePercent}%`, background: '#6bc786', height: '100%', transition: 'width 0.2s linear' }}></div>
                                     </div>
                                 )}
                             </div>

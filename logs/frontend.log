@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 289ms
+✓ built in 48ms
 
 build the electron main process successfully
 

@@ -188,6 +188,14 @@ export default function ResourceImportManager(): React.JSX.Element {
     const diskFreeBytes = devDiskFreeGB * 1024 * 1024 * 1024;
     const isSpaceLow = totalRequiredSize > diskFreeBytes;
 
+    // 6. 计算各个模式的整体状态颜色
+    const getModeOverallColor = (mode: 'basic' | 'standard' | 'premium') => {
+        const reqRes = RESOURCES_DB.filter(r => r.requiredFor.includes(mode)).map(r => statusOverrides[r.id] || r.status);
+        if (reqRes.includes('missing')) return THEME_RED;
+        if (reqRes.includes('partial')) return THEME_ORANGE;
+        return THEME_GREEN; // all imported or included
+    };
+
     // 注册开发者选项
     useEffect(() => {
         registerDevOption({
@@ -420,22 +428,8 @@ export default function ResourceImportManager(): React.JSX.Element {
                     </div>
                 </Header>
                 <Content style={{ padding: '20px 40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                    {/* 顶部工具栏：模式切换，居中显示 */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                        <Radio.Group
-                            type="button"
-                            buttonSize="large"
-                            value={viewMode}
-                            onChange={(e) => setViewMode(e.target.value as 'basic' | 'standard' | 'premium')}
-                        >
-                            <Radio value="basic">基础极速版</Radio>
-                            <Radio value="standard">标准推荐版</Radio>
-                            <Radio value="premium">豪华全享版</Radio>
-                        </Radio.Group>
-                    </div>
-
                     {/* 状态图例 */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32 }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_GREEN }}></div>
                             <Text style={{color:'#ccc'}}>已导入</Text>
@@ -452,6 +446,35 @@ export default function ResourceImportManager(): React.JSX.Element {
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME_BLUE }}></div>
                             <Text style={{color:'#ccc'}}>已包含在其他包中</Text>
                         </div>
+                    </div>
+
+                    {/* 顶部工具栏：模式切换，居中显示 */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+                        <Radio.Group
+                            type="button"
+                            buttonSize="large"
+                            value={viewMode}
+                            onChange={(e) => setViewMode(e.target.value as 'basic' | 'standard' | 'premium')}
+                        >
+                            <Radio value="basic">
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: getModeOverallColor('basic') }} />
+                                    <span>基础极速版</span>
+                                </div>
+                            </Radio>
+                            <Radio value="standard">
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: getModeOverallColor('standard') }} />
+                                    <span>标准推荐版</span>
+                                </div>
+                            </Radio>
+                            <Radio value="premium">
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: getModeOverallColor('premium') }} />
+                                    <span>豪华全享版</span>
+                                </div>
+                            </Radio>
+                        </Radio.Group>
                     </div>
 
                     {/* 显著的拖拽安装区域 */}
