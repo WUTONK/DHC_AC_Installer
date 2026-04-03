@@ -37,4 +37,6 @@ Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
+2026-04-03 23:13:23.438 Electron[89411:5036381] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-04-03 23:13:24.087 Electron[89411:5036381] error messaging the mach port for IMKCFRunLoopWakeUpReliable
  ELIFECYCLE  Command failed.

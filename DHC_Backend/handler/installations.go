@@ -42,6 +42,33 @@ type categoryProgress struct {
 
 // installTask 代表一个安装任务的完整状态。
 // 通过 installId 唯一标识，存储在内存注册表中。
+// demoPaceState 在 DEMO 慢速模式下按「全局总进度」节流，使整次任务约占用固定总时长（便于观察 UI）。
+type demoPaceState struct {
+	total time.Duration
+	once  sync.Once
+	t0    time.Time
+}
+
+func (p *demoPaceState) sleepUntilGlobalPercent(globalPercent float64) {
+	if p == nil || p.total <= 0 {
+		return
+	}
+	p.once.Do(func() {
+		p.t0 = time.Now()
+	})
+	if globalPercent < 0 {
+		globalPercent = 0
+	}
+	if globalPercent > 100 {
+		globalPercent = 100
+	}
+	target := time.Duration(float64(p.total) * globalPercent / 100.0)
+	elapsed := time.Since(p.t0)
+	if elapsed < target {
+		time.Sleep(target - elapsed)
+	}
+}
+
 type installTask struct {
 	ID         string
 	VersionID  string
@@ -50,6 +77,8 @@ type installTask struct {
 	EndTime    *int64
 	Error      string
 	Categories map[string]*categoryProgress
+	// demoPace 非 nil 时，每次进度快照后按全局总进度与 total 对齐时间轴（仅 DEMO 安装/校验）。
+	demoPace *demoPaceState
 }
 
 // ── 任务注册表 ──
@@ -82,6 +111,10 @@ func registerInstallationRoutes(g gin.IRouter) {
 func createInstallation(c *gin.Context) {
 	var req struct {
 		VersionID string `json:"versionId" binding:"required"`
+		// DemoSlowProgress：为 true 时，对 DEMO 安装/资源校验按全局总进度 pacing（默认总时长见 DemoSlowTotalSeconds）。
+		DemoSlowProgress bool `json:"demoSlowProgress"`
+		// DemoSlowTotalSeconds：整次任务目标总耗时（秒），默认 20，范围 [1,300]。
+		DemoSlowTotalSeconds float64 `json:"demoSlowTotalSeconds"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body", "detail": err.Error()})
@@ -95,6 +128,20 @@ func createInstallation(c *gin.Context) {
 		VersionID: req.VersionID,
 		Status:    installStatusPreparing,
 		StartTime: now,
+	}
+
+	if req.DemoSlowProgress && (req.VersionID == "demo-install-v1" || req.VersionID == "demo-resource-verify-v1") {
+		secs := req.DemoSlowTotalSeconds
+		if secs <= 0 {
+			secs = 20
+		}
+		if secs < 1 {
+			secs = 1
+		}
+		if secs > 300 {
+			secs = 300
+		}
+		task.demoPace = &demoPaceState{total: time.Duration(secs * float64(time.Second))}
 	}
 
 	// 根据 versionId 初始化分类列表。
@@ -266,11 +313,13 @@ func runInstallExecutor(
 	// 创建 tracker：每次进度变化时，通过回调更新任务注册表。
 	// 前端轮询时会读取注册表，于是就能看到实时进度。
 	tracker := modinstall.NewTaskTracker(func(snapshot modinstall.ProgressSnapshot) {
-		installTasksMu.Lock()
-		defer installTasksMu.Unlock()
+		var pace *demoPaceState
+		var global float64
 
+		installTasksMu.Lock()
 		task, ok := installTasks[installID]
 		if !ok {
+			installTasksMu.Unlock()
 			return
 		}
 
@@ -278,6 +327,7 @@ func runInstallExecutor(
 
 		cp := task.Categories[categoryID]
 		if cp == nil {
+			installTasksMu.Unlock()
 			return
 		}
 		cp.Progress = snapshot.TotalProgress
@@ -287,6 +337,15 @@ func runInstallExecutor(
 			cp.Status = "active"
 		} else if snapshot.PhaseStatus == "failed" {
 			cp.Status = "failed"
+		}
+
+		pace = task.demoPace
+		global = calcTotalProgressFromTask(task)
+		installTasksMu.Unlock()
+
+		// 在锁外休眠，避免阻塞其他 goroutine 轮询进度。
+		if pace != nil {
+			pace.sleepUntilGlobalPercent(global)
 		}
 	})
 
@@ -363,6 +422,17 @@ func calcTotalProgress(categories []categoryProgress) float64 {
 		sum += cp.Progress
 	}
 	return sum / float64(len(categories))
+}
+
+func calcTotalProgressFromTask(task *installTask) float64 {
+	if task == nil || len(task.Categories) == 0 {
+		return 0
+	}
+	categories := make([]categoryProgress, 0, len(task.Categories))
+	for _, cp := range task.Categories {
+		categories = append(categories, *cp)
+	}
+	return calcTotalProgress(categories)
 }
 
 // nilIfEmpty 统一 JSON 输出：空字符串 → null，非空 → 原样返回。

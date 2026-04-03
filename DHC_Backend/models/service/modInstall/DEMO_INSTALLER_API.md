@@ -27,9 +27,19 @@
 请求体：
 ```json
 {
-  "versionId": "demo-install-v1"
+  "versionId": "demo-install-v1",
+  "demoSlowProgress": true,
+  "demoSlowTotalSeconds": 20
 }
 ```
+
+可选字段（仅对 `demo-install-v1`、`demo-resource-verify-v1` 生效）：
+
+- `demoSlowProgress`（`boolean`，默认 `false`）  
+  为 `true` 时，后端按**全局总进度**（各类别 `progress` 的简单平均）做时间轴对齐，使整次任务大约占用 `demoSlowTotalSeconds` 秒，便于观察前端流程；不阻塞 HTTP 轮询锁，只在安装 goroutine 内休眠。
+
+- `demoSlowTotalSeconds`（`number`，默认 `20`，范围 `1`～`300`）  
+  目标总耗时（秒）。未传或 `≤0` 时按 `20` 处理。
 
 返回：
 ```json

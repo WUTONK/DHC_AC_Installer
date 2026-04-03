@@ -71,6 +71,17 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         return saved !== null ? saved === 'true' : false;
     });
 
+    // DEMO 安装：后端慢速进度（按全局总进度 pacing，便于观察流程）
+    const [devDemoSlowProgress, setDevDemoSlowProgress] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devDemoSlowProgress');
+        return saved !== null ? saved === 'true' : true;
+    });
+    const [devDemoSlowTotalSeconds, setDevDemoSlowTotalSeconds] = useState<number>(() => {
+        const saved = localStorage.getItem('devDemoSlowTotalSeconds');
+        const n = saved !== null ? Number(saved) : 20;
+        return Number.isFinite(n) && n > 0 ? n : 20;
+    });
+
     // [新增] 开发者调试：资源模拟状态
     const [devResourceImported, setDevResourceImported] = useState<boolean>(() => {
         const saved = localStorage.getItem('devResourceImported');
@@ -121,6 +132,14 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     useEffect(() => {
         localStorage.setItem('devInstallDemo', String(devInstallDemo));
     }, [devInstallDemo]);
+
+    useEffect(() => {
+        localStorage.setItem('devDemoSlowProgress', String(devDemoSlowProgress));
+    }, [devDemoSlowProgress]);
+
+    useEffect(() => {
+        localStorage.setItem('devDemoSlowTotalSeconds', String(devDemoSlowTotalSeconds));
+    }, [devDemoSlowTotalSeconds]);
 
     useEffect(() => {
         localStorage.setItem('devResourceImported', String(devResourceImported));
@@ -191,6 +210,43 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                 </div>
             ),
             order: 7
+        });
+
+        registerDevOption({
+            id: 'oneclick-installer-demo-slow',
+            label: 'DEMO：后端慢速进度（总时长）',
+            component: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Switch
+                            checked={devDemoSlowProgress}
+                            onChange={(checked) => setDevDemoSlowProgress(checked)}
+                            size="small"
+                        />
+                        <span style={{ color: '#ccc', fontSize: 12 }}>
+                            {devDemoSlowProgress
+                                ? '开启：按总进度 pacing（默认约 20s 跑完全程）'
+                                : '关闭：后端最快速度'}
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ color: '#999', fontSize: 12, whiteSpace: 'nowrap' }}>目标总秒数</span>
+                        <InputNumber
+                            size="small"
+                            min={1}
+                            max={300}
+                            value={devDemoSlowTotalSeconds}
+                            onChange={(v) => {
+                                if (typeof v === 'number' && Number.isFinite(v)) {
+                                    setDevDemoSlowTotalSeconds(Math.min(300, Math.max(1, Math.round(v))));
+                                }
+                            }}
+                            style={{ width: 100 }}
+                        />
+                    </div>
+                </div>
+            ),
+            order: 9
         });
 
         // [新增] 选项 3: 资源已导入模拟
@@ -271,11 +327,23 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             unregisterDevOption('oneclick-installer-region');
             unregisterDevOption('oneclick-installer-conflict');
             unregisterDevOption('oneclick-installer-demo');
+            unregisterDevOption('oneclick-installer-demo-slow');
             unregisterDevOption('oneclick-resource-imported');
             unregisterDevOption('oneclick-resource-complete');
             unregisterDevOption('oneclick-disk-space');
         };
-    }, [registerDevOption, unregisterDevOption, devRegionCN, devSimulateConflict, devInstallDemo, devResourceImported, devResourceComplete, devDiskFreeGB]);
+    }, [
+        registerDevOption,
+        unregisterDevOption,
+        devRegionCN,
+        devSimulateConflict,
+        devInstallDemo,
+        devDemoSlowProgress,
+        devDemoSlowTotalSeconds,
+        devResourceImported,
+        devResourceComplete,
+        devDiskFreeGB
+    ]);
 
     // 预检查状态
     const [cmInstalled, setCmInstalled] = useState<boolean>(false);
@@ -590,7 +658,13 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             void (async () => {
                 try {
                     const response = (await requestBackend('POST', '/api/installations', {
-                        versionId: 'demo-install-v1'
+                        versionId: 'demo-install-v1',
+                        ...(devDemoSlowProgress
+                            ? {
+                                  demoSlowProgress: true,
+                                  demoSlowTotalSeconds: devDemoSlowTotalSeconds
+                              }
+                            : {})
                     })) as InstallationCreateResponse;
 
                     setDemoInstallId(response.id);
@@ -783,7 +857,13 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             void (async () => {
                 try {
                     const response = (await requestBackend('POST', '/api/installations', {
-                        versionId: 'demo-resource-verify-v1'
+                        versionId: 'demo-resource-verify-v1',
+                        ...(devDemoSlowProgress
+                            ? {
+                                  demoSlowProgress: true,
+                                  demoSlowTotalSeconds: devDemoSlowTotalSeconds
+                              }
+                            : {})
                     })) as InstallationCreateResponse;
 
                     // 启动轮询，进度由后端 tracker 驱动
