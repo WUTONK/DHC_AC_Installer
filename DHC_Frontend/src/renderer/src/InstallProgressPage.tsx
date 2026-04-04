@@ -81,9 +81,16 @@ interface InstallProgressPageProps {
     installId?: string;
     onComplete?: () => void;
     onCancel?: () => void;
+    /** 为 true 时安装成功后不自动 onComplete，需用户点击「继续」进入完成页 */
+    manualContinueAfterComplete?: boolean;
 }
 
-export default function InstallProgressPage({ installId, onComplete, onCancel }: InstallProgressPageProps): React.JSX.Element {
+export default function InstallProgressPage({
+    installId,
+    onComplete,
+    onCancel,
+    manualContinueAfterComplete = false
+}: InstallProgressPageProps): React.JSX.Element {
     // --- 状态管理 ---
     const { isDevMode } = useDevMode();
     const [activeCategoryIdx, setActiveCategoryIdx] = useState<number>(0); // 当前正在安装的大类索引
@@ -92,6 +99,8 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
     const [totalProgress, setTotalProgress] = useState<number>(0);         // 总进度
     const [logs, setLogs] = useState<string[]>([]);                          // 底部日志
     const [isFinished, setIsFinished] = useState<boolean>(false);
+    /** 手动继续：安装已成功，仍停留在分类列表页，等待用户点击「继续」 */
+    const [awaitingContinue, setAwaitingContinue] = useState<boolean>(false);
 
     // DEMO/后端模式：按 categoryId 存储后端类别进度
     const [backendCategoryMap, setBackendCategoryMap] = useState<Record<string, InstallationCategoryProgress>>({});
@@ -106,6 +115,7 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
         // 后端模式：使用轮询 tracker 真实进度，禁用本地模拟定时器
         if (installId) return;
         if (isFinished) return;
+        if (awaitingContinue) return;
         if (activeCategoryIdx >= INSTALL_QUEUE.length) return;
 
         const currentCategory = INSTALL_QUEUE[activeCategoryIdx];
@@ -170,7 +180,7 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
         return () => {
             clearInterval(timer);
         };
-    }, [activeCategoryIdx, activeItemIdx, isFinished, isDevMode, installId]);
+    }, [activeCategoryIdx, activeItemIdx, isFinished, isDevMode, installId, manualContinueAfterComplete, awaitingContinue]);
 
     // 自动滚动日志
     useEffect(() => {
@@ -189,6 +199,7 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
         // 后端模式才启用；否则走上面“模拟安装逻辑”
         if (!installId) return;
         if (isFinished) return;
+        if (awaitingContinue) return;
 
         let cancelled = false;
 
@@ -228,14 +239,19 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
 
                 if (progress.status === 'completed' || progress.status === 'failed') {
                     if (cancelled) return;
-                    setIsFinished(true);
 
                     if (progress.status === 'completed') {
                         addLog('所有安装任务已完成。环境配置更新完毕。');
-                        if (onComplete) {
-                            setTimeout(() => onComplete(), 1000);
+                        if (manualContinueAfterComplete) {
+                            setAwaitingContinue(true);
+                        } else {
+                            setIsFinished(true);
+                            if (onComplete) {
+                                setTimeout(() => onComplete(), 1000);
+                            }
                         }
                     } else {
+                        setIsFinished(true);
                         addLog(`安装失败: ${progress.error || '未知错误'}`);
                     }
                     return;
@@ -258,7 +274,7 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
         return () => {
             cancelled = true;
         };
-    }, [installId, isFinished, isDevMode, onComplete]);
+    }, [installId, isFinished, isDevMode, onComplete, manualContinueAfterComplete, awaitingContinue]);
 
     const handleCategoryComplete = (): void => {
         const currentIdx = activeCategoryIdx;
@@ -266,12 +282,14 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
         if (currentIdx >= INSTALL_QUEUE.length) {
             // 如果已经超出范围，直接完成
             setTotalProgress(100);
-            setIsFinished(true);
             addLog("所有安装任务已完成。环境配置更新完毕。");
-            if (onComplete) {
-                setTimeout(() => {
-                    onComplete();
-                }, 1000);
+            if (manualContinueAfterComplete) {
+                setAwaitingContinue(true);
+            } else {
+                setIsFinished(true);
+                if (onComplete) {
+                    setTimeout(() => onComplete(), 1000);
+                }
             }
             return;
         }
@@ -289,11 +307,14 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
                 setCategoryProgress(0);
             }, 500);
         } else {
-            // 全部完成（不自动跳转，让用户自行确定）
+            // 全部完成
             setTotalProgress(100);
-            setIsFinished(true);
             addLog("所有安装任务已完成。环境配置更新完毕。");
-            // 移除自动跳转逻辑，让用户点击按钮自行决定
+            if (manualContinueAfterComplete) {
+                setAwaitingContinue(true);
+            } else {
+                setIsFinished(true);
+            }
         }
     };
 
@@ -344,8 +365,14 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
                 
                 {/* 1. 顶部总进度 */}
                 <div style={{ marginBottom: 40, textAlign: 'center' }}>
-                    <Title heading={2} style={{ color: '#fff', marginBottom: 8 }}>正在配置游戏环境...</Title>
-                    <Text style={{ color: '#888' }}>请勿关闭安装器，这可能需要几分钟时间</Text>
+                    <Title heading={2} style={{ color: '#fff', marginBottom: 8 }}>
+                        {awaitingContinue ? '安装完成' : '正在配置游戏环境...'}
+                    </Title>
+                    <Text style={{ color: '#888' }}>
+                        {awaitingContinue
+                            ? '各项模块已就绪。点击下方「继续」进入完成页。'
+                            : '请勿关闭安装器，这可能需要几分钟时间'}
+                    </Text>
                     
                     <div style={{ marginTop: 30, padding: '0 20px' }}>
                         <Progress 
@@ -364,9 +391,13 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
                     {INSTALL_QUEUE.map((category, index) => {
                         const isBackendMode = Boolean(installId);
                         const cp = backendCategoryMap[category.id];
-                        const isDone = isBackendMode ? cp?.status === 'completed' : index < activeCategoryIdx;
-                        const isActive = isBackendMode ? cp?.status === 'active' : index === activeCategoryIdx;
-                        const isWaiting = isBackendMode ? !isDone && !isActive : index > activeCategoryIdx;
+                        const isDone = isBackendMode
+                            ? (cp?.status === 'completed' ?? false)
+                            : (awaitingContinue ? true : index < activeCategoryIdx);
+                        const isActive = isBackendMode
+                            ? (cp?.status === 'active' ?? false)
+                            : (awaitingContinue ? false : index === activeCategoryIdx);
+                        const isWaiting = !isDone && !isActive;
                         const activePercent = isBackendMode ? Math.floor(cp?.progress || 0) : Math.floor(categoryProgress);
 
                         return (
@@ -457,6 +488,19 @@ export default function InstallProgressPage({ installId, onComplete, onCancel }:
                         <div ref={logEndRef} />
                     </div>
                 </div>
+
+                {awaitingContinue && (
+                    <div style={{ marginTop: 24 }}>
+                        <Button
+                            theme="solid"
+                            size="large"
+                            onClick={() => onComplete?.()}
+                            style={{ width: '100%', backgroundColor: '#6bc786', color: '#fff' }}
+                        >
+                            继续
+                        </Button>
+                    </div>
+                )}
 
             </div>
         </Layout>

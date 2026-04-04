@@ -65,13 +65,11 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     });
 
     // [新增] 开发者调试：安装 DEMO 测试 toggle
-    // 打开后会把“一键式安装”卡片中的“豪华全享版”替换为“安装DEMO”
     const [devInstallDemo, setDevInstallDemo] = useState<boolean>(() => {
         const saved = localStorage.getItem('devInstallDemo');
         return saved !== null ? saved === 'true' : false;
     });
 
-    // DEMO 安装：后端慢速进度（按全局总进度 pacing，便于观察流程）
     const [devDemoSlowProgress, setDevDemoSlowProgress] = useState<boolean>(() => {
         const saved = localStorage.getItem('devDemoSlowProgress');
         return saved !== null ? saved === 'true' : true;
@@ -80,6 +78,11 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         const saved = localStorage.getItem('devDemoSlowTotalSeconds');
         const n = saved !== null ? Number(saved) : 20;
         return Number.isFinite(n) && n > 0 ? n : 20;
+    });
+
+    const [devInstallManualContinue, setDevInstallManualContinue] = useState<boolean>(() => {
+        const saved = localStorage.getItem('devInstallManualContinue');
+        return saved !== null ? saved === 'true' : true;
     });
 
     // [新增] 开发者调试：资源模拟状态
@@ -142,6 +145,10 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     }, [devDemoSlowTotalSeconds]);
 
     useEffect(() => {
+        localStorage.setItem('devInstallManualContinue', String(devInstallManualContinue));
+    }, [devInstallManualContinue]);
+
+    useEffect(() => {
         localStorage.setItem('devResourceImported', String(devResourceImported));
     }, [devResourceImported]);
 
@@ -193,7 +200,6 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             order: 3
         });
 
-        // [新增] 选项 3.1: 安装 DEMO 测试 toggle
         registerDevOption({
             id: 'oneclick-installer-demo',
             label: '安装DEMO测试toggle',
@@ -205,7 +211,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                         size="small"
                     />
                     <span style={{ color: '#ccc', fontSize: 12 }}>
-                        {devInstallDemo ? '开启：豪华全享版->安装DEMO' : '关闭'}
+                        {devInstallDemo ? '开启：豪华全享版→安装DEMO' : '关闭'}
                     </span>
                 </div>
             ),
@@ -247,6 +253,26 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                 </div>
             ),
             order: 9
+        });
+
+        registerDevOption({
+            id: 'oneclick-install-manual-continue',
+            label: '安装完成：停留在分类进度页',
+            component: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                        checked={devInstallManualContinue}
+                        onChange={(checked) => setDevInstallManualContinue(checked)}
+                        size="small"
+                    />
+                    <span style={{ color: '#ccc', fontSize: 12 }}>
+                        {devInstallManualContinue
+                            ? '开启：保留天气/地图/车辆等列表至结束，点「继续」再进入完成页'
+                            : '关闭：完成后约 1s 自动进入完成页'}
+                    </span>
+                </div>
+            ),
+            order: 10
         });
 
         // [新增] 选项 3: 资源已导入模拟
@@ -328,6 +354,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             unregisterDevOption('oneclick-installer-conflict');
             unregisterDevOption('oneclick-installer-demo');
             unregisterDevOption('oneclick-installer-demo-slow');
+            unregisterDevOption('oneclick-install-manual-continue');
             unregisterDevOption('oneclick-resource-imported');
             unregisterDevOption('oneclick-resource-complete');
             unregisterDevOption('oneclick-disk-space');
@@ -340,6 +367,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         devInstallDemo,
         devDemoSlowProgress,
         devDemoSlowTotalSeconds,
+        devInstallManualContinue,
         devResourceImported,
         devResourceComplete,
         devDiskFreeGB
@@ -1004,7 +1032,13 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                     />
                 );
             case 'INSTALLING':
-                return <InstallProgressPage installId={demoInstallId || undefined} onComplete={handleInstallComplete} />;
+                return (
+                    <InstallProgressPage
+                        installId={demoInstallId || undefined}
+                        onComplete={handleInstallComplete}
+                        manualContinueAfterComplete={devInstallManualContinue}
+                    />
+                );
             case 'POST_INSTALL':
                 return <PostInstallPage onNavigate={onNavigate} setCurrentStep={setCurrentStep} />;
             default:

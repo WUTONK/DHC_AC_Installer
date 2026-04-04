@@ -465,4 +465,3 @@ func runDetectDemoDlcCarPackWithTracker(tracker *TaskTracker) (hasAll bool) {
 
 	return dlcPass && carPackPass
 }
-
