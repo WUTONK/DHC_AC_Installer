@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 46ms
+✓ built in 168ms
 
 build the electron main process successfully
 
@@ -19,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 7ms
+✓ built in 8ms
 
 build the electron preload files successfully
 
@@ -35,36 +35,6 @@ start electron app...
 Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   npx update-browserslist-db@latest
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
-23:56:30 [vite] (client) warning: The "??" operator here will always return the left operand
-412 |              const cp = backendCategoryMap[category.id];
-413 |              const isDone = isBackendMode ?
-414 |              cp?.status === 'completed' ?? false :
-    |                                         ^
-415 |              awaitingContinue ? true : index < activeCategoryIdx;
-416 |              const isActive = isBackendMode ?
-
-  Plugin: vite:esbuild
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/InstallProgressPage.tsx
-23:56:30 [vite] (client) warning: The "??" operator here will always return the left operand
-415 |              awaitingContinue ? true : index < activeCategoryIdx;
-416 |              const isActive = isBackendMode ?
-417 |              cp?.status === 'active' ?? false :
-    |                                      ^
-418 |              awaitingContinue ? false : index === activeCategoryIdx;
-419 |              const isWaiting = !isDone && !isActive;
-
-  Plugin: vite:esbuild
-  File: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/InstallProgressPage.tsx
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-23:57:44 [vite] (client) page reload src/main.tsx
-23:57:44 [vite] (client) hmr update /src/contexts/InstallDemoDevContext.tsx, /src/assets/main.css
-23:57:44 [vite] (client) Pre-transform error: Failed to load url /src/contexts/InstallDemoDevContext.tsx (resolved id: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/contexts/InstallDemoDevContext.tsx) in /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend/src/renderer/src/OneClickInstaller.tsx. Does the file exist?
-23:57:44 [vite] (client) page reload src/main.tsx
-23:57:44 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-23:57:46 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-23:57:47 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-23:57:50 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-23:57:50 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
-23:57:51 [vite] (client) hmr update /src/OneClickInstaller.tsx, /src/assets/main.css
  ELIFECYCLE  Command failed.
