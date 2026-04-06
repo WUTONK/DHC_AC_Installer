@@ -27,7 +27,7 @@ var testEnvType envType
 // init 初始化函数，从环境变量读取或设置默认值
 func init() {
 	// 读取是否为开发模式，接受 true/false（默认 false）
-	isDev := IsDevModeGet()
+	isDev = IsDevModeGet()
 
 	// 如果为开发模式，读取测试环境类型（默认 SimEnvHasDlc）
 	if isDev {

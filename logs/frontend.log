@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 168ms
+✓ built in 171ms
 
 build the electron main process successfully
 
@@ -19,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 8ms
+✓ built in 9ms
 
 build the electron preload files successfully
 

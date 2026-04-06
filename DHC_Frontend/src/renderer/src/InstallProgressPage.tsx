@@ -47,28 +47,28 @@ const INSTALL_QUEUE: InstallCategory[] = [
         id: 'core',
         name: '基础环境 (CSP)',
         icon: <IconBolt />,
-        items: ['Content Manager API', 'CSP v0.1.79', '7zip Library'],
+        items: ['资源包校验：车辆资源', '资源包校验：地图资源', '资源包校验：光影资源', 'DLC 与车包检测', '基础环境安装'],
         totalSize: 150
     },
     {
         id: 'weather',
         name: '天气系统 (Sol & Pure)',
         icon: <IconFile />,
-        items: ['Sol 2.2.9 Core', 'Sol Config', 'Pure 0.238 Base', 'Pure Textures HighRes'],
+        items: ['安装 Sol 2.2.9 Core', '安装 Sol Config', '安装 Pure 0.238 Base', '安装 Pure Textures HighRes'],
         totalSize: 500
     },
     {
         id: 'map',
         name: '地图包 (首都高)',
         icon: <IconFolder />,
-        items: ['SRP Main Track', 'SRP Extras', 'Tatsumi PA Objects', 'Shibaura PA'],
+        items: ['安装 SRP Main Track', '安装 SRP Extras', '安装辰巳 PA 场景', '安装芝浦 PA 场景'],
         totalSize: 2400
     },
     {
         id: 'cars',
         name: '车辆包 (JDM Pack)',
         icon: <IconFile />,
-        items: ['Nissan Skyline R34', 'Toyota Supra MK4', 'Mazda RX-7 FD3S', 'Honda NSX-R', 'Mitsubishi Lancer Evo 9'],
+        items: ['安装 Nissan Skyline R34', '安装 Toyota Supra MK4', '安装 Mazda RX-7 FD3S', '安装 Honda NSX-R', '安装 Mitsubishi Lancer Evo 9'],
         totalSize: 1800
     }
 ];

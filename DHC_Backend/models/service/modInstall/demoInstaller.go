@@ -58,15 +58,24 @@ func assertDevGamePathSafe() (string, error) {
 
 // writeDemoTxt 在 content 下写入一个 txt 模拟文件。
 func writeDemoTxt(gamePath string, relUnderContent string, content string) error {
-	// relUnderContent 约定：永远是 content 内的相对路径，比如：
-	// "weather/DHC_demo_weather.txt"
-	// "cars/DHC_demo_cars.txt"
 	target := filepath.Join(gamePath, "content", filepath.FromSlash(relUnderContent))
 
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return fmt.Errorf("创建目录失败: %w", err)
 	}
-	// 始终覆盖：DEMO 安装允许重复运行，用最新内容刷新标记即可。
+	if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("写入模拟文件失败: %w", err)
+	}
+	return nil
+}
+
+// writeDemoTxtAtRoot 在游戏根目录下写入一个 txt 模拟文件（用于 extension/ 等不在 content/ 下的路径）。
+func writeDemoTxtAtRoot(gamePath string, relPath string, content string) error {
+	target := filepath.Join(gamePath, filepath.FromSlash(relPath))
+
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		return fmt.Errorf("创建目录失败: %w", err)
+	}
 	if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
 		return fmt.Errorf("写入模拟文件失败: %w", err)
 	}
@@ -291,7 +300,7 @@ func RunDemoCoreInstall(tracker *TaskTracker) error {
 	tracker.CompletePhase("dlc_carpack_detect")
 
 	// -----------------------------
-	// 6) 基础环境写入（.txt 模拟文件）
+	// 6) 基础环境写入（.txt 模拟文件 → 真实 AC 目录）
 	// -----------------------------
 	tracker.StartPhase("base_env_install")
 	gamePath, err := assertDevGamePathSafe()
@@ -300,23 +309,31 @@ func RunDemoCoreInstall(tracker *TaskTracker) error {
 		return err
 	}
 
-	steps := []struct {
-		rel  string
-		text string
-	}{
-		{rel: "DHC_demo/base_env/CSP_demo_ready.txt", text: "CSP 基础环境（DEMO）就绪。\n"},
-		{rel: "DHC_demo/base_env/Extension_demo_ready.txt", text: "扩展模块（DEMO）就绪。\n"},
-		{rel: "DHC_demo/base_env/Launcher_demo_ready.txt", text: "启动器/配置（DEMO）就绪。\n"},
+	type cspFile struct {
+		rel    string
+		text   string
+		isRoot bool // true = 写到 gamePath 下；false = 写到 gamePath/content 下
+	}
+	cspFiles := []cspFile{
+		{rel: "texture/csp/csp_demo_ready.txt", text: "CSP 基础环境纹理配置（DEMO）就绪。\n"},
+		{rel: "extension/csp/csp_extension_demo.txt", text: "CSP 扩展模块（DEMO）就绪。\n", isRoot: true},
+		{rel: "cfg/csp_launcher_config_demo.txt", text: "CSP 启动器配置（DEMO）就绪。\n", isRoot: true},
 	}
 
-	for i := 0; i < len(steps); i++ {
-		stepPct := float64(i+1) * 100 / float64(len(steps))
-		// 写入前先让进度前移一点点，保证前端看到变化
+	for i, f := range cspFiles {
+		stepPct := float64(i+1) * 100 / float64(len(cspFiles))
 		tracker.SetSubProgress("base_env_install", stepPct-1)
 
-		if err := writeDemoTxt(gamePath, steps[i].rel, steps[i].text); err != nil {
-			tracker.FailPhase("base_env_install")
-			return err
+		if f.isRoot {
+			if err := writeDemoTxtAtRoot(gamePath, f.rel, f.text); err != nil {
+				tracker.FailPhase("base_env_install")
+				return err
+			}
+		} else {
+			if err := writeDemoTxt(gamePath, f.rel, f.text); err != nil {
+				tracker.FailPhase("base_env_install")
+				return err
+			}
 		}
 		tracker.SetSubProgress("base_env_install", stepPct)
 	}
@@ -326,91 +343,263 @@ func RunDemoCoreInstall(tracker *TaskTracker) error {
 }
 
 // RunDemoWeatherInstall 作为前端进度条里的 `weather` 类别执行器。
+// 阶段划分：Sol Core → Sol Config → Pure Base → Pure Textures
 func RunDemoWeatherInstall(tracker *TaskTracker) error {
-	tracker.AddPhase("install_weather", "天气系统安装", 100)
-	tracker.StartPhase("install_weather")
-
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
-		tracker.FailPhase("install_weather")
 		return err
 	}
 
-	steps := []string{
-		"DHC_demo/weather/Sol_Core_demo.txt",
-		"DHC_demo/weather/Sol_Config_demo.txt",
-		"DHC_demo/weather/Pure_Base_demo.txt",
-		"DHC_demo/weather/Pure_Textures_demo.txt",
-	}
-	for i := 0; i < len(steps); i++ {
-		pct := float64(i+1) * 100 / float64(len(steps))
-		if err := writeDemoTxt(gamePath, steps[i], "天气系统（DEMO）已写入模拟文件。\n"); err != nil {
-			tracker.FailPhase("install_weather")
-			return err
+	type weatherStep struct {
+		phaseID   string
+		phaseName string
+		weight    float64
+		files     []struct {
+			rel  string
+			text string
 		}
-		tracker.SetSubProgress("install_weather", pct)
 	}
 
-	tracker.CompletePhase("install_weather")
+	steps := []weatherStep{
+		{
+			phaseID: "sol_core", phaseName: "安装 Sol 2.2.9 Core", weight: 30,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "weather/sol_demo/sol_core.txt", text: "Sol 2.2.9 Core 天气引擎（DEMO）就绪。\n"},
+				{rel: "weather/sol_demo/sol_pp_filter.txt", text: "Sol PP Filter 后处理配置（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "sol_config", phaseName: "安装 Sol Config", weight: 15,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "weather/sol_demo/sol_config.txt", text: "Sol Weather Config 天气预设（DEMO）就绪。\n"},
+				{rel: "weather/sol_demo/sol_weather_plan.txt", text: "Sol 天气方案数据（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "pure_base", phaseName: "安装 Pure 0.238 Base", weight: 30,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "texture/pure_demo/pure_base.txt", text: "Pure 0.238 Base 光影后处理基础（DEMO）就绪。\n"},
+				{rel: "texture/pure_demo/pure_config.txt", text: "Pure Config 光影配置（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "pure_textures", phaseName: "安装 Pure Textures HighRes", weight: 25,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "texture/pure_demo/pure_textures_sky.txt", text: "Pure 高清天空纹理（DEMO）就绪。\n"},
+				{rel: "texture/pure_demo/pure_textures_clouds.txt", text: "Pure 高清云层纹理（DEMO）就绪。\n"},
+				{rel: "texture/pure_demo/pure_textures_rain.txt", text: "Pure 雨天特效纹理（DEMO）就绪。\n"},
+			},
+		},
+	}
+
+	for _, s := range steps {
+		tracker.AddPhase(s.phaseID, s.phaseName, s.weight)
+	}
+
+	for _, s := range steps {
+		tracker.StartPhase(s.phaseID)
+		for i, f := range s.files {
+			pct := float64(i+1) * 100 / float64(len(s.files))
+			if err := writeDemoTxt(gamePath, f.rel, f.text); err != nil {
+				tracker.FailPhase(s.phaseID)
+				return err
+			}
+			tracker.SetSubProgress(s.phaseID, pct)
+		}
+		tracker.CompletePhase(s.phaseID)
+	}
+
 	return nil
 }
 
 // RunDemoMapInstall 作为前端进度条里的 `map` 类别执行器。
+// 阶段划分：SRP 主赛道 → SRP 附加内容 → PA 辰巳 → PA 芝浦
 func RunDemoMapInstall(tracker *TaskTracker) error {
-	tracker.AddPhase("install_map", "地图包安装", 100)
-	tracker.StartPhase("install_map")
-
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
-		tracker.FailPhase("install_map")
 		return err
 	}
 
-	steps := []string{
-		"DHC_demo/map/SRP_Main_demo.txt",
-		"DHC_demo/map/SRP_Extras_demo.txt",
-		"DHC_demo/map/PA_Objects_demo.txt",
-		"DHC_demo/map/PA_Shibaura_demo.txt",
-	}
-	for i := 0; i < len(steps); i++ {
-		pct := float64(i+1) * 100 / float64(len(steps))
-		if err := writeDemoTxt(gamePath, steps[i], "地图包（DEMO）已写入模拟文件。\n"); err != nil {
-			tracker.FailPhase("install_map")
-			return err
+	type mapStep struct {
+		phaseID   string
+		phaseName string
+		weight    float64
+		files     []struct {
+			rel  string
+			text string
 		}
-		tracker.SetSubProgress("install_map", pct)
 	}
 
-	tracker.CompletePhase("install_map")
+	steps := []mapStep{
+		{
+			phaseID: "srp_main", phaseName: "安装 SRP Main Track", weight: 40,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "tracks/shuto_revival_project_beta/srp_main_layout.txt", text: "SRP 首都高主赛道布局数据（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/srp_main_surfaces.txt", text: "SRP 主赛道路面材质（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/srp_main_objects.txt", text: "SRP 主赛道场景物件（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/ai/srp_main_ai.txt", text: "SRP 主赛道 AI 路线（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "srp_extras", phaseName: "安装 SRP Extras", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "tracks/shuto_revival_project_beta/srp_extras_signs.txt", text: "SRP 额外路标与指示牌（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/srp_extras_lighting.txt", text: "SRP 额外夜间灯光（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "pa_tatsumi", phaseName: "安装辰巳 PA 场景", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "tracks/shuto_revival_project_beta/tatsumi_pa/tatsumi_pa_objects.txt", text: "辰巳 PA 停车场景物件（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/tatsumi_pa/tatsumi_pa_textures.txt", text: "辰巳 PA 纹理贴图（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "pa_shibaura", phaseName: "安装芝浦 PA 场景", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "tracks/shuto_revival_project_beta/shibaura_pa/shibaura_pa_objects.txt", text: "芝浦 PA 停车场景物件（DEMO）就绪。\n"},
+				{rel: "tracks/shuto_revival_project_beta/shibaura_pa/shibaura_pa_textures.txt", text: "芝浦 PA 纹理贴图（DEMO）就绪。\n"},
+			},
+		},
+	}
+
+	for _, s := range steps {
+		tracker.AddPhase(s.phaseID, s.phaseName, s.weight)
+	}
+
+	for _, s := range steps {
+		tracker.StartPhase(s.phaseID)
+		for i, f := range s.files {
+			pct := float64(i+1) * 100 / float64(len(s.files))
+			if err := writeDemoTxt(gamePath, f.rel, f.text); err != nil {
+				tracker.FailPhase(s.phaseID)
+				return err
+			}
+			tracker.SetSubProgress(s.phaseID, pct)
+		}
+		tracker.CompletePhase(s.phaseID)
+	}
+
 	return nil
 }
 
 // RunDemoCarsInstall 作为前端进度条里的 `cars` 类别执行器。
+// 阶段划分：按每辆车独立阶段，每辆车写入模型+皮肤+数据三个文件
 func RunDemoCarsInstall(tracker *TaskTracker) error {
-	tracker.AddPhase("install_cars", "车辆包安装", 100)
-	tracker.StartPhase("install_cars")
-
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
-		tracker.FailPhase("install_cars")
 		return err
 	}
 
-	steps := []string{
-		"DHC_demo/cars/JDM_Shard1_demo.txt",
-		"DHC_demo/cars/JDM_Shard2_demo.txt",
-		"DHC_demo/cars/JDM_Shard3_demo.txt",
-	}
-	for i := 0; i < len(steps); i++ {
-		pct := float64(i+1) * 100 / float64(len(steps))
-		if err := writeDemoTxt(gamePath, steps[i], "车辆包（DEMO）已写入模拟文件。\n"); err != nil {
-			tracker.FailPhase("install_cars")
-			return err
+	type carStep struct {
+		phaseID   string
+		phaseName string
+		weight    float64
+		files     []struct {
+			rel  string
+			text string
 		}
-		tracker.SetSubProgress("install_cars", pct)
 	}
 
-	tracker.CompletePhase("install_cars")
+	steps := []carStep{
+		{
+			phaseID: "car_r34", phaseName: "安装 Nissan Skyline R34", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "cars/dhc_nissan_r34/dhc_r34_model.txt", text: "Nissan Skyline R34 车辆模型（DEMO）就绪。\n"},
+				{rel: "cars/dhc_nissan_r34/skins/default/dhc_r34_skin.txt", text: "R34 默认涂装（DEMO）就绪。\n"},
+				{rel: "cars/dhc_nissan_r34/data/dhc_r34_data.txt", text: "R34 物理数据与调校（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "car_supra", phaseName: "安装 Toyota Supra MK4", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "cars/dhc_toyota_supra_mk4/dhc_supra_model.txt", text: "Toyota Supra MK4 车辆模型（DEMO）就绪。\n"},
+				{rel: "cars/dhc_toyota_supra_mk4/skins/default/dhc_supra_skin.txt", text: "Supra MK4 默认涂装（DEMO）就绪。\n"},
+				{rel: "cars/dhc_toyota_supra_mk4/data/dhc_supra_data.txt", text: "Supra MK4 物理数据与调校（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "car_rx7", phaseName: "安装 Mazda RX-7 FD3S", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "cars/dhc_mazda_rx7_fd3s/dhc_rx7_model.txt", text: "Mazda RX-7 FD3S 车辆模型（DEMO）就绪。\n"},
+				{rel: "cars/dhc_mazda_rx7_fd3s/skins/default/dhc_rx7_skin.txt", text: "RX-7 FD3S 默认涂装（DEMO）就绪。\n"},
+				{rel: "cars/dhc_mazda_rx7_fd3s/data/dhc_rx7_data.txt", text: "RX-7 FD3S 物理数据与调校（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "car_nsx", phaseName: "安装 Honda NSX-R", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "cars/dhc_honda_nsx_r/dhc_nsx_model.txt", text: "Honda NSX-R 车辆模型（DEMO）就绪。\n"},
+				{rel: "cars/dhc_honda_nsx_r/skins/default/dhc_nsx_skin.txt", text: "NSX-R 默认涂装（DEMO）就绪。\n"},
+				{rel: "cars/dhc_honda_nsx_r/data/dhc_nsx_data.txt", text: "NSX-R 物理数据与调校（DEMO）就绪。\n"},
+			},
+		},
+		{
+			phaseID: "car_evo9", phaseName: "安装 Mitsubishi Lancer Evo 9", weight: 20,
+			files: []struct {
+				rel  string
+				text string
+			}{
+				{rel: "cars/dhc_mitsubishi_evo9/dhc_evo9_model.txt", text: "Mitsubishi Lancer Evo 9 车辆模型（DEMO）就绪。\n"},
+				{rel: "cars/dhc_mitsubishi_evo9/skins/default/dhc_evo9_skin.txt", text: "Evo 9 默认涂装（DEMO）就绪。\n"},
+				{rel: "cars/dhc_mitsubishi_evo9/data/dhc_evo9_data.txt", text: "Evo 9 物理数据与调校（DEMO）就绪。\n"},
+			},
+		},
+	}
+
+	for _, s := range steps {
+		tracker.AddPhase(s.phaseID, s.phaseName, s.weight)
+	}
+
+	for _, s := range steps {
+		tracker.StartPhase(s.phaseID)
+		for i, f := range s.files {
+			pct := float64(i+1) * 100 / float64(len(s.files))
+			if err := writeDemoTxt(gamePath, f.rel, f.text); err != nil {
+				tracker.FailPhase(s.phaseID)
+				return err
+			}
+			tracker.SetSubProgress(s.phaseID, pct)
+		}
+		tracker.CompletePhase(s.phaseID)
+	}
+
 	return nil
 }
 
