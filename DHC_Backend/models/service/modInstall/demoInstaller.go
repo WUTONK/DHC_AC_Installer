@@ -604,6 +604,35 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 }
 
 // ------------------------------
+// 实验环境收尾（测试 / git 还原）
+// ------------------------------
+
+// SimEnvDevInstallCleanup 在实验安装流程结束后调用：清空后端中间目录，并将 simEnv 下游戏目录恢复为 envBackup 基线。
+// 默认无论安装成功与否都应执行（例如在 handler 里 defer），除非显式跳过回收。
+//
+// 参数 skipRecycle：
+//   - true：跳过全部回收，保留 resources/cache、importResourceCache 与 acRoot 写入内容（调试用）。
+//
+// 环境变量 DHC_SIMENV_SKIP_INSTALL_CLEANUP=true 时与 skipRecycle=true 等效，便于不改调用代码保留现场。
+//
+// 非开发模式（DHC_DEV≠true）下为安全起见整函数为空操作（返回 nil）。
+//
+// TODO：真实模组 / 生产场景下，在安装成功后按次删除 resources/cache 中对应解压目录（见 decompression），
+// 以及可配置临时盘；本函数仅覆盖当前测试与 simEnv 需求，保持简单。
+func SimEnvDevInstallCleanup(skipRecycle bool) error {
+	if skipRecycle || readEnvBool("DHC_SIMENV_SKIP_INSTALL_CLEANUP", false) {
+		return nil
+	}
+	if !infoGet.IsDevModeGet() {
+		return nil
+	}
+	if err := ClearBackendModInstallIntermediateDirs(); err != nil {
+		return err
+	}
+	return ResetSimEnvModDirectoriesForDevCleanup()
+}
+
+// ------------------------------
 // 内部：带 tracker 的检测封装
 // ------------------------------
 

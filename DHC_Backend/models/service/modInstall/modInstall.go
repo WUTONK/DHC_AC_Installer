@@ -628,7 +628,8 @@ func ResetSimEnvModDirectories() error {
 	return ResetSimEnvModDirectoriesAtPath(gamePath)
 }
 
-// ResetSimEnvModDirectoriesAtPath 将指定游戏目录的 content 重置为 envBackup 中的基线内容。
+// ResetSimEnvModDirectoriesAtPath 将指定游戏目录的 content（及 envBackup 中存在的 cfg）重置为 envBackup 基线，
+// 并移除 demo 在 extension/csp 下的占位目录。
 // 这个函数适合测试时传入 t.TempDir() 下的临时目录，避免污染仓库内的骨架数据。
 func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
 	funcIdt := "-modInstall.ResetSimEnvModDirectoriesAtPath-"
@@ -646,11 +647,27 @@ func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
 		return fmt.Errorf("%s拒绝直接操作 git 跟踪的 simenv 骨架目录: %s，请先复制到临时目录后再重置", funcIdt, gamePath)
 	}
 
-	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC")
-	contentPath := filepath.Join(gamePath, "content")
-	backupContentPath := filepath.Join(backupPath, "content")
-
 	servicelog.Infof("%s开始重置 simenv 模组目录...\n", funcIdt)
+	if err := restoreSimEnvGameTreeFromEnvBackup(gamePath); err != nil {
+		return err
+	}
+	servicelog.Infof("%s simenv 模组目录重置完成\n", funcIdt)
+	return nil
+}
+
+// restoreSimEnvGameTreeFromEnvBackup 从 test/simEnv/acRoot/envBackup 还原 content 与 cfg（若备份中存在 cfg），
+// 并删除 extension/csp（demo 占位，envBackup 中通常不含该目录）。
+func restoreSimEnvGameTreeFromEnvBackup(gamePath string) error {
+	funcIdt := "-modInstall.restoreSimEnvGameTreeFromEnvBackup-"
+
+	backendRootPath, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取根目录失败: %v", err)
+	}
+
+	backupPath := filepath.Join(backendRootPath, "test", "simEnv", "acRoot", "envBackup", "AC_SKELETON_HASDLC")
+	backupContentPath := filepath.Join(backupPath, "content")
+	contentPath := filepath.Join(gamePath, "content")
 
 	if _, err := os.Stat(backupContentPath); os.IsNotExist(err) {
 		return fmt.Errorf("%s备份 content 目录不存在: %s", funcIdt, backupContentPath)
@@ -666,6 +683,63 @@ func ResetSimEnvModDirectoriesAtPath(gamePath string) error {
 	}
 	servicelog.Infof("%s已从备份恢复 content 目录: %s -> %s\n", funcIdt, backupContentPath, contentPath)
 
-	servicelog.Infof("%s simenv 模组目录重置完成\n", funcIdt)
+	backupCfgPath := filepath.Join(backupPath, "cfg")
+	if _, err := os.Stat(backupCfgPath); err == nil {
+		gameCfgPath := filepath.Join(gamePath, "cfg")
+		if err := os.RemoveAll(gameCfgPath); err != nil {
+			return fmt.Errorf("%s删除 cfg 目录失败: %s, 错误: %v", funcIdt, gameCfgPath, err)
+		}
+		if err := copyDir(backupCfgPath, gameCfgPath); err != nil {
+			return fmt.Errorf("%s从备份恢复 cfg 目录失败: %s -> %s, 错误: %v", funcIdt, backupCfgPath, gameCfgPath, err)
+		}
+		servicelog.Infof("%s已从备份恢复 cfg 目录: %s -> %s\n", funcIdt, backupCfgPath, gameCfgPath)
+	}
+
+	demoCspDir := filepath.Join(gamePath, "extension", "csp")
+	if err := os.RemoveAll(demoCspDir); err != nil {
+		return fmt.Errorf("%s移除 extension/csp 失败: %s, 错误: %v", funcIdt, demoCspDir, err)
+	}
+
+	return nil
+}
+
+// ResetSimEnvModDirectoriesForDevCleanup 仅用于开发/测试收尾：允许直接重置仓库内跟踪的 simEnv 骨架游戏目录，
+// 使其与 envBackup 一致，便于 git 工作区干净与重复跑实验。勿在生产环境调用。
+func ResetSimEnvModDirectoriesForDevCleanup() error {
+	funcIdt := "-modInstall.ResetSimEnvModDirectoriesForDevCleanup-"
+
+	if !infoGet.IsDevModeGet() {
+		return fmt.Errorf("%s仅开发模式可用", funcIdt)
+	}
+
+	gamePath, err := infoGet.GetGamePathAuto()
+	if err != nil {
+		return fmt.Errorf("%s获取游戏路径失败: %v", funcIdt, err)
+	}
+
+	if !strings.Contains(filepath.ToSlash(gamePath), "test/simEnv/") {
+		return fmt.Errorf("%s拒绝：游戏路径不在 test/simEnv 下: %s", funcIdt, gamePath)
+	}
+
+	return restoreSimEnvGameTreeFromEnvBackup(gamePath)
+}
+
+// ClearBackendModInstallIntermediateDirs 删除模组安装产生的后端中间目录（解压缓存、资源包引入缓存）。
+// 仅覆盖当前测试布局使用的路径；生产环境可在此基础上扩展。
+func ClearBackendModInstallIntermediateDirs() error {
+	backendRoot, err := infoGet.GetBackendRootPath()
+	if err != nil {
+		return fmt.Errorf("获取后端根目录失败: %w", err)
+	}
+
+	dirs := []string{
+		filepath.Join(backendRoot, "resources", "cache"),
+		filepath.Join(backendRoot, "test", "simEnv", "resources", "importResourceCache"),
+	}
+	for _, d := range dirs {
+		if err := os.RemoveAll(d); err != nil {
+			return fmt.Errorf("清理中间目录失败 %s: %w", d, err)
+		}
+	}
 	return nil
 }

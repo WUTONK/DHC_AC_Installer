@@ -235,9 +235,50 @@ const (
 	Local DetectionPath = "Local"
 )
 
-// 导入资源检测：返回**某一个类型**的已导入资源情况列表 map[string]map[string]bool
-// ImportResourceDetection 返回指定资源类型的导入情况
-// 参数 ： -要检测的类型(如果为 All 那么会检测所有资源) 检测路径（缺省为本地资源路径）
+// ImportResourceDetection 根据 pkgInfo.json 构建的 catalog，扫描磁盘上对应资源目录，
+// 对每个三级路径 resource/pkg/mod 累加文件体积并与 catalog 中的预期大小比对，写入 ResourceMap。
+//
+// 参数：
+//   - resource：要检测的资源类型。为 All 时依次检测 tracks、cars、shaders、dashboard 并合并结果；
+//     为单一类型时只扫描该类型。
+//   - DetectionPath：Local 表示使用后端约定目录——开发模式下为
+//     <backend>/test/simEnv/resources/<类型>，非开发为 <backend>/resources/<类型>，目录不存在则返回错误。
+//     非 Local 的字符串视为自定义根路径；若路径不存在则返回 (nil, nil)，便于在批量场景中跳过缺失类型。
+//
+// 比对规则（在 catalog 中已登记的 mod）：
+//   目录下无有效文件 → NotImported；总大小小于预期 → Incomplete；达到或超过预期 → Pass。
+// 扫描结束后会自下而上汇总各 pkg 以及资源类型根节点（tracks/cars/…）的 State。
+//
+// 使用示例：
+//
+//	// 安装前校验本地全部资源（与 modInstall_test.TestImportResourceDetection 一致）
+//	rm, err := ImportResourceDetection(All, Local)
+//	if err != nil {
+//		return err
+//	}
+//	jsonStr, _ := ResourceMapToJson(rm) // 可发给前端展示
+//
+//	// 只检查车辆，并查询某个 mod 是否完整
+//	rmCars, err := ImportResourceDetection(Cars, Local)
+//	if err != nil {
+//		return err
+//	}
+//	state, exists := rmCars.GetState(Cars, "shmc", "r34")
+//	if exists && state == Pass {
+//		// 该车辆 mod 已完整导入
+//	}
+//
+//	// DEMO 安装流程中按类型检测（见 demoInstaller.go）
+//	rmTracks, err := ImportResourceDetection(Tracks, Local)
+//
+// 具体场景（与 test/simEnv/resources/pkgInfo.json 一致，开发模式 + Local）：
+//
+//	catalog 里写着 cars/SHMC/r34 的预期总大小为 8 字节（测试数据里的数字）。
+//	扫描目录为 <backend>/test/simEnv/resources/cars/，会递归遍历其下所有文件；
+//	凡是路径形如 .../cars/SHMC/r34/ 下的文件，体积都累加到 mod「cars/SHMC/r34」上。
+//	若累加结果 = 0 → 该 mod 为 NotImported；0 < 累加 < 8 → Incomplete；累加 ≥ 8 → Pass。
+//	若磁盘上根本没有 SHMC/r34 下任何文件，该 mod 保持初始的 NotImported。
+//	同一 pkg 下多个 mod 的状态会再汇总成 pkg、再汇总成 cars 根节点的 State。
 func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath) (ResourceMap, error) {
 
 	// 获取所有资源模式

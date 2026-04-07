@@ -211,6 +211,10 @@ func createInstallation(c *gin.Context) {
 	case "demo-install-v1":
 		// DEMO 安装：按类别顺序执行 core -> weather -> map -> cars。
 		go func() {
+			// 实验流程收尾：清空后端中间目录并还原 simEnv（见 modinstall.SimEnvDevInstallCleanup 注释）。
+			defer func() {
+				_ = modinstall.SimEnvDevInstallCleanup(false)
+			}()
 			if err := runInstallExecutor(installID, "core", modinstall.RunDemoCoreInstall, false); err != nil {
 				finalizeInstallTask(installID, err)
 				return
