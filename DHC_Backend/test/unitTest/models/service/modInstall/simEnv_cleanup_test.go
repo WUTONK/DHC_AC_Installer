@@ -16,7 +16,7 @@ func TestClearBackendModInstallIntermediateDirs(t *testing.T) {
 	}
 
 	cacheDir := filepath.Join(backendRoot, "resources", "cache")
-	importCacheDir := filepath.Join(backendRoot, "test", "simEnv", "resources", "importResourceCache")
+	importCacheDir := filepath.Join(modinstall.DevLocalResourceLibraryRoot(backendRoot), "importResourceCache")
 	markerCache := filepath.Join(cacheDir, "dhc_unit_test_cleanup_marker.txt")
 	markerImport := filepath.Join(importCacheDir, "dhc_unit_test_cleanup_marker.txt")
 

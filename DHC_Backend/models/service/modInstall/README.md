@@ -17,11 +17,11 @@
 **合法示例**: `cars/shmc/r34`
 
 ### 1.2 资源库目录结构
-在开发模式下，资源库位于 `test/simEnv/resources/`（生产环境下在 `resources/`）。
+生产环境下资源库根目录为 `resources/`。开发模式下为模拟「从资源包解压后的根」，多一层 `testPkg/`，即 `test/simEnv/resources/testPkg/`（与真实环境中多个资源包并列时，每个包解压后各自为独立根目录的布局一致）。
 其结构必须与三级路径和 `pkgInfo.json` 严格对应：
 
 ```text
-resources/
+resources/                    # 生产；开发为 test/simEnv/resources/testPkg/
 ├── pkgInfo.json            # 核心注册表（定义了所有合法的模组及其期望大小）
 ├── cars/
 │   └── shmc/
@@ -58,13 +58,13 @@ resources/
 用于将用户下载的外部大资源包（可能包含多个模组）导入到本地资源库。
 
 ```go
-// 传入外部压缩包路径，解压并移动到 resources/ 目录下
+// 传入外部压缩包路径，解压并移动到本地资源库根目录（生产为 resources/，开发为 test/simEnv/resources/testPkg/）
 rm, err := modinstall.DhcResoucePkgImport("/path/to/downloaded_pkg.zip")
 ```
 **内部行为**:
-1. 解压到临时目录 `importResourceCache`。
+1. 解压到临时目录 `importResourceCache`（与资源库根同级）。
 2. 扫描临时目录，与 `pkgInfo.json` 比对，生成 `ResourceMap`。
-3. 将文件移动到正式的 `resources/` 目录。
+3. 将文件移动到正式的本地资源库根目录。
 4. 清理临时目录。
 
 ### 2.2 资源状态检测 (`ImportResourceDetection`)

@@ -86,7 +86,7 @@ func writeDemoTxtAtRoot(gamePath string, relPath string, content string) error {
 // 资源校验（参考 resourceDetection.go）
 // ------------------------------
 
-// DetectDemoResourcesIntegrity 检测 DEMO 所需的资源完整性（开发模式下用 test/simEnv/resources）。
+// DetectDemoResourcesIntegrity 检测 DEMO 所需的资源完整性（开发模式下用 test/simEnv/resources/testPkg）。
 //
 // 说明：
 // - 仓库当前 pkgInfo.json 里只注册了 cars / tracks / shaders 等资源（dashboard 可能缺失）

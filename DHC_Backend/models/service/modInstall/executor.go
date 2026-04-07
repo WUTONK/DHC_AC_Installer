@@ -78,7 +78,7 @@ func RunRealCMInstall(tracker *TaskTracker) error {
 
 // MinimalModsetInstall v0.1：一次安装「车 + 图 + 光影」三个模组，均为 zip，解压走默认 cache。
 //
-// 资源必须放在开发环境资源库 test/simEnv/resources/{cars|tracks|shaders}/{pkg}/{mod}/，
+// 资源必须放在开发环境资源库 test/simEnv/resources/testPkg/{cars|tracks|shaders}/{pkg}/{mod}/，
 // 且每个模组目录内各自一份 dft.json（不得放在 cars/、tracks/ 等大类根目录）。
 // dft 查找方式：与 zip 同目录（DftPathFromDir → FindDftJsonWithPriority）。
 //

@@ -68,7 +68,7 @@ import (
 ─────────────────────────────────────────────────────────────────────────────
 • 外部资源包: 用户提供的压缩包
 • 临时引入缓存: resources/importResourceCache/ (引入时临时使用)
-• 资源库: resources/ 或 test/simEnv/resources/ (存储已解压模组)
+• 资源库: resources/ 或 test/simEnv/resources/testPkg/ (开发模式，模拟资源包解压根目录)
 • 安装中间目录: resources/cache/{ModType}/{modName}/ (安装时临时使用)
 • 游戏目录: content/{cars|tracks|...}/ (最终安装位置)
 
@@ -97,6 +97,15 @@ dft.json: {modType, defaultAction, rules, overwriteStartingDir}
 ================================================================================
 */
 
+// DevSimEnvResourcePkgDir 开发模拟环境中本地资源库目录名，对应真实环境下「单个资源包解压后的根」
+//（含 pkgInfo.json 与 cars|tracks|shaders 等）。仓库内见 test/simEnv/resources/testPkg/。
+const DevSimEnvResourcePkgDir = "testPkg"
+
+// DevLocalResourceLibraryRoot 返回开发模式下本地资源库根目录（…/test/simEnv/resources/testPkg）。
+func DevLocalResourceLibraryRoot(backendRoot string) string {
+	return filepath.Join(backendRoot, "test", "simEnv", "resources", DevSimEnvResourcePkgDir)
+}
+
 // 资源包将会分为：
 // - 完整包(全部资源)
 // - 最小包(仅主图+一个C1环线副图+SHMC车包)
@@ -120,7 +129,7 @@ func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 	var midFilePath string
 	isDevMode := infoGet.IsDevModeGet()
 	if isDevMode {
-		midFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", "importResourceCache")
+		midFilePath = filepath.Join(DevLocalResourceLibraryRoot(backendRootPath), "importResourceCache")
 	} else {
 		midFilePath = filepath.Join(backendRootPath, "resources", "importResourceCache")
 		// TODO：补充非开发模式下获取 windows desktop 路径函数
@@ -128,7 +137,7 @@ func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 
 	var resourceJsonFilePath string
 	if isDevMode {
-		resourceJsonFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+		resourceJsonFilePath = DevLocalResourceLibraryRoot(backendRootPath)
 	} else {
 		resourceJsonFilePath = filepath.Join(backendRootPath, "resources")
 	}
@@ -309,7 +318,7 @@ func MultiModInstall(paths []string, dftFilePath string) error {
 		return fmt.Errorf("获取根目录失败 error:%s", err)
 	}
 	if isDevMode {
-		localResouceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+		localResouceDir = DevLocalResourceLibraryRoot(backendRootPath)
 	} else {
 		localResouceDir = filepath.Join(backendRootPath, "resources")
 	}
@@ -388,7 +397,7 @@ func MultiModInstallWithTracker(paths []string, dftFilePath string, tracker *Tas
 		return fmt.Errorf("获取根目录失败 error:%s", err)
 	}
 	if isDevMode {
-		localResouceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources")
+		localResouceDir = DevLocalResourceLibraryRoot(backendRootPath)
 	} else {
 		localResouceDir = filepath.Join(backendRootPath, "resources")
 	}
@@ -734,7 +743,7 @@ func ClearBackendModInstallIntermediateDirs() error {
 
 	dirs := []string{
 		filepath.Join(backendRoot, "resources", "cache"),
-		filepath.Join(backendRoot, "test", "simEnv", "resources", "importResourceCache"),
+		filepath.Join(DevLocalResourceLibraryRoot(backendRoot), "importResourceCache"),
 	}
 	for _, d := range dirs {
 		if err := os.RemoveAll(d); err != nil {

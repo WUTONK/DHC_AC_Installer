@@ -148,7 +148,7 @@ func BuildCompleteResourceCatalog() ResourceCatalog {
 	jsonFileName := "pkgInfo.json"
 	var resourceJsonFilePath string
 	if isDev {
-		resourceJsonFilePath = filepath.Join(backendRootPath, "test", "simEnv", "resources", jsonFileName)
+		resourceJsonFilePath = filepath.Join(DevLocalResourceLibraryRoot(backendRootPath), jsonFileName)
 	} else {
 		resourceJsonFilePath = filepath.Join(backendRootPath, "resources", jsonFileName)
 	}
@@ -242,7 +242,7 @@ const (
 //   - resource：要检测的资源类型。为 All 时依次检测 tracks、cars、shaders、dashboard 并合并结果；
 //     为单一类型时只扫描该类型。
 //   - DetectionPath：Local 表示使用后端约定目录——开发模式下为
-//     <backend>/test/simEnv/resources/<类型>，非开发为 <backend>/resources/<类型>，目录不存在则返回错误。
+//     <backend>/test/simEnv/resources/testPkg/<类型>，非开发为 <backend>/resources/<类型>，目录不存在则返回错误。
 //     非 Local 的字符串视为自定义根路径；若路径不存在则返回 (nil, nil)，便于在批量场景中跳过缺失类型。
 //
 // 比对规则（在 catalog 中已登记的 mod）：
@@ -271,10 +271,10 @@ const (
 //	// DEMO 安装流程中按类型检测（见 demoInstaller.go）
 //	rmTracks, err := ImportResourceDetection(Tracks, Local)
 //
-// 具体场景（与 test/simEnv/resources/pkgInfo.json 一致，开发模式 + Local）：
+// 具体场景（与 test/simEnv/resources/testPkg/pkgInfo.json 一致，开发模式 + Local）：
 //
 //	catalog 里写着 cars/SHMC/r34 的预期总大小为 8 字节（测试数据里的数字）。
-//	扫描目录为 <backend>/test/simEnv/resources/cars/，会递归遍历其下所有文件；
+//	扫描目录为 <backend>/test/simEnv/resources/testPkg/cars/，会递归遍历其下所有文件；
 //	凡是路径形如 .../cars/SHMC/r34/ 下的文件，体积都累加到 mod「cars/SHMC/r34」上。
 //	若累加结果 = 0 → 该 mod 为 NotImported；0 < 累加 < 8 → Incomplete；累加 ≥ 8 → Pass。
 //	若磁盘上根本没有 SHMC/r34 下任何文件，该 mod 保持初始的 NotImported。
@@ -318,7 +318,7 @@ func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath)
 
 	if DetectionPath == Local {
 		if isDev {
-			resourceDir = filepath.Join(backendRootPath, "test", "simEnv", "resources", string(resource))
+			resourceDir = filepath.Join(DevLocalResourceLibraryRoot(backendRootPath), string(resource))
 		} else {
 			resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
 		}
