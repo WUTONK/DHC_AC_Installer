@@ -1,3 +1,6 @@
+# macOS
+.DS_Store
+
 # cursor code history
 .history/
 
@@ -14,6 +17,8 @@ DHC_Backend/resources/cache
 DHC_Backend/test/testModFile
 DHC_Backend/test/simEnv/windows_finder
 DHC_Backend/test/simEnv/acRoot
+# Large local demo package assets (~GB); keep out of git to avoid slow git add / huge repo
+DHC_Backend/test/simEnv/resources/resources/demoPkg/
 
 # Temporary document
 doc/.*
