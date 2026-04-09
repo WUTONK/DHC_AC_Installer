@@ -26,11 +26,11 @@ const DEFAULT_STATE: AppStateJson = {
 
 function resolveAppStatePath(): string {
   // 1) 常见场景：electron 从项目根目录启动
-  const cwdCandidate = path.resolve(process.cwd(), 'DHC_Backend', 'Databese', 'appState.json')
+  const cwdCandidate = path.resolve(process.cwd(), 'DHC_Backend', 'Database', 'appState.json')
   if (fs.existsSync(cwdCandidate)) return cwdCandidate
 
   // 2) 兜底：向上找一层（有时 CWD 可能是 DHC_Frontend）
-  const upCandidate = path.resolve(process.cwd(), '..', 'DHC_Backend', 'Databese', 'appState.json')
+  const upCandidate = path.resolve(process.cwd(), '..', 'DHC_Backend', 'Database', 'appState.json')
   if (fs.existsSync(upCandidate)) return upCandidate
 
   // 3) 最后兜底：返回 CWD 方案（让调用方能看到“找不到/写不进去”的报错）

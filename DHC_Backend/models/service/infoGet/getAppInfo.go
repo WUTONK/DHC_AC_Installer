@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 )
 
-// 状态检测：所有状态保存在 Databese/appState.json
+// 状态检测：所有状态保存在 Database/appState.json
 
-// AppState 应用持久化状态（与 Databese/appState.json 对应）
+// AppState 应用持久化状态（与 Database/appState.json 对应）
 type AppState struct {
 	// FirstLaunchCompleted 为 true 表示用户已完成首次启动流程（非「第一次使用」）
 	FirstLaunchCompleted bool `json:"firstLaunchCompleted"`
@@ -30,7 +30,7 @@ func appStateFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(root, "Databese", "appState.json"), nil
+	return filepath.Join(root, "Database", "appState.json"), nil
 }
 
 func readAppState() (AppState, error) {
@@ -62,7 +62,7 @@ func writeAppState(state AppState) error {
 	}
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("创建 Databese 目录失败: %w", err)
+		return fmt.Errorf("创建 Database 目录失败: %w", err)
 	}
 	out, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {

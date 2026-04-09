@@ -25,18 +25,6 @@ import (
 // 工具函数
 // ------------------------------
 
-// readEnvBool 读取环境变量 bool。
-// - value 为空：返回 defaultVal
-// - value 为 "true"（忽略大小写）：返回 true
-// - 其他值：返回 false
-func readEnvBool(key string, defaultVal bool) bool {
-	v := strings.TrimSpace(os.Getenv(key))
-	if v == "" {
-		return defaultVal
-	}
-	return strings.EqualFold(v, "true")
-}
-
 // assertDevGamePathSafe 断言：当前运行环境允许写入 simEnv。
 func assertDevGamePathSafe() (string, error) {
 	if !infoGet.IsDevModeGet() {
@@ -85,40 +73,6 @@ func writeDemoTxtAtRoot(gamePath string, relPath string, content string) error {
 // ------------------------------
 // 资源校验（参考 resourceDetection.go）
 // ------------------------------
-
-// DetectDemoResourcesIntegrity 检测 DEMO 所需的资源完整性（开发模式下用 test/simEnv/resources/testPkg）。
-//
-// 说明：
-// - 仓库当前 pkgInfo.json 里只注册了 cars / tracks / shaders 等资源（dashboard 可能缺失）
-// - 所以 DEMO 这里只检查这三类，避免因为 dashboard 缺失导致 complete 永远为 false
-func DetectDemoResourcesIntegrity() (imported bool, complete bool, err error) {
-	required := []ResourceType{Cars, Tracks, Shaders}
-
-	anyImported := false
-	allPass := true
-
-	for _, rt := range required {
-		rm, detErr := ImportResourceDetection(rt, Local)
-		if detErr != nil {
-			return false, false, detErr
-		}
-
-		// rm[rt] 理论上应该存在，但仍做防御性校验。
-		var state ResourceState = NotImported
-		if rm != nil && rm[rt] != nil {
-			state = rm[rt].State
-		}
-
-		if state != NotImported {
-			anyImported = true
-		}
-		if state != Pass {
-			allPass = false
-		}
-	}
-
-	return anyImported, allPass, nil
-}
 
 // RunDemoResourceVerify 是“资源包校验”执行器（供前端导入/校验进度条使用）。
 // 返回 nil 表示通过；返回错误表示校验不通过。
@@ -198,8 +152,8 @@ func RunDemoResourceVerify(tracker *TaskTracker) error {
 // - DHC_DEMO_DLC_PASS=false 时返回不过
 // - DHC_DEMO_CARPACK_PASS=false 时返回不过
 func DetectDemoDlcAndCarPack() (hasAllDLC bool) {
-	dlcPass := readEnvBool("DHC_DEMO_DLC_PASS", true)
-	carPackPass := readEnvBool("DHC_DEMO_CARPACK_PASS", true)
+	dlcPass := infoGet.ReadEnvBool("DHC_DEMO_DLC_PASS", true)
+	carPackPass := infoGet.ReadEnvBool("DHC_DEMO_CARPACK_PASS", true)
 	return dlcPass && carPackPass
 }
 
@@ -620,7 +574,7 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 // TODO：真实模组 / 生产场景下，在安装成功后按次删除 resources/cache 中对应解压目录（见 decompression），
 // 以及可配置临时盘；本函数仅覆盖当前测试与 simEnv 需求，保持简单。
 func SimEnvDevInstallCleanup(skipRecycle bool) error {
-	if skipRecycle || readEnvBool("DHC_SIMENV_SKIP_INSTALL_CLEANUP", false) {
+	if skipRecycle || infoGet.ReadEnvBool("DHC_SIMENV_SKIP_INSTALL_CLEANUP", false) {
 		return nil
 	}
 	if !infoGet.IsDevModeGet() {
@@ -636,7 +590,10 @@ func SimEnvDevInstallCleanup(skipRecycle bool) error {
 // 内部：带 tracker 的检测封装
 // ------------------------------
 
-func runDetectDemoResourcesIntegrityWithTracker(tracker *TaskTracker) (imported bool, complete bool, err error) {
+// DetectDemoResourcesIntegrityWithTracker 检测 DEMO 所需的资源完整性，并通过 tracker 报告子进度。
+// 检查 cars / tracks / shaders 三类资源，返回 imported（是否有任何资源已导入）和 complete（是否全部通过）。
+// 无需进度追踪时，传入 NewTaskTracker(nil) 即可静默执行。
+func DetectDemoResourcesIntegrityWithTracker(tracker *TaskTracker) (imported bool, complete bool, err error) {
 	// 这里不新增额外 phase，只是让当前 phase 内的子进度有变化。
 	// cars/tracks/shaders 依次检测，按 0/30/60/100 推进。
 	tracker.SetSubProgress("resource_verify", 10)
@@ -676,9 +633,9 @@ func runDetectDemoResourcesIntegrityWithTracker(tracker *TaskTracker) (imported 
 func runDetectDemoDlcCarPackWithTracker(tracker *TaskTracker) (hasAll bool) {
 	// 这里模拟两步检测，让子进度可见。
 	tracker.SetSubProgress("dlc_carpack_detect", 30)
-	dlcPass := readEnvBool("DHC_DEMO_DLC_PASS", true)
+	dlcPass := infoGet.ReadEnvBool("DHC_DEMO_DLC_PASS", true)
 	tracker.SetSubProgress("dlc_carpack_detect", 60)
-	carPackPass := readEnvBool("DHC_DEMO_CARPACK_PASS", true)
+	carPackPass := infoGet.ReadEnvBool("DHC_DEMO_CARPACK_PASS", true)
 	tracker.SetSubProgress("dlc_carpack_detect", 100)
 
 	return dlcPass && carPackPass

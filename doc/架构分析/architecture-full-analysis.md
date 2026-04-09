@@ -329,7 +329,7 @@ sequenceDiagram
     Note over R,G: ⚠️ 路径三：直接 Node fs（绕过后端）
     R->>R: appStateFileStore.ts
     R->>R: window.require('fs')
-    R->>R: 直接读写 DHC_Backend/Databese/appState.json
+    R->>R: 直接读写 DHC_Backend/Database/appState.json
 ```
 
 ---
@@ -563,7 +563,7 @@ graph TB
         end
         
         subgraph P4["问题4：前端直接操作后端文件"]
-            P4_desc["appStateFileStore.ts<br/>通过 window.require('fs')<br/>直接读写 DHC_Backend/Databese/appState.json<br/>绕过了后端 API 层"]
+            P4_desc["appStateFileStore.ts<br/>通过 window.require('fs')<br/>直接读写 DHC_Backend/Database/appState.json<br/>绕过了后端 API 层"]
         end
         
         subgraph P5["问题5：死代码 & 幽灵文件"]
@@ -579,7 +579,7 @@ graph TB
         end
         
         subgraph P8["问题8：命名不一致"]
-            P8_desc["• Databese（拼写错误，应为 Database）<br/>• modInstall 包名 vs modinstall（Go 约定小写）<br/>• getGamePath 占位函数返回硬编码<br/>• Demo 前缀函数实际包含真实逻辑"]
+            P8_desc["• Database（拼写错误，应为 Database）<br/>• modInstall 包名 vs modinstall（Go 约定小写）<br/>• getGamePath 占位函数返回硬编码<br/>• Demo 前缀函数实际包含真实逻辑"]
         end
     end
     
@@ -761,7 +761,7 @@ gantt
     
     section 第一阶段：清理（低风险）
     删除死代码与废弃文件              :p1a, 2026-04-09, 1d
-    修复命名（Databese→Database等）    :p1b, after p1a, 1d
+    修复命名（Database→Database等）    :p1b, after p1a, 1d
     前端移除 appStateFileStore 改用 API :p1c, after p1b, 1d
     
     section 第二阶段：后端分层（核心）
@@ -792,7 +792,7 @@ gantt
 | 删除 | `handler/systemInfoHandler.go` | 路由未注册，handler 为空函数 |
 | 删除 | `ShaderInstaller.v1.tsx` | 旧版本，已有新版 |
 | 删除 | `OneClickInstallerContext.tsx` | 无消费者 |
-| 重命名 | `Databese/` → `database/` | 修复拼写错误 |
+| 重命名 | `Database/` → `database/` | 修复拼写错误 |
 | 迁移 | `appStateFileStore.ts` | 改为调用 `GET/PUT /api/AppState` |
 
 #### 第二阶段：后端分层

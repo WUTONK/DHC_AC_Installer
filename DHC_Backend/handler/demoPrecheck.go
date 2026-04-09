@@ -16,7 +16,7 @@ func registerDemoPrecheckRoutes(g gin.IRouter) {
 
 // demoPrecheckResourcesHandler 返回 DEMO 资源包完整性信息（用于 PreCheckPage 的“资源包就绪状态”卡片）。
 func demoPrecheckResourcesHandler(c *gin.Context) {
-	imported, complete, err := modinstall.DetectDemoResourcesIntegrity()
+	imported, complete, err := modinstall.DetectDemoResourcesIntegrityWithTracker(modinstall.NewTaskTracker(nil))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
