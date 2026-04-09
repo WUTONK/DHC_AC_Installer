@@ -236,3 +236,11 @@ func DetectLocalCmPath() (isCmExist bool, cmPath string, err error) {
 	// 所有路径都不存在
 	return false, "", nil
 }
+
+// RunRealCMInstall 是生产版 CM 安装执行器。
+// 内部调用 InstallCmWithTracker 执行真实的下载、解压、移动操作。
+// 需要网络连接（下载 CM 安装包），适用于生产环境。
+func RunRealCMInstall(tracker *TaskTracker) error {
+	_, err := InstallCmWithTracker(tracker)
+	return err
+}

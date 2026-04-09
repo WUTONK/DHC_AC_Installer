@@ -12,6 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// registerServerInfoHandlerRoute 注册服务器信息查询相关路由。
+func registerServerInfoHandlerRoute(g gin.IRouter) {
+	g.GET("/api/GetServerInfo", GetServerInfo)
+}
+
 // GetServerInfo 处理 /api/GetServerInfo 请求，查询指定服务器的在线状态。
 // 支持 JSON body 或 query 参数传入 ServerHost。
 func GetServerInfo(c *gin.Context) {

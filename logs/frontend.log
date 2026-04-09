@@ -1,5 +1,5 @@
 
-> dhc@1.0.0 dev /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend
+> dhc-frontend@1.0.0 dev /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Frontend
 > electron-vite dev
 
 vite v7.1.7 building SSR bundle for development...
@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 51ms
+✓ built in 160ms
 
 build the electron main process successfully
 
@@ -19,7 +19,7 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 10ms
+✓ built in 7ms
 
 build the electron preload files successfully
 

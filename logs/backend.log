@@ -26,8 +26,9 @@
 [GIN-debug] GET    /api/demo/precheck/dlc-carpack --> DHC_Backend/handler.demoPrecheckDlcCarPackHandler (4 handlers)
 [GIN-debug] GET    /api/demo/precheck/cm     --> DHC_Backend/handler.demoPrecheckCmHandler (4 handlers)
 [GIN-debug] GET    /api/GetDiskInfo          --> DHC_Backend/handler.getDiskInfoHandler (4 handlers)
-2026/04/09 10:03:19 Backend Server is running on port http://127.0.0.1:19810
-2026/04/09 10:03:19 Frontend login page is running on path http://localhost:11451
+2026/04/09 10:54:18 Backend Server is running on port http://127.0.0.1:19810
+2026/04/09 10:54:18 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
+[GIN] 2026/04/09 - 10:54:40 | 200 |      220.25µs |       127.0.0.1 | GET      "/api/lab/ping"

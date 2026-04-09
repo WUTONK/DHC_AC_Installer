@@ -3,9 +3,7 @@ package modinstall
 import (
 	"DHC_Backend/models/service/infoGet"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+	"time"
 )
 
 // ==============================
@@ -21,52 +19,60 @@ import (
 // - 只有在开发模式下才允许写入 game 目录
 // - 进一步校验 gamePath 必须位于 test/simEnv 内，避免误写到真实用户目录
 
-// ------------------------------
-// 工具函数
-// ------------------------------
+// ============================================================================
+// 安装执行器（Install Executor）
+//
+// 这一层负责"具体安装流程的编排"，例如 CM 安装分几个阶段、每个阶段做什么。
+// 执行器通过 TaskTracker 报告进度，但不关心进度数据最终去了哪里（注册表、日志、前端）。
+//
+// ── 统一签名 ──
+//
+//   func XxxExecutor(tracker *TaskTracker) error
+//
+// 所有执行器都遵循这个签名：接收 tracker，返回 error。
+// handler 层通过 runInstallExecutor 统一调用，不需要了解内部细节。
+//
+// ── 扩展方式 ──
+//
+// 未来新增 shader / map / carPack 安装，只需在对应文件加一个函数：
+//
+//   func RunShaderInstall(tracker *TaskTracker) error { ... }
+//
+// 然后在 handler 的 createInstallation 里多加一个 category 和对应的
+// runInstallExecutor 调用即可。
+// ============================================================================
 
-// assertDevGamePathSafe 断言：当前运行环境允许写入 simEnv。
-func assertDevGamePathSafe() (string, error) {
-	if !infoGet.IsDevModeGet() {
-		return "", fmt.Errorf("DEMO 安装仅允许在开发模式下运行：请设置 DHC_DEV=true")
-	}
+// RunDemoCMInstall 是演示/测试版 CM 安装执行器。
+// 使用 TaskTracker 管理进度，用 time.Sleep 模拟耗时操作。
+// 阶段设计和真实版完全一致（download → extract → move），方便对照。
+//
+// 适用场景：开发调试、前端联调、集成测试（不需要网络）。
+func RunDemoCMInstall(tracker *TaskTracker) error {
+	tracker.AddPhase("download", "下载CM安装包", 25)
+	tracker.AddPhase("extract", "解压CM文件", 50)
+	tracker.AddPhase("move", "移动到桌面", 25)
 
-	gamePath, err := infoGet.GetGamePathAuto()
-	if err != nil {
-		return "", fmt.Errorf("获取游戏路径失败: %w", err)
+	// 模拟下载阶段：子进度 0→20→40→60→80→100，总进度 0→5→10→15→20→25
+	tracker.StartPhase("download")
+	for i := 1; i <= 5; i++ {
+		time.Sleep(200 * time.Millisecond)
+		tracker.SetSubProgress("download", float64(i)*20)
 	}
+	tracker.CompletePhase("download")
 
-	// 双重保险：要求 gamePath 一定在 test/simEnv 下。
-	// infoGet 在开发模式下会返回对应目录，但这里再校验一遍更安全。
-	if !strings.Contains(filepath.ToSlash(gamePath), "test/simEnv/") {
-		return "", fmt.Errorf("拒绝写入非测试 simEnv 目录：%s", gamePath)
+	// 模拟解压阶段：子进度 0→20→40→60→80→100，总进度 25→35→45→55→65→75
+	tracker.StartPhase("extract")
+	for i := 1; i <= 5; i++ {
+		time.Sleep(300 * time.Millisecond)
+		tracker.SetSubProgress("extract", float64(i)*20)
 	}
-	return gamePath, nil
-}
+	tracker.CompletePhase("extract")
 
-// writeDemoTxt 在 content 下写入一个 txt 模拟文件。
-func writeDemoTxt(gamePath string, relUnderContent string, content string) error {
-	target := filepath.Join(gamePath, "content", filepath.FromSlash(relUnderContent))
+	// 模拟移动阶段：一步到位，总进度 75→100
+	tracker.StartPhase("move")
+	time.Sleep(300 * time.Millisecond)
+	tracker.CompletePhase("move")
 
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return fmt.Errorf("创建目录失败: %w", err)
-	}
-	if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
-		return fmt.Errorf("写入模拟文件失败: %w", err)
-	}
-	return nil
-}
-
-// writeDemoTxtAtRoot 在游戏根目录下写入一个 txt 模拟文件（用于 extension/ 等不在 content/ 下的路径）。
-func writeDemoTxtAtRoot(gamePath string, relPath string, content string) error {
-	target := filepath.Join(gamePath, filepath.FromSlash(relPath))
-
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return fmt.Errorf("创建目录失败: %w", err)
-	}
-	if err := os.WriteFile(target, []byte(content), 0o644); err != nil {
-		return fmt.Errorf("写入模拟文件失败: %w", err)
-	}
 	return nil
 }
 
@@ -555,35 +561,6 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 	}
 
 	return nil
-}
-
-// ------------------------------
-// 实验环境收尾（测试 / git 还原）
-// ------------------------------
-
-// SimEnvDevInstallCleanup 在实验安装流程结束后调用：清空后端中间目录，并将 simEnv 下游戏目录恢复为 envBackup 基线。
-// 默认无论安装成功与否都应执行（例如在 handler 里 defer），除非显式跳过回收。
-//
-// 参数 skipRecycle：
-//   - true：跳过全部回收，保留 resources/cache、importResourceCache 与 acRoot 写入内容（调试用）。
-//
-// 环境变量 DHC_SIMENV_SKIP_INSTALL_CLEANUP=true 时与 skipRecycle=true 等效，便于不改调用代码保留现场。
-//
-// 非开发模式（DHC_DEV≠true）下为安全起见整函数为空操作（返回 nil）。
-//
-// TODO：真实模组 / 生产场景下，在安装成功后按次删除 resources/cache 中对应解压目录（见 decompression），
-// 以及可配置临时盘；本函数仅覆盖当前测试与 simEnv 需求，保持简单。
-func SimEnvDevInstallCleanup(skipRecycle bool) error {
-	if skipRecycle || infoGet.ReadEnvBool("DHC_SIMENV_SKIP_INSTALL_CLEANUP", false) {
-		return nil
-	}
-	if !infoGet.IsDevModeGet() {
-		return nil
-	}
-	if err := ClearBackendModInstallIntermediateDirs(); err != nil {
-		return err
-	}
-	return ResetSimEnvModDirectoriesForDevCleanup()
 }
 
 // ------------------------------
