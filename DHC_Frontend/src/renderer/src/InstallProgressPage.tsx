@@ -80,6 +80,7 @@ interface InstallProgressPageProps {
     onComplete?: () => void;
     onCancel?: () => void;
     manualContinueAfterComplete?: boolean;
+    requireBackendTracker?: boolean;
 }
 
 type FinishState = 'running' | 'awaiting_continue' | 'done';
@@ -88,7 +89,8 @@ export default function InstallProgressPage({
     installId,
     onComplete,
     onCancel,
-    manualContinueAfterComplete = false
+    manualContinueAfterComplete = false,
+    requireBackendTracker = false
 }: InstallProgressPageProps): React.JSX.Element {
     const { isDevMode } = useDevMode();
     const [activeCategoryIdx, setActiveCategoryIdx] = useState<number>(0);
@@ -139,6 +141,7 @@ export default function InstallProgressPage({
 
     // --- 本地模拟安装逻辑 ---
     useEffect(() => {
+        if (requireBackendTracker) return;
         if (installId) return;
         if (finishState !== 'running') return;
         if (activeCategoryIdx >= INSTALL_QUEUE.length) return;
@@ -204,7 +207,7 @@ export default function InstallProgressPage({
         }, updateInterval);
 
         return () => { clearInterval(timer); };
-    }, [activeCategoryIdx, activeItemIdx, finishState, isDevMode, installId, addLog, handleAllDone]);
+    }, [activeCategoryIdx, activeItemIdx, finishState, isDevMode, installId, addLog, handleAllDone, requireBackendTracker]);
 
     // 自动滚动日志
     useEffect(() => {
@@ -271,6 +274,34 @@ export default function InstallProgressPage({
     
     const isAllDone = finishState === 'done';
     const isAwaiting = finishState === 'awaiting_continue';
+
+    if (requireBackendTracker && !installId) {
+        return (
+            <div style={{ height: '100vh', background: '#16161a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Card style={{ width: 560, textAlign: 'center', backgroundColor: '#232326', border: '1px solid #444' }}>
+                    <Title heading={3} style={{ color: '#fff' }}>无法启动后端安装任务</Title>
+                    <Text style={{ color: '#ccc', margin: '16px 0', display: 'block' }}>
+                        当前安装流程已配置为必须由后端驱动，但没有拿到有效的 `installId`。
+                    </Text>
+                    <Text style={{ color: '#888', display: 'block' }}>
+                        请返回上一页后重试，并检查 Electron 控制台里是否存在创建安装任务失败的报错。
+                    </Text>
+                    {onCancel && (
+                        <div style={{ marginTop: 20 }}>
+                            <Button
+                                theme="solid"
+                                size="large"
+                                style={{ backgroundColor: '#e74c3c', color: '#fff' }}
+                                onClick={onCancel}
+                            >
+                                返回
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </div>
+        );
+    }
 
     if (isAllDone) {
         return (

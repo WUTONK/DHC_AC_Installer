@@ -2,6 +2,7 @@ package handler
 
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
+	"DHC_Backend/models/service/servicelog"
 	"time"
 )
 
@@ -65,8 +66,15 @@ func runInstallExecutor(
 		}
 	})
 
+	servicelog.Infof("[install] executor start installId=%s category=%s finalizeTask=%v", installID, categoryID, finalizeTask)
+
 	// 调用执行器：具体安装逻辑全在这里面
 	err := executorFn(tracker)
+	if err != nil {
+		servicelog.Errorf("[install] executor failed installId=%s category=%s: %v", installID, categoryID, err)
+	} else {
+		servicelog.Infof("[install] executor ok installId=%s category=%s finalizeTask=%v", installID, categoryID, finalizeTask)
+	}
 
 	// 根据执行结果标记类别状态。
 	// finalizeTask=true：同时写入任务 EndTime，并把全局状态收敛到 completed/failed。
@@ -117,6 +125,7 @@ func finalizeInstallTask(installID string, err error) {
 	if err != nil {
 		task.Status = installStatusFailed
 		task.Error = err.Error()
+		servicelog.Errorf("[install] finalize early installId=%s status=failed err=%v", installID, err)
 	} else {
 		task.Status = installStatusCompleted
 	}

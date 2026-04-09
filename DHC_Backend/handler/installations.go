@@ -2,6 +2,7 @@ package handler
 
 import (
 	modinstall "DHC_Backend/models/service/modInstall"
+	"DHC_Backend/models/service/servicelog"
 	"fmt"
 	"net/http"
 	"time"
@@ -87,6 +88,7 @@ func createInstallation(c *gin.Context) {
 	setDef, found := installSetRegistry[req.SetID]
 	if !found {
 		setDef = defaultInstallSet
+		servicelog.Infof("[install] setId %q not in registry, using default (cm demo)", req.SetID)
 	}
 
 	installID := fmt.Sprintf("install_%d", time.Now().UnixNano())
@@ -128,14 +130,20 @@ func createInstallation(c *gin.Context) {
 	installTasks[installID] = task
 	installTasksMu.Unlock()
 
+	servicelog.Infof("[install] created task installId=%s setId=%s registryHit=%v demoSlowProgress=%v steps=%d",
+		installID, req.SetID, found, task.demoPace != nil, len(setDef.Steps))
+
 	// 异步启动安装流程：按步骤顺序执行，最后一步负责 finalize。
 	go func() {
+		defer servicelog.Infof("[install] pipeline goroutine exit installId=%s setId=%s", installID, task.SetID)
 		if setDef.DeferCleanup {
 			defer func() {
+				servicelog.Infof("[install] deferred SimEnvDevInstallCleanup for installId=%s", installID)
 				_ = modinstall.SimEnvDevInstallCleanup(false)
 			}()
 		}
 
+		servicelog.Infof("[install] pipeline start installId=%s setId=%s", installID, task.SetID)
 		steps := setDef.Steps
 		for i, step := range steps {
 			isLast := (i == len(steps)-1)

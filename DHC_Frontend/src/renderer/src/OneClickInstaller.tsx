@@ -84,6 +84,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         const saved = localStorage.getItem('devInstallManualContinue');
         return saved !== null ? saved === 'true' : true;
     });
+    const [requireBackendInstall, setRequireBackendInstall] = useState<boolean>(false);
 
     // [新增] 开发者调试：资源模拟状态
     const [devResourceImported, setDevResourceImported] = useState<boolean>(() => {
@@ -648,6 +649,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
     const handleInstallComplete = (): void => {
         setCurrentStep('POST_INSTALL');
         setDemoInstallId(null);
+        setRequireBackendInstall(false);
         Toast.success('安装完成！');
         // 可以在这里添加其他完成后的逻辑，比如刷新页面或跳转
     };
@@ -683,6 +685,8 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         if (currentMode.id === 'demo') {
             // DEMO：创建后端安装任务，让 InstallProgressPage 轮询 tracker 真实进度
             Toast.info('开始 DEMO 安装，一切准备就绪');
+            setRequireBackendInstall(true);
+            setDemoInstallId(null);
             void (async () => {
                 try {
                     const response = (await requestBackend('POST', '/api/installations', {
@@ -695,10 +699,16 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                             : {})
                     })) as InstallationCreateResponse;
 
+                    if (!response?.id) {
+                        throw new Error('backend did not return installId');
+                    }
+
+                    console.info('[OneClickInstaller] DEMO 安装任务已创建', response);
                     setDemoInstallId(response.id);
                     setCurrentStep('INSTALLING');
                 } catch (err: unknown) {
                     console.error('创建 DEMO 安装任务失败:', err);
+                    setRequireBackendInstall(false);
                     Toast.error('无法启动 DEMO 安装任务，请检查后端服务');
                 }
             })();
@@ -706,6 +716,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         }
 
         // 非 DEMO：保留原有前端模拟行为
+        setRequireBackendInstall(false);
         setCurrentStep('INSTALLING');
         Toast.info('开始安装，一切准备就绪');
     };
@@ -1036,7 +1047,12 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                     <InstallProgressPage
                         installId={demoInstallId || undefined}
                         onComplete={handleInstallComplete}
+                        onCancel={() => {
+                            setRequireBackendInstall(false);
+                            setCurrentStep('PRE_CHECK');
+                        }}
                         manualContinueAfterComplete={devInstallManualContinue}
+                        requireBackendTracker={requireBackendInstall}
                     />
                 );
             case 'POST_INSTALL':

@@ -2,6 +2,7 @@ package modinstall
 
 import (
 	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"fmt"
 	"time"
 )
@@ -48,6 +49,7 @@ import (
 //
 // 适用场景：开发调试、前端联调、集成测试（不需要网络）。
 func RunDemoCMInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoCMInstall begin")
 	tracker.AddPhase("download", "下载CM安装包", 25)
 	tracker.AddPhase("extract", "解压CM文件", 50)
 	tracker.AddPhase("move", "移动到桌面", 25)
@@ -73,6 +75,7 @@ func RunDemoCMInstall(tracker *TaskTracker) error {
 	time.Sleep(300 * time.Millisecond)
 	tracker.CompletePhase("move")
 
+	servicelog.Infof("[demo] RunDemoCMInstall done")
 	return nil
 }
 
@@ -83,6 +86,7 @@ func RunDemoCMInstall(tracker *TaskTracker) error {
 // RunDemoResourceVerify 是“资源包校验”执行器（供前端导入/校验进度条使用）。
 // 返回 nil 表示通过；返回错误表示校验不通过。
 func RunDemoResourceVerify(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoResourceVerify begin")
 	// 资源校验阶段：逐类扫描并把结果合并。
 	tracker.AddPhase("cars", "资源包校验：车辆资源", 35)
 	tracker.AddPhase("tracks", "资源包校验：地图资源", 35)
@@ -145,6 +149,7 @@ func RunDemoResourceVerify(tracker *TaskTracker) error {
 		return fmt.Errorf("资源包校验不通过：anyImported=%v allPass=%v", anyImported, allPass)
 	}
 	tracker.CompletePhase("finalize")
+	servicelog.Infof("[demo] RunDemoResourceVerify done")
 	return nil
 }
 
@@ -170,6 +175,7 @@ func DetectDemoDlcAndCarPack() (hasAllDLC bool) {
 // RunDemoCoreInstall 完成“资源校验 + DLC/车包检测 + 基础环境写入”。
 // 它会作为前端进度条里的 `core` 类别执行器。
 func RunDemoCoreInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoCoreInstall begin")
 	// tracker 阶段划分（权重合计 = 100）
 	// - 资源校验：车辆 10 + 地图 10 + 光影 10 + 汇总判定 5
 	// - DLC/车包检测：20
@@ -299,12 +305,14 @@ func RunDemoCoreInstall(tracker *TaskTracker) error {
 	}
 
 	tracker.CompletePhase("base_env_install")
+	servicelog.Infof("[demo] RunDemoCoreInstall done")
 	return nil
 }
 
 // RunDemoWeatherInstall 作为前端进度条里的 `weather` 类别执行器。
 // 阶段划分：Sol Core → Sol Config → Pure Base → Pure Textures
 func RunDemoWeatherInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoWeatherInstall begin")
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
 		return err
@@ -381,12 +389,14 @@ func RunDemoWeatherInstall(tracker *TaskTracker) error {
 		tracker.CompletePhase(s.phaseID)
 	}
 
+	servicelog.Infof("[demo] RunDemoWeatherInstall done")
 	return nil
 }
 
 // RunDemoMapInstall 作为前端进度条里的 `map` 类别执行器。
 // 阶段划分：SRP 主赛道 → SRP 附加内容 → PA 辰巳 → PA 芝浦
 func RunDemoMapInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoMapInstall begin")
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
 		return err
@@ -464,12 +474,14 @@ func RunDemoMapInstall(tracker *TaskTracker) error {
 		tracker.CompletePhase(s.phaseID)
 	}
 
+	servicelog.Infof("[demo] RunDemoMapInstall done")
 	return nil
 }
 
 // RunDemoCarsInstall 作为前端进度条里的 `cars` 类别执行器。
 // 阶段划分：按每辆车独立阶段，每辆车写入模型+皮肤+数据三个文件
 func RunDemoCarsInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[demo] RunDemoCarsInstall begin")
 	gamePath, err := assertDevGamePathSafe()
 	if err != nil {
 		return err
@@ -560,6 +572,7 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 		tracker.CompletePhase(s.phaseID)
 	}
 
+	servicelog.Infof("[demo] RunDemoCarsInstall done")
 	return nil
 }
 

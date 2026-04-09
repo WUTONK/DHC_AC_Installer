@@ -2,6 +2,7 @@ package main
 
 import (
 	"DHC_Backend/handler"
+	"DHC_Backend/models/service/servicelog"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -9,6 +10,10 @@ import (
 )
 
 func main() {
+	// 重定向到文件时让 Gin 访问日志与 servicelog 一样及时落盘（tail -f 可见）。
+	gin.DefaultWriter = servicelog.SyncingStdout()
+	gin.DefaultErrorWriter = servicelog.SyncingStdout()
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{

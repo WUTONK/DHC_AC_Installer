@@ -26,9 +26,393 @@
 [GIN-debug] GET    /api/demo/precheck/dlc-carpack --> DHC_Backend/handler.demoPrecheckDlcCarPackHandler (4 handlers)
 [GIN-debug] GET    /api/demo/precheck/cm     --> DHC_Backend/handler.demoPrecheckCmHandler (4 handlers)
 [GIN-debug] GET    /api/GetDiskInfo          --> DHC_Backend/handler.getDiskInfoHandler (4 handlers)
-2026/04/09 10:54:18 Backend Server is running on port http://127.0.0.1:19810
-2026/04/09 10:54:18 Frontend login page is running on path http://localhost:11451
+2026/04/09 11:54:41 Backend Server is running on port http://127.0.0.1:19810
+2026/04/09 11:54:41 Frontend login page is running on path http://localhost:11451
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on 127.0.0.1:19810
-[GIN] 2026/04/09 - 10:54:40 | 200 |      220.25µs |       127.0.0.1 | GET      "/api/lab/ping"
+[GIN] 2026/04/09 - 11:55:19 | 200 |     150.833µs |       127.0.0.1 | GET      "/api/demo/precheck/dlc-carpack"
+[GIN] 2026/04/09 - 11:55:19 | 200 |       154.5µs |       127.0.0.1 | GET      "/api/demo/precheck/cm"
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:55:19 | 200 |   26.263791ms |       127.0.0.1 | GET      "/api/demo/precheck/resources"
+[1;38;5;86mINFO[0m [install] created task installId=install_1775706920329075000 setId=demo-install-v1 registryHit=true demoSlowProgress=true steps=4
+[GIN] 2026/04/09 - 11:55:20 | 200 |    7.012042ms |       127.0.0.1 | POST     "/api/installations"
+[1;38;5;86mINFO[0m [install] pipeline start installId=install_1775706920329075000 setId=demo-install-v1
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706920329075000 category=core finalizeTask=false
+[GIN] 2026/04/09 - 11:55:20 | 200 |      72.167µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall begin
+[GIN] 2026/04/09 - 11:55:20 | 200 |          30µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:55:20 | 200 |     154.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:20 | 200 |       37.25µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:20 | 200 |       33.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:20 | 200 |      51.292µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      57.583µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |     121.416µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      43.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      73.209µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      38.958µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |        83.5µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      81.667µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:21 | 200 |      70.333µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      43.208µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      62.541µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      40.208µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |     112.541µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      56.416µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |       38.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      64.208µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:22 | 200 |      67.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      60.708µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      28.542µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      47.833µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      61.583µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      58.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |     116.917µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      60.667µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:23 | 200 |      65.584µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |       79.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      38.334µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      74.542µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      66.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      70.417µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      50.917µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:24 | 200 |      28.167µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |      61.458µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |       61.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |      67.875µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706920329075000 category=core finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706920329075000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall begin
+[GIN] 2026/04/09 - 11:55:25 | 200 |      63.791µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |      30.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |       25.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |      27.791µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:25 | 200 |      70.625µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |     110.292µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      81.542µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |       56.25µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      30.708µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      74.542µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      76.292µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      71.041µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:26 | 200 |      97.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      74.833µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      65.459µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      30.209µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      27.208µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      37.792µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      56.041µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      27.667µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:27 | 200 |      29.917µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      24.625µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      32.041µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |          34µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      23.791µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      41.542µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      21.459µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      29.166µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:28 | 200 |      40.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |       87.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |       31.75µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |      93.834µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |      30.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |          60µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |     116.459µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:29 | 200 |      32.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |      36.625µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |      26.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |        33.5µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706920329075000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706920329075000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall begin
+[GIN] 2026/04/09 - 11:55:30 | 200 |      61.667µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |      30.209µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |      23.708µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |      24.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:30 | 200 |        56.5µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      57.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      27.667µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      47.833µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      86.917µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      32.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |          28µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      60.167µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:31 | 200 |      88.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      27.042µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      25.333µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |     108.167µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      73.458µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      27.375µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      27.292µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      39.125µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:32 | 200 |      36.459µs |       127.0.0.1 | GET      "/api/installations/install_1775706920329075000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706920329075000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706920329075000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706920329075000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [install] deferred SimEnvDevInstallCleanup for installId=install_1775706920329075000
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已删除 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[GIN] 2026/04/09 - 11:55:46 | 200 |      87.625µs |       127.0.0.1 | GET      "/api/demo/precheck/cm"
+[GIN] 2026/04/09 - 11:55:46 | 200 |     133.125µs |       127.0.0.1 | GET      "/api/demo/precheck/dlc-carpack"
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:55:46 | 200 |    49.27275ms |       127.0.0.1 | GET      "/api/demo/precheck/resources"
+[1;38;5;86mINFO[0m [install] created task installId=install_1775706947043398000 setId=demo-install-v1 registryHit=true demoSlowProgress=false steps=4
+[GIN] 2026/04/09 - 11:55:47 | 200 |   10.094542ms |       127.0.0.1 | POST     "/api/installations"
+[1;38;5;86mINFO[0m [install] pipeline start installId=install_1775706947043398000 setId=demo-install-v1
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706947043398000 category=core finalizeTask=false
+[GIN] 2026/04/09 - 11:55:47 | 200 |      27.292µs |       127.0.0.1 | GET      "/api/installations/install_1775706947043398000/progress?category=all"
+[GIN] 2026/04/09 - 11:55:47 | 200 |      28.833µs |       127.0.0.1 | GET      "/api/installations/install_1775706947043398000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall begin
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706947043398000 category=core finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706947043398000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706947043398000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706947043398000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706947043398000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706947043398000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706947043398000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [install] deferred SimEnvDevInstallCleanup for installId=install_1775706947043398000
+[GIN] 2026/04/09 - 11:55:47 | 200 |      36.958µs |       127.0.0.1 | GET      "/api/installations/install_1775706947043398000/progress?category=all"
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/content -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 cfg 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/cfg -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/cfg
+[1;38;5;86mINFO[0m [install] pipeline goroutine exit installId=install_1775706920329075000 setId=demo-install-v1
+[1;38;5;86mINFO[0m [install] pipeline goroutine exit installId=install_1775706947043398000 setId=demo-install-v1
+[GIN] 2026/04/09 - 11:56:10 | 200 |      53.208µs |       127.0.0.1 | GET      "/api/demo/precheck/dlc-carpack"
+[GIN] 2026/04/09 - 11:56:10 | 200 |     102.458µs |       127.0.0.1 | GET      "/api/demo/precheck/cm"
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:56:10 | 200 |   20.943292ms |       127.0.0.1 | GET      "/api/demo/precheck/resources"
+[1;38;5;86mINFO[0m [install] created task installId=install_1775706977877940000 setId=demo-install-v1 registryHit=true demoSlowProgress=false steps=4
+[GIN] 2026/04/09 - 11:56:17 | 200 |     8.83625ms |       127.0.0.1 | POST     "/api/installations"
+[1;38;5;86mINFO[0m [install] pipeline start installId=install_1775706977877940000 setId=demo-install-v1
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706977877940000 category=core finalizeTask=false
+[GIN] 2026/04/09 - 11:56:17 | 200 |      34.458µs |       127.0.0.1 | GET      "/api/installations/install_1775706977877940000/progress?category=all"
+[GIN] 2026/04/09 - 11:56:17 | 200 |      42.417µs |       127.0.0.1 | GET      "/api/installations/install_1775706977877940000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall begin
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706977877940000 category=core finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706977877940000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706977877940000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706977877940000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706977877940000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775706977877940000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall begin
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775706977877940000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [install] deferred SimEnvDevInstallCleanup for installId=install_1775706977877940000
+[GIN] 2026/04/09 - 11:56:18 | 200 |        30.5µs |       127.0.0.1 | GET      "/api/installations/install_1775706977877940000/progress?category=all"
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已删除 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/content -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 cfg 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/cfg -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/cfg
+[1;38;5;86mINFO[0m [install] pipeline goroutine exit installId=install_1775706977877940000 setId=demo-install-v1
+[GIN] 2026/04/09 - 11:58:42 | 200 |      40.209µs |       127.0.0.1 | GET      "/api/demo/precheck/dlc-carpack"
+[GIN] 2026/04/09 - 11:58:42 | 200 |        60.5µs |       127.0.0.1 | GET      "/api/demo/precheck/cm"
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:58:42 | 200 |   25.033625ms |       127.0.0.1 | GET      "/api/demo/precheck/resources"
+[1;38;5;86mINFO[0m [install] created task installId=install_1775707123484220000 setId=demo-install-v1 registryHit=true demoSlowProgress=true steps=4
+[GIN] 2026/04/09 - 11:58:43 | 200 |    8.490375ms |       127.0.0.1 | POST     "/api/installations"
+[1;38;5;86mINFO[0m [install] pipeline start installId=install_1775707123484220000 setId=demo-install-v1
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775707123484220000 category=core finalizeTask=false
+[GIN] 2026/04/09 - 11:58:43 | 200 |       34.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:43 | 200 |       31.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall begin
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/DREAM/AE86
+[1;38;5;192mWARN[0m 检测到不在 catalog 中的资源路径: cars/SHMC/rx7
+[GIN] 2026/04/09 - 11:58:43 | 200 |      53.584µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:43 | 200 |      48.916µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:43 | 200 |      72.125µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      40.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |       28.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      34.958µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      43.166µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      41.084µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      41.458µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      43.167µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:44 | 200 |      65.958µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |     111.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |        74.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |      44.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |      41.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |      72.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |     861.041µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |      44.083µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:45 | 200 |      64.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      43.166µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |     144.208µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      63.208µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      31.792µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      45.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      71.834µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      64.166µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:46 | 200 |      63.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |      25.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |          27µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |       31.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |      35.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |      46.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |       70.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:47 | 200 |       39.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |     121.917µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |      25.083µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |      24.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |       42.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |      46.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCoreInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775707123484220000 category=core finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775707123484220000 category=weather finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall begin
+[GIN] 2026/04/09 - 11:58:48 | 200 |      42.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |      27.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:48 | 200 |      45.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      58.458µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      61.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      72.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      81.458µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      28.834µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      49.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      65.709µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:49 | 200 |      31.125µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      59.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      28.541µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      46.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      41.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |        28.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      42.416µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      41.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:50 | 200 |      30.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      30.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |        49.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      62.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |       34.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      59.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      35.208µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      35.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:51 | 200 |      29.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      38.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      24.125µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      60.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      75.541µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      37.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      33.791µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:52 | 200 |      71.458µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      27.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      36.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      31.083µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      41.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoWeatherInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775707123484220000 category=weather finalizeTask=false
+[GIN] 2026/04/09 - 11:58:53 | 200 |      58.125µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775707123484220000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall begin
+[GIN] 2026/04/09 - 11:58:53 | 200 |      43.792µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      81.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:53 | 200 |      61.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      35.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      56.167µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      42.208µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      50.333µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |     131.791µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      60.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |      37.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:54 | 200 |        40.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |     151.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |      66.208µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |      32.125µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |      39.417µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |       68.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |      75.333µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |      41.167µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:55 | 200 |       39.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |      74.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |      56.667µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |      29.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |      43.834µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |     104.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |       62.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:56 | 200 |        46.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      59.375µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      86.292µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      32.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      30.791µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      62.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      71.542µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      24.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:57 | 200 |      23.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |       28.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |      55.917µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |       24.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |      31.417µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoMapInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775707123484220000 category=map finalizeTask=false
+[1;38;5;86mINFO[0m [install] executor start installId=install_1775707123484220000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall begin
+[GIN] 2026/04/09 - 11:58:58 | 200 |      50.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |      55.333µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |      28.666µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:58 | 200 |          47µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      57.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      32.291µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      77.709µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      27.291µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      72.416µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |       24.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      39.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:58:59 | 200 |      72.958µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |      53.917µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |      50.166µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |       55.75µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |      50.917µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |      84.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |       45.25µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:00 | 200 |      43.708µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      48.916µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      36.541µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      31.917µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      28.167µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      53.042µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      49.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      36.625µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:01 | 200 |      75.792µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      26.417µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      34.334µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      75.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      24.875µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      32.666µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |          37µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |      52.958µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:02 | 200 |        81.5µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:03 | 200 |      38.167µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:03 | 200 |      49.791µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:03 | 200 |      26.583µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[GIN] 2026/04/09 - 11:59:03 | 200 |      35.333µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m [demo] RunDemoCarsInstall done
+[1;38;5;86mINFO[0m [install] executor ok installId=install_1775707123484220000 category=cars finalizeTask=true
+[1;38;5;86mINFO[0m [install] deferred SimEnvDevInstallCleanup for installId=install_1775707123484220000
+[GIN] 2026/04/09 - 11:59:03 | 200 |      31.833µs |       127.0.0.1 | GET      "/api/installations/install_1775707123484220000/progress?category=all"
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已删除 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 content 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/content -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/content
+[1;38;5;86mINFO[0m -modInstall.restoreSimEnvGameTreeFromEnvBackup-已从备份恢复 cfg 目录: /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/envBackup/AC_SKELETON_HASDLC/cfg -> /Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC/Assetto Corsa/cfg
+[1;38;5;86mINFO[0m [install] pipeline goroutine exit installId=install_1775707123484220000 setId=demo-install-v1
