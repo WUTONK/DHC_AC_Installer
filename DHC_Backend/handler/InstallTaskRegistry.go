@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"DHC_Backend/models/service/infoGet"
+	"DHC_Backend/models/service/servicelog"
 	"sync"
 	"time"
 )
@@ -119,4 +121,99 @@ func nilIfEmpty(s string) interface{} {
 		return nil
 	}
 	return s
+}
+
+// ── 持久化 ──
+
+// taskToRecord 将内存 installTask 转换为可持久化的 InstallTaskRecord。
+func taskToRecord(t *installTask) infoGet.InstallTaskRecord {
+	cats := make(map[string]*infoGet.CategorySnapshot, len(t.Categories))
+	for k, cp := range t.Categories {
+		cats[k] = &infoGet.CategorySnapshot{
+			CategoryID:     cp.CategoryID,
+			CategoryName:   cp.CategoryName,
+			Status:         cp.Status,
+			Progress:       cp.Progress,
+			CurrentItem:    cp.CurrentItem,
+			TotalItems:     cp.TotalItems,
+			CompletedItems: cp.CompletedItems,
+			SubProgress:    cp.SubProgress,
+		}
+	}
+	return infoGet.InstallTaskRecord{
+		ID:         t.ID,
+		SetID:      t.SetID,
+		Status:     string(t.Status),
+		StartTime:  t.StartTime,
+		EndTime:    t.EndTime,
+		Error:      t.Error,
+		Categories: cats,
+	}
+}
+
+// recordToTask 将持久化的 InstallTaskRecord 转换为内存 installTask（不含运行时字段）。
+func recordToTask(r infoGet.InstallTaskRecord) *installTask {
+	cats := make(map[string]*categoryProgress, len(r.Categories))
+	for k, cs := range r.Categories {
+		cats[k] = &categoryProgress{
+			CategoryID:     cs.CategoryID,
+			CategoryName:   cs.CategoryName,
+			Status:         cs.Status,
+			Progress:       cs.Progress,
+			CurrentItem:    cs.CurrentItem,
+			TotalItems:     cs.TotalItems,
+			CompletedItems: cs.CompletedItems,
+			SubProgress:    cs.SubProgress,
+		}
+	}
+	return &installTask{
+		ID:         r.ID,
+		SetID:      r.SetID,
+		Status:     installStatus(r.Status),
+		StartTime:  r.StartTime,
+		EndTime:    r.EndTime,
+		Error:      r.Error,
+		Categories: cats,
+	}
+}
+
+// persistCheckpoint 将当前 installTasks map 快照写入磁盘。
+// 调用方须已持有 installTasksMu 的读锁或写锁。
+func persistCheckpoint() {
+	records := make([]infoGet.InstallTaskRecord, 0, len(installTasks))
+	for _, t := range installTasks {
+		records = append(records, taskToRecord(t))
+	}
+	if err := infoGet.SaveInstallTasks(records); err != nil {
+		servicelog.Errorf("[install] persistCheckpoint failed: %v", err)
+	}
+}
+
+// initTasksFromDisk 在启动时从磁盘加载历史任务到内存注册表。
+// 将中断的 installing/preparing 任务标记为 interrupted。
+func initTasksFromDisk() {
+	records, err := infoGet.LoadInstallTasks()
+	if err != nil {
+		servicelog.Errorf("[install] initTasksFromDisk load failed: %v", err)
+		return
+	}
+	if len(records) == 0 {
+		return
+	}
+
+	records = infoGet.RecoverInterruptedTasks(records)
+
+	installTasksMu.Lock()
+	for _, r := range records {
+		if _, exists := installTasks[r.ID]; !exists {
+			installTasks[r.ID] = recordToTask(r)
+		}
+	}
+	installTasksMu.Unlock()
+
+	if err := infoGet.SaveInstallTasks(records); err != nil {
+		servicelog.Errorf("[install] initTasksFromDisk save-back failed: %v", err)
+	}
+
+	servicelog.Infof("[install] initTasksFromDisk loaded %d historical tasks", len(records))
 }

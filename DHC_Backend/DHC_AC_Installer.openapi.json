@@ -1,46 +1,110 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "默认模块",
-    "description": "",
-    "version": "1.0.0"
+    "title": "DHC AC Installer API",
+    "description": "DHC AC Installer 前后端 API 接口规范，与后端 Gin 路由一一对应",
+    "version": "2.0.0"
   },
-  "tags": [],
+  "tags": [
+    {
+      "name": "System",
+      "description": "系统信息相关接口（游戏路径、磁盘信息、服务器信息）"
+    },
+    {
+      "name": "Installation",
+      "description": "安装任务创建与进度查询"
+    },
+    {
+      "name": "Precheck",
+      "description": "安装前预检接口（资源包、DLC、CM）"
+    },
+    {
+      "name": "AppState",
+      "description": "应用持久化状态读写"
+    },
+    {
+      "name": "Dev",
+      "description": "开发/测试接口（TestPlayground、CommunicationLab）"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://127.0.0.1:19810",
+      "description": "本地开发服务器"
+    }
+  ],
   "paths": {
     "/api/GetGamePath": {
       "get": {
         "summary": "获取游戏路径",
-        "deprecated": false,
-        "description": "获取游戏存储路径",
-        "tags": [],
+        "description": "获取游戏安装路径",
+        "tags": ["System"],
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "成功返回游戏路径",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetGamePathResp"
                 }
               }
-            },
-            "headers": {}
+            }
           }
-        },
-        "security": []
+        }
+      }
+    },
+    "/api/GetDiskInfo": {
+      "get": {
+        "summary": "获取磁盘信息",
+        "description": "获取指定磁盘的空间信息",
+        "tags": ["System"],
+        "parameters": [
+          {
+            "name": "drive",
+            "in": "query",
+            "description": "磁盘盘符，例如 'C:', 'D:'",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "D:"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回磁盘信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDiskInfoResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/GetServerInfo": {
       "get": {
-        "summary": "获取服务器信息",
-        "deprecated": false,
-        "description": "",
-        "tags": [],
+        "summary": "获取游戏服务器信息",
+        "description": "查询 AC 游戏服务器的在线状态、延迟和在线人数",
+        "tags": ["System"],
         "parameters": [
           {
             "name": "ServerHost",
             "in": "query",
-            "description": "",
+            "description": "服务器地址（host:port）",
             "required": false,
             "example": "1.1.1.1:8080",
             "schema": {
@@ -48,36 +112,589 @@
             }
           }
         ],
+        "requestBody": {
+          "description": "也可通过 JSON body 传入 ServerHost（query 优先）",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetServerInfoReq"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "",
+            "description": "成功返回服务器信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetServerInfoResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 ServerHost 或查询失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installations": {
+      "post": {
+        "summary": "创建安装任务",
+        "description": "根据安装集标识创建异步安装任务，立即返回 installId 供后续轮询",
+        "tags": ["Installation"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInstallationReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "任务创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateInstallationResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/installations/{installId}/progress": {
+      "get": {
+        "summary": "查询安装进度",
+        "description": "查询指定安装任务的实时进度，支持按类别过滤",
+        "tags": ["Installation"],
+        "parameters": [
+          {
+            "name": "installId",
+            "in": "path",
+            "description": "安装任务 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "类别过滤（all 返回全部，或指定 cm/core/weather/map/cars 等）",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回进度快照",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationProgressResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo/precheck/resources": {
+      "get": {
+        "summary": "资源包预检",
+        "description": "检测 Demo 安装所需的资源包是否已导入且完整",
+        "tags": ["Precheck"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "预检结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResourcesResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "检测失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo/precheck/dlc-carpack": {
+      "get": {
+        "summary": "DLC 车包预检",
+        "description": "检测是否拥有所需的 DLC 车辆包",
+        "tags": ["Precheck"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "预检结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckDlcResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo/precheck/cm": {
+      "get": {
+        "summary": "Content Manager 预检",
+        "description": "检测 Content Manager 是否已安装",
+        "tags": ["Precheck"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "预检结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckCmResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "检测失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AppState": {
+      "get": {
+        "summary": "获取应用状态",
+        "description": "读取 appState.json 中的完整应用状态",
+        "tags": ["AppState"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "应用状态",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppStateResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "读取失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AppState/ServerDisclaimer": {
+      "put": {
+        "summary": "更新服务器入服警告状态",
+        "description": "局部更新 serverDisclaimer 字段",
+        "tags": ["AppState"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertServerDisclaimerReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "Rtt": {
-                      "type": "string"
+                    "ok": {
+                      "type": "boolean"
                     },
-                    "Clients": {
-                      "type": "number"
-                    },
-                    "MaxClients": {
-                      "type": "number"
+                    "serverDisclaimer": {
+                      "$ref": "#/components/schemas/ServerDisclaimerState"
                     }
                   },
-                  "required": [
-                    "Rtt",
-                    "Clients",
-                    "MaxClients"
-                  ]
+                  "required": ["ok", "serverDisclaimer"]
                 }
               }
-            },
-            "headers": {}
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "写入失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TestPlaygroundHealth": {
+      "get": {
+        "summary": "测试场健康检查",
+        "tags": ["Dev"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "健康检查结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pong": { "type": "boolean" },
+                    "serverTime": { "type": "string", "format": "date-time" }
+                  },
+                  "required": ["pong", "serverTime"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TestPlaygroundEcho": {
+      "post": {
+        "summary": "测试场回声",
+        "tags": ["Dev"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
           }
         },
-        "security": []
+        "responses": {
+          "200": {
+            "description": "回声响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "echo": { "type": "object", "additionalProperties": true },
+                    "serverTime": { "type": "string", "format": "date-time" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["echo", "serverTime", "message"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求体格式错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TestPlaygroundJob/start": {
+      "post": {
+        "summary": "启动测试场任务",
+        "tags": ["Dev"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "任务已启动",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": { "type": "string" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["jobId", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TestPlaygroundJob/progress": {
+      "get": {
+        "summary": "查询测试场任务进度",
+        "tags": ["Dev"],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "query",
+            "description": "任务 ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务进度",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": { "type": "string" },
+                    "progress": { "type": "integer", "minimum": 0, "maximum": 100 },
+                    "phase": { "type": "string", "enum": ["processing", "done"] },
+                    "detail": {
+                      "type": "object",
+                      "properties": {
+                        "step": { "type": "string" },
+                        "elapsedSec": { "type": "number", "format": "float" }
+                      },
+                      "required": ["step", "elapsedSec"]
+                    }
+                  },
+                  "required": ["jobId", "progress", "phase"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 jobId",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResp" }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResp" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/ping": {
+      "get": {
+        "summary": "实验室 ping",
+        "tags": ["Dev"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "pong 响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "time": { "type": "string", "format": "date-time" },
+                    "lesson": { "type": "string" }
+                  },
+                  "required": ["ok", "time", "lesson"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/echo": {
+      "post": {
+        "summary": "实验室 echo",
+        "tags": ["Dev"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "echo 响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "echo": { "type": "object", "additionalProperties": true },
+                    "time": { "type": "string", "format": "date-time" },
+                    "subInfo": { "type": "string" }
+                  },
+                  "required": ["ok", "echo", "time", "subInfo"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求体格式错误",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResp" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/task/start": {
+      "post": {
+        "summary": "启动实验室任务",
+        "tags": ["Dev"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "任务已启动",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "taskId": { "type": "string" }
+                  },
+                  "required": ["ok", "taskId"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lab/task/status": {
+      "get": {
+        "summary": "查询实验室任务状态",
+        "tags": ["Dev"],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "description": "任务 ID",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务状态",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "taskId": { "type": "string" },
+                    "status": { "type": "string", "enum": ["running", "done"] },
+                    "progress": { "type": "integer", "minimum": 0, "maximum": 100 }
+                  },
+                  "required": ["ok", "taskId", "status", "progress"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "缺少 taskId",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResp" }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResp" }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -87,46 +704,308 @@
         "type": "object",
         "properties": {
           "GamePath": {
-            "type": "string"
+            "type": "string",
+            "description": "游戏安装路径"
           }
         },
-        "required": [
-          "GamePath"
-        ]
+        "required": ["GamePath"]
+      },
+      "GetDiskInfoResp": {
+        "type": "object",
+        "properties": {
+          "Drive": {
+            "type": "string",
+            "description": "磁盘盘符",
+            "example": "D:"
+          },
+          "Label": {
+            "type": "string",
+            "description": "磁盘卷标"
+          },
+          "TotalBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "总空间（字节）"
+          },
+          "UsedBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "已用空间（字节）"
+          },
+          "FreeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "可用空间（字节）"
+          },
+          "IsSSD": {
+            "type": "boolean",
+            "description": "是否为 SSD"
+          },
+          "IsRemovable": {
+            "type": "boolean",
+            "description": "是否为可移动磁盘"
+          }
+        },
+        "required": ["Drive", "TotalBytes", "UsedBytes", "FreeBytes"]
       },
       "GetServerInfoReq": {
         "type": "object",
         "properties": {
           "ServerHost": {
-            "type": "string"
+            "type": "string",
+            "description": "服务器地址（host:port）"
           }
         },
-        "required": [
-          "ServerHost"
-        ]
+        "required": ["ServerHost"]
       },
       "GetServerInfoResp": {
         "type": "object",
         "properties": {
           "Rtt": {
-            "type": "string"
+            "type": "string",
+            "description": "往返延迟"
           },
           "Clients": {
-            "type": "number"
+            "type": "number",
+            "format": "float",
+            "description": "当前在线人数"
           },
           "MaxClients": {
-            "type": "number"
+            "type": "number",
+            "format": "float",
+            "description": "最大在线人数"
           }
         },
-        "required": [
-          "Clients",
-          "MaxClients",
-          "Rtt"
-        ]
+        "required": ["Rtt", "Clients", "MaxClients"]
+      },
+      "CreateInstallationReq": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "description": "安装集标识（如 demo-install-v1、demo-resource-verify-v1）"
+          },
+          "demoSlowProgress": {
+            "type": "boolean",
+            "description": "是否启用 DEMO 慢速进度模式",
+            "default": false
+          },
+          "demoSlowTotalSeconds": {
+            "type": "number",
+            "format": "float",
+            "description": "慢速模式目标总耗时（秒），范围 [1,300]，默认 20",
+            "default": 20
+          }
+        },
+        "required": ["versionId"]
+      },
+      "CreateInstallationResp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "安装任务 ID"
+          },
+          "versionId": {
+            "type": "string",
+            "description": "安装集标识"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["preparing"],
+            "description": "初始状态"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "创建时间（Unix 时间戳，秒）"
+          }
+        },
+        "required": ["id", "versionId", "status", "startTime"]
+      },
+      "InstallCategoryProgress": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "类别 ID（cm、core、weather、map、cars 等）"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "类别显示名称"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["waiting", "active", "completed", "failed"],
+            "description": "类别状态"
+          },
+          "progress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "进度百分比"
+          },
+          "currentItem": {
+            "type": "string",
+            "nullable": true,
+            "description": "当前处理项名称"
+          },
+          "totalItems": {
+            "type": "integer",
+            "description": "总子项数量"
+          },
+          "completedItems": {
+            "type": "integer",
+            "description": "已完成子项数量"
+          },
+          "subProgress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "阶段内子进度（0-100）"
+          }
+        },
+        "required": ["categoryId", "categoryName", "status", "progress"]
+      },
+      "InstallationProgressResp": {
+        "type": "object",
+        "properties": {
+          "installId": {
+            "type": "string",
+            "description": "安装任务 ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["preparing", "installing", "completed", "failed", "interrupted"],
+            "description": "总体状态"
+          },
+          "totalProgress": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "总进度百分比"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstallCategoryProgress"
+            },
+            "description": "各类别进度"
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "开始时间（Unix 时间戳，秒）"
+          },
+          "endTime": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "结束时间"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "错误信息"
+          }
+        },
+        "required": ["installId", "status", "totalProgress", "categories", "startTime"]
+      },
+      "PrecheckResourcesResp": {
+        "type": "object",
+        "properties": {
+          "imported": {
+            "type": "boolean",
+            "description": "资源包是否已导入"
+          },
+          "complete": {
+            "type": "boolean",
+            "description": "资源包是否完整"
+          }
+        },
+        "required": ["imported", "complete"]
+      },
+      "PrecheckDlcResp": {
+        "type": "object",
+        "properties": {
+          "hasAllDLC": {
+            "type": "boolean",
+            "description": "是否拥有所有所需 DLC"
+          }
+        },
+        "required": ["hasAllDLC"]
+      },
+      "PrecheckCmResp": {
+        "type": "object",
+        "properties": {
+          "cmInstalled": {
+            "type": "boolean",
+            "description": "Content Manager 是否已安装"
+          }
+        },
+        "required": ["cmInstalled"]
+      },
+      "AppStateResp": {
+        "type": "object",
+        "properties": {
+          "firstLaunchCompleted": {
+            "type": "boolean",
+            "description": "是否已完成首次启动"
+          },
+          "serverDisclaimer": {
+            "$ref": "#/components/schemas/ServerDisclaimerState"
+          }
+        },
+        "required": ["firstLaunchCompleted", "serverDisclaimer"]
+      },
+      "ServerDisclaimerState": {
+        "type": "object",
+        "properties": {
+          "shownCount": {
+            "type": "integer",
+            "description": "历史累计显示次数"
+          },
+          "devForceShowSuppressed": {
+            "type": "boolean",
+            "description": "开发者调试开关"
+          }
+        },
+        "required": ["shownCount", "devForceShowSuppressed"]
+      },
+      "UpsertServerDisclaimerReq": {
+        "type": "object",
+        "properties": {
+          "shownCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "累计显示次数"
+          },
+          "devForceShowSuppressed": {
+            "type": "boolean",
+            "description": "开发者调试开关"
+          }
+        },
+        "required": ["shownCount", "devForceShowSuppressed"]
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "错误消息"
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true,
+            "description": "详细信息"
+          }
+        },
+        "required": ["error"]
       }
-    },
-    "securitySchemes": {}
+    }
   },
-  "servers": [],
   "security": []
 }

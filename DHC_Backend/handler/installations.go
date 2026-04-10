@@ -128,6 +128,7 @@ func createInstallation(c *gin.Context) {
 	// 先写入注册表，确保前端拿到 installId 后马上轮询不会 404。
 	installTasksMu.Lock()
 	installTasks[installID] = task
+	persistCheckpoint()
 	installTasksMu.Unlock()
 
 	servicelog.Infof("[install] created task installId=%s setId=%s registryHit=%v demoSlowProgress=%v steps=%d",

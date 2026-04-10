@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 234ms
+✓ built in 262ms
 
 build the electron main process successfully
 
@@ -19,13 +19,12 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 7ms
+✓ built in 8ms
 
 build the electron preload files successfully
 
 -----
 
-23:50:52 [vite] (client) Re-optimizing dependencies because lockfile has changed
 dev server running for the electron renderer process at:
 
   ➜  Local:   http://localhost:5173/
@@ -38,4 +37,3 @@ Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
- ELIFECYCLE  Command failed.

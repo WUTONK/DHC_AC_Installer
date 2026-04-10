@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"DHC_Backend/models/service/infoGet"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -113,4 +114,98 @@ func TestInstallationFlowMinimal(t *testing.T) {
 	}
 
 	fmt.Println(gloP)
+}
+
+func TestInstallTaskPersistence(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	r := gin.New()
+	handler.InitGin(r)
+
+	reqBody := []byte(`{"versionId":"standard"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/installations", bytes.NewReader(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("create installation status=%d body=%s", w.Code, w.Body.String())
+	}
+
+	var createResp struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &createResp); err != nil {
+		t.Fatalf("unmarshal create resp failed: %v", err)
+	}
+
+	// 等任务完成
+	deadline := time.Now().Add(7 * time.Second)
+	for time.Now().Before(deadline) {
+		pollReq := httptest.NewRequest(http.MethodGet,
+			"/api/installations/"+createResp.ID+"/progress?category=all", nil)
+		pollW := httptest.NewRecorder()
+		r.ServeHTTP(pollW, pollReq)
+		var resp struct{ Status string `json:"status"` }
+		json.Unmarshal(pollW.Body.Bytes(), &resp)
+		if resp.Status == "completed" || resp.Status == "failed" {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	records, err := infoGet.LoadInstallTasks()
+	if err != nil {
+		t.Fatalf("LoadInstallTasks failed: %v", err)
+	}
+
+	found := false
+	for _, r := range records {
+		if r.ID == createResp.ID {
+			found = true
+			if r.Status != "completed" && r.Status != "failed" {
+				t.Errorf("expected completed/failed, got %s", r.Status)
+			}
+			if len(r.Categories) == 0 {
+				t.Errorf("expected non-empty categories")
+			}
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("task %s not found in persisted records (total=%d)", createResp.ID, len(records))
+	}
+}
+
+func TestRecoverInterruptedTasks(t *testing.T) {
+	now := time.Now().Unix()
+	records := []infoGet.InstallTaskRecord{
+		{ID: "install_1", SetID: "demo-install-v1", Status: "installing", StartTime: now},
+		{ID: "install_2", SetID: "demo-install-v1", Status: "completed", StartTime: now - 100},
+		{ID: "install_3", SetID: "demo-install-v1", Status: "preparing", StartTime: now - 50},
+		{ID: "install_4", SetID: "demo-install-v1", Status: "failed", StartTime: now - 200},
+	}
+
+	recovered := infoGet.RecoverInterruptedTasks(records)
+
+	for _, r := range recovered {
+		switch r.ID {
+		case "install_1":
+			if r.Status != "interrupted" {
+				t.Errorf("install_1: expected interrupted, got %s", r.Status)
+			}
+		case "install_2":
+			if r.Status != "completed" {
+				t.Errorf("install_2: expected completed, got %s", r.Status)
+			}
+		case "install_3":
+			if r.Status != "interrupted" {
+				t.Errorf("install_3: expected interrupted, got %s", r.Status)
+			}
+		case "install_4":
+			if r.Status != "failed" {
+				t.Errorf("install_4: expected failed, got %s", r.Status)
+			}
+		}
+	}
 }

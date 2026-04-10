@@ -103,6 +103,7 @@ func runInstallExecutor(
 			task.Status = installStatusFailed
 			task.Error = err.Error()
 		}
+		persistCheckpoint()
 	}
 	installTasksMu.Unlock()
 
@@ -129,4 +130,5 @@ func finalizeInstallTask(installID string, err error) {
 	} else {
 		task.Status = installStatusCompleted
 	}
+	persistCheckpoint()
 }

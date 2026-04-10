@@ -1,0 +1,111 @@
+[
+  {
+    "id": "install_1775838433303948000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775838433,
+    "endTime": 1775838436,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775838436116968000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775838436,
+    "endTime": 1775838438,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775838679600887000",
+    "setId": "demo-install-v1",
+    "status": "completed",
+    "startTime": 1775838679,
+    "endTime": 1775838699,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包 (JDM Pack)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 Mitsubishi Lancer Evo 9",
+        "subProgress": 100
+      },
+      "core": {
+        "categoryId": "core",
+        "categoryName": "基础环境 (CSP)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "基础环境安装",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (首都高)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装芝浦 PA 场景",
+        "subProgress": 100
+      },
+      "weather": {
+        "categoryId": "weather",
+        "categoryName": "天气系统 (Sol \u0026 Pure)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 Pure Textures HighRes",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775837682726212000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775837682,
+    "endTime": 1775837685,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775837693235086000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775837693,
+    "endTime": 1775837696,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  }
+]
