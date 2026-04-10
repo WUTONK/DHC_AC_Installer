@@ -1,7 +1,13 @@
-import React, { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, useCallback, ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { resolveRoute, ROUTES } from '../routes'
+
+interface NavigateOptions {
+  state?: Record<string, unknown>
+}
 
 interface NavigationContextType {
-  navigate: (page: string) => void
+  navigate: (pageNameOrPath: string, options?: NavigateOptions) => void
   goHome: () => void
 }
 
@@ -9,17 +15,21 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 
 interface NavigationProviderProps {
   children: ReactNode
-  onNavigate: (page: string) => void
 }
 
-export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children, onNavigate }) => {
-  const navigate = (page: string): void => {
-    onNavigate(page)
-  }
+export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children }) => {
+  const routerNavigate = useNavigate()
 
-  const goHome = (): void => {
-    onNavigate('Home')
-  }
+  const navigate = useCallback(
+    (pageNameOrPath: string, options?: NavigateOptions): void => {
+      routerNavigate(resolveRoute(pageNameOrPath), { state: options?.state })
+    },
+    [routerNavigate]
+  )
+
+  const goHome = useCallback((): void => {
+    routerNavigate(ROUTES.HOME)
+  }, [routerNavigate])
 
   return (
     <NavigationContext.Provider value={{ navigate, goHome }}>
@@ -35,4 +45,3 @@ export const useNavigation = (): NavigationContextType => {
   }
   return context
 }
-

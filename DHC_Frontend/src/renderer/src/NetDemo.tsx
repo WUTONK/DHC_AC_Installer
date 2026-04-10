@@ -1,15 +1,10 @@
 import React from 'react'
-import { useState } from 'react'
-import { Card, Layout, Button } from '@douyinfe/semi-ui'
-import { Api } from '../../shared'
+import { Card, Layout, Button, Spin } from '@douyinfe/semi-ui'
+import { useServerInfo } from './hooks/useServerInfo'
 
-
-// const markdown = '# Hi, *Pluto*!'
-// <Markdown>{markdown}</Markdown>
 function NetDemo(): React.JSX.Element {
-  const [tts, setTts] = useState<string>("")
-  const [clients, setclients] = useState<number>(0)
-  const [maxClients, setMaxclients] = useState<number>(0)
+  const { loading, error, serverInfo, fetchServerInfo } = useServerInfo()
+
   return(
     <Layout>
        <Card
@@ -17,18 +12,22 @@ function NetDemo(): React.JSX.Element {
             style={{ maxWidth: 500, maxHeight:500 }}
             headerExtraContent={
               <div>
-                <Button onClick={async ()=>{
-                   const [tts, clients, maxClients] = await GetServerInfo("SHMC")
-                   setTts(tts)
-                   setclients(clients)
-                   setMaxclients(maxClients)
-                 }}>获取SHMC服务器人数信息</Button>
+                <Button
+                  loading={loading}
+                  onClick={() => { void fetchServerInfo("SHMC") }}
+                >获取SHMC服务器人数信息</Button>
               </div>
             }
         >
-          <p>tts:{tts}</p>
-          <p>当前人数:{clients}</p>
-          <p>最大人数:{maxClients}</p>
+          {error && <p style={{ color: 'var(--semi-color-danger)' }}>错误: {error}</p>}
+          {loading && <Spin />}
+          {serverInfo && (
+            <>
+              <p>tts:{serverInfo.rtt}</p>
+              <p>当前人数:{serverInfo.clients}</p>
+              <p>最大人数:{serverInfo.maxClients}</p>
+            </>
+          )}
         </Card>
 
         <Card
@@ -42,7 +41,6 @@ function NetDemo(): React.JSX.Element {
             }
         >
         </Card>
-        {/* 模拟环境 */}
     </Layout>
   )
 }
@@ -61,20 +59,6 @@ export function resolveServerHost(input: ServerName | string): string {
     return ServerList[input as ServerName];
   }
   return input;
-}
-
-async function GetServerInfo(server:string): Promise<[string, number, number]> {
-  const serverHost = resolveServerHost(server)
-  return Api.apiGetServerInfoGet(
-      {
-        serverHost: serverHost
-      }
-  ).then((res): [string, number, number] => {
-    return [res.rtt, res.clients, res.maxClients]
-  }).catch((err): [string, number, number] => {
-    console.log(err)
-    return ["获取信息失败", 0, 0]
-  })
 }
 
 export default NetDemo

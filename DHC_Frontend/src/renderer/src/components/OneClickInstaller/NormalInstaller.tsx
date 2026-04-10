@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button, Typography, Card, Row, Col, Switch, Divider, Modal } from '@douyinfe/semi-ui';
 import { IconServer, IconDownload, IconRefresh, IconTickCircle, IconArrowRight, IconAlertTriangle } from '@douyinfe/semi-icons';
-import { InstallMode, DiskInfo, RequirementConfig } from './types';
+import { InstallMode, DiskInfo, InstallStep } from './types';
 import { REQUIREMENTS_MAP } from './constants';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -17,19 +18,19 @@ interface NormalInstallerProps {
     formatSize: (bytes: number) => string;
     handleInstallClick: () => void;
     setMode: (mode: 'normal' | 'clean_install') => void;
-    onNavigate?: (page: string) => void;
     showSpaceSolutionModal: () => void;
     conflictModalVisible: boolean;
     setConflictModalVisible: (val: boolean) => void;
-    setCurrentStep: (step: any) => void;
+    setCurrentStep: (step: InstallStep) => void;
 }
 
 export default function NormalInstaller({
     currentMode, DISK_INFO, devRegionCN, setDevRegionCN,
     INSTALL_MODES, selectedModeId, setSelectedModeId,
-    formatSize, handleInstallClick, setMode, onNavigate,
+    formatSize, handleInstallClick, setMode,
     showSpaceSolutionModal, conflictModalVisible, setConflictModalVisible, setCurrentStep
 }: NormalInstallerProps): React.JSX.Element {
+    const { navigate } = useNavigation();
     const percentUsed = (DISK_INFO.used / DISK_INFO.total) * 100;
     const percentInstall = (currentMode.size / DISK_INFO.total) * 100;
     const isSpaceLow = (DISK_INFO.free < currentMode.size);
@@ -221,11 +222,7 @@ export default function NormalInstaller({
                     <Button
                         theme="borderless"
                         style={{ color: '#00b5ad' }}
-                        onClick={() => {
-                            if (onNavigate) {
-                                onNavigate('CustomInstallWizard');
-                            }
-                        }}
+                        onClick={() => navigate('CustomInstallWizard')}
                     >
                         高级自定义安装
                     </Button>

@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 172ms
+✓ built in 234ms
 
 build the electron main process successfully
 
@@ -19,12 +19,13 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 8ms
+✓ built in 7ms
 
 build the electron preload files successfully
 
 -----
 
+23:50:52 [vite] (client) Re-optimizing dependencies because lockfile has changed
 dev server running for the electron renderer process at:
 
   ➜  Local:   http://localhost:5173/
@@ -37,5 +38,4 @@ Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
-2026-04-09 11:58:39.574 Electron[97118:1473353] error messaging the mach port for IMKCFRunLoopWakeUpReliable
  ELIFECYCLE  Command failed.

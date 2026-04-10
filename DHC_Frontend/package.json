@@ -28,6 +28,7 @@
     "@semi-bot/semi-theme-dhc-semi": "^1.0.1",
     "electron-updater": "^6.3.9",
     "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.14.0",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {

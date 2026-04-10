@@ -53,7 +53,4 @@ export interface InstallationProgressResponse {
 
 export type InstallStep = 'SELECT_MODE' | 'PRE_CHECK' | 'INSTALLING' | 'POST_INSTALL';
 
-export interface OneClickInstallerProps {
-    onNavigate?: (page: string) => void;
-    onNavigateToSettingsFromDiskLow?: () => void;
-}
+export type OneClickInstallerProps = Record<string, never>

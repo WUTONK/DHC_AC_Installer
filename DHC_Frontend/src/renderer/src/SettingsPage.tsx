@@ -13,6 +13,8 @@ import {
 } from '@douyinfe/semi-icons';
 
 import HomeBreadcrumb from './components/HomeBreadcrumb';
+import { useLocation } from 'react-router-dom';
+import { useNavigation } from './contexts/NavigationContext';
 
 
 
@@ -20,15 +22,11 @@ const { Header, Content } = Layout;
 
 const { Text, Paragraph } = Typography;
 
-interface SettingsPageProps {
-    showReturnToInstaller?: boolean;
-    onReturnToInstaller?: () => void;
-}
-
-export default function SettingsPage({
-    showReturnToInstaller = false,
-    onReturnToInstaller
-}: SettingsPageProps): React.JSX.Element {
+export default function SettingsPage(): React.JSX.Element {
+    const location = useLocation();
+    const { navigate } = useNavigation();
+    const locationState = location.state as { from?: string } | null;
+    const showReturnToInstaller = locationState?.from === 'install-disk-low';
     // --- 状态管理 ---
 
     // 1. 语言设置 (模拟系统语言检测)
@@ -375,9 +373,7 @@ export default function SettingsPage({
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, paddingBottom: 20 }}>
                             <Button
                                 theme="solid"
-                                onClick={() => {
-                                    onReturnToInstaller?.();
-                                }}
+                                onClick={() => navigate('OneClickInstaller')}
                                 style={{ backgroundColor: THEME_GREEN, color: '#fff', minWidth: 180 }}
                             >
                                 返回安装页面

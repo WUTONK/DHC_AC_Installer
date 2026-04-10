@@ -6,6 +6,7 @@ import {
     IconAlertTriangle
 } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
+import { useNavigation } from './contexts/NavigationContext';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -153,10 +154,10 @@ const autoSetResourceDirLocal = (drives: DriveInfo[], gamePathDrive: string): {
 
 interface WelcomePageProps {
     region: 'zhCN' | 'enUS';
-    onNavigate?: (page: string) => void;
 }
 
-export default function WelcomePage({ region, onNavigate }: WelcomePageProps): React.JSX.Element {
+export default function WelcomePage({ region }: WelcomePageProps): React.JSX.Element {
+    const { navigate } = useNavigation();
     // --- 状态管理 ---
     const [config, setConfig] = useState<{
         resourceDrive: string;
@@ -432,7 +433,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                                 transition: 'transform 0.3s ease'
                             }}
                             className="hero-card"
-                            onClick={() => onNavigate && onNavigate('OneClickInstaller')}
+                            onClick={() => navigate('OneClickInstaller')}
                             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
                         >
@@ -512,7 +513,7 @@ export default function WelcomePage({ region, onNavigate }: WelcomePageProps): R
                     ].map((item, idx) => (
                         <Col span={6} key={idx}>
                             <div
-                                onClick={() => onNavigate && onNavigate(item.page)}
+                                onClick={() => navigate(item.page)}
                                 onMouseEnter={(e) => {
                                     const card = e.currentTarget.querySelector('.nav-card') as HTMLElement;
                                     if (card) {

@@ -4,35 +4,8 @@ import {
     IconBolt, IconFile, IconFolder, IconTickCircle, IconLoading
 } from '@douyinfe/semi-icons';
 import { useDevMode } from './contexts/DevModeContext';
-import type { InstallationCategoryProgress, InstallationProgressResponse } from './components/OneClickInstaller/types';
-
-const BACKEND_BASE = 'http://127.0.0.1:19810';
-
-async function requestBackend(
-    method: string,
-    pathAndQuery: string,
-    body?: Record<string, unknown>
-): Promise<unknown> {
-    const url = `${BACKEND_BASE}${pathAndQuery}`;
-    const hasBody = body !== undefined;
-    const result = await window.api.requestApi(
-        url,
-        hasBody
-            ? {
-                  method,
-                  body: JSON.stringify(body),
-                  headers: { 'Content-Type': 'application/json' }
-              }
-            : { method }
-    );
-    if (!result.success) {
-        throw new Error(result.error || 'request failed');
-    }
-    if (!result.ok) {
-        throw new Error(`HTTP ${result.status}`);
-    }
-    return result.data;
-}
+import type { InstallationCategoryProgress } from './components/OneClickInstaller/types';
+import { getInstallationProgress } from './api/install';
 
 interface InstallCategory {
     id: string;
@@ -227,10 +200,7 @@ export default function InstallProgressPage({
             if (cancelled) return;
 
             try {
-                const progress = (await requestBackend(
-                    'GET',
-                    `/api/installations/${installId}/progress?category=all`
-                )) as InstallationProgressResponse;
+                const progress = await getInstallationProgress(installId);
 
                 setTotalProgress(progress.totalProgress);
 

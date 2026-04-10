@@ -1,15 +1,19 @@
 import React from 'react';
 import { Button, Typography, Card, Row, Col, Divider } from '@douyinfe/semi-ui';
 import { IconTickCircle, IconHelpCircle, IconServer, IconArrowRight } from '@douyinfe/semi-icons';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const { Title, Text, Paragraph } = Typography;
 
+import type { InstallStep } from './types';
+
 interface PostInstallPageProps {
-    onNavigate?: (page: string) => void;
-    setCurrentStep: (step: any) => void;
+    setCurrentStep: (step: InstallStep) => void;
 }
 
-export default function PostInstallPage({ onNavigate, setCurrentStep }: PostInstallPageProps): React.JSX.Element {
+export default function PostInstallPage({ setCurrentStep }: PostInstallPageProps): React.JSX.Element {
+    const { navigate } = useNavigation();
+
     return (
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px' }}>
             <div style={{ textAlign: 'center', marginBottom: 30 }}>
@@ -34,11 +38,7 @@ export default function PostInstallPage({ onNavigate, setCurrentStep }: PostInst
                             size="large"
                             icon={<IconArrowRight />}
                             style={{ backgroundColor: '#6bc786', color: '#fff', fontWeight: 'bold', minWidth: 200 }}
-                            onClick={() => {
-                                if (onNavigate) {
-                                    onNavigate('ServerListPage')
-                                }
-                            }}
+                            onClick={() => navigate('ServerListPage')}
                         >
                             前往服务器推荐页面
                         </Button>

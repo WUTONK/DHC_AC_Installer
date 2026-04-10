@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Layout, Button, Typography, Modal, Toast, Switch, Slider, InputNumber } from '@douyinfe/semi-ui';
 import {
     IconAlertTriangle,
@@ -10,48 +10,20 @@ import { useDevMode } from './contexts/DevModeContext';
 import { useNavigation } from './contexts/NavigationContext';
 import { DEFAULT_DISK_INFO, INSTALL_MODES, EXISTING_RESOURCES } from './components/OneClickInstaller/constants';
 import {
-    DiskInfo, InstallationCreateResponse,
-    InstallationProgressResponse, InstallStep,
-    OneClickInstallerProps,
+    DiskInfo, InstallStep,
     InstallMode
 } from './components/OneClickInstaller/types';
 import PostInstallPage from './components/OneClickInstaller/PostInstallPage';
 import CleanInstallWizard from './components/OneClickInstaller/CleanInstallWizard';
 import NormalInstaller from './components/OneClickInstaller/NormalInstaller';
 import PreCheckPage from './components/OneClickInstaller/PreCheckPage';
-
-const BACKEND_BASE = 'http://127.0.0.1:19810';
-
-async function requestBackend(
-    method: string,
-    pathAndQuery: string,
-    body?: Record<string, unknown>
-): Promise<unknown> {
-    const url = `${BACKEND_BASE}${pathAndQuery}`;
-    const hasBody = body !== undefined;
-    const result = await window.api.requestApi(
-        url,
-        hasBody
-            ? {
-                  method,
-                  body: JSON.stringify(body),
-                  headers: { 'Content-Type': 'application/json' }
-              }
-            : { method }
-    );
-    if (!result.success) {
-        throw new Error(result.error || 'request failed');
-    }
-    if (!result.ok) {
-        throw new Error(`HTTP ${result.status}`);
-    }
-    return result.data;
-}
+import { usePrecheck } from './hooks/usePrecheck';
+import { useInstallation } from './hooks/useInstallation';
 
 const { Content } = Layout;
 const { Text, Paragraph } = Typography;
 
-export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFromDiskLow }: OneClickInstallerProps = {}): React.JSX.Element {
+export default function OneClickInstaller(): React.JSX.Element {
     // --- 状态管理 ---
     // 开发者调试：地区
     const [devRegionCN, setDevRegionCN] = useState<boolean>(() => {
@@ -374,48 +346,12 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         devDiskFreeGB
     ]);
 
-    // 预检查状态
-    const [cmInstalled, setCmInstalled] = useState<boolean>(false);
-    const [hasAllDLC, setHasAllDLC] = useState<boolean>(true);
     const [cmTutorialVisible, setCmTutorialVisible] = useState<boolean>(false);
     const [keyTutorialVisible, setKeyTutorialVisible] = useState<boolean>(false);
     const [taobaoTutorialVisible, setTaobaoTutorialVisible] = useState<boolean>(false);
-    const [checkingEnv, setCheckingEnv] = useState<boolean>(false);
-
-    // [新增] 资源检测相关状态
-    const [checkingResources, setCheckingResources] = useState<boolean>(false);
-    const [resourceState, setResourceState] = useState<{ imported: boolean; complete: boolean }>({ imported: false, complete: false });
     const [resourceDownloadVisible, setResourceDownloadVisible] = useState<boolean>(false);
-    const [importingProgress, setImportingProgress] = useState<number>(0); // 模拟导入进度
-    const [deletePackageAfterInstall, setDeletePackageAfterInstall] = useState<boolean>(false); // 安装后删除包选项
-
-    // CM 安装状态
-    const [cmInstalling, setCmInstalling] = useState<boolean>(false);
-    const [cmInstallProgress, setCmInstallProgress] = useState<number>(0);
-    const [cmInstallStatusText, setCmInstallStatusText] = useState<string>('');
-
-    // DEMO 安装任务 id（用于 InstallProgressPage 轮询真实 tracker 进度）
+    const [deletePackageAfterInstall, setDeletePackageAfterInstall] = useState<boolean>(false);
     const [demoInstallId, setDemoInstallId] = useState<string | null>(null);
-    const isPollingRef = useRef<boolean>(false);
-    const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // DEMO 资源校验（导入进度条）轮询
-    const isResourcePollingRef = useRef<boolean>(false);
-    const resourcePollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // 组件卸载时清理定时器
-    useEffect(() => {
-        return () => {
-            isPollingRef.current = false;
-            isResourcePollingRef.current = false;
-            if (pollingTimerRef.current) {
-                clearTimeout(pollingTimerRef.current);
-            }
-            if (resourcePollingTimerRef.current) {
-                clearTimeout(resourcePollingTimerRef.current);
-            }
-        };
-    }, []);
 
     // 纯净安装向导状态
     const [wizardStep, setWizardStep] = useState<number>(0);
@@ -456,6 +392,41 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
         return found || installModesForUI[1];
     }, [selectedModeId, installModesForUI]);
 
+    // 预检查（hook）
+    const {
+        checkingEnv, checkingResources,
+        resourceState, setResourceState,
+        cmInstalled, setCmInstalled,
+        hasAllDLC
+    } = usePrecheck({
+        enabled: currentStep === 'PRE_CHECK',
+        modeId: currentMode.id,
+        devResourceImported: devResourceImported,
+        devResourceComplete: devResourceComplete
+    });
+
+    // 安装相关（hook）
+    const {
+        cmInstalling, cmInstallProgress, cmInstallStatusText, cmInstallCompleted,
+        handleInstallCM, importingProgress,
+        handleResourceVerify, resourceVerifyState,
+        createDemoInstall
+    } = useInstallation();
+
+    // CM 安装完成后同步到预检查状态
+    useEffect(() => {
+        if (cmInstallCompleted) {
+            setCmInstalled(true);
+        }
+    }, [cmInstallCompleted, setCmInstalled]);
+
+    // 资源校验完成后同步到预检查状态
+    useEffect(() => {
+        if (resourceVerifyState) {
+            setResourceState(resourceVerifyState);
+        }
+    }, [resourceVerifyState, setResourceState]);
+
     // 当 devInstallDemo 切换时，保证 selectedModeId 与 UI 列表一致
     useEffect(() => {
         if (devInstallDemo && selectedModeId === 'full') {
@@ -478,64 +449,6 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             setInitConflictVisible(false);
         }
     }, [devSimulateConflict]);
-
-    // 进入预检查后自动检测 CM、DLC 和资源状态（可替换为后端接口）
-    useEffect(() => {
-        if (currentStep !== 'PRE_CHECK') return;
-
-        let cancelled = false;
-        setCheckingEnv(true);
-        setCheckingResources(true);
-
-        const run = async (): Promise<void> => {
-            try {
-                if (currentMode.id === 'demo') {
-                    // DEMO 模式：直接读取后端检测结果
-                    const [res, dlc, cm] = await Promise.all([
-                        requestBackend('GET', '/api/demo/precheck/resources') as Promise<{ imported: boolean; complete: boolean }>,
-                        requestBackend('GET', '/api/demo/precheck/dlc-carpack') as Promise<{ hasAllDLC: boolean }>,
-                        requestBackend('GET', '/api/demo/precheck/cm') as Promise<{ cmInstalled: boolean }>
-                    ]);
-
-                    if (cancelled) return;
-                    setResourceState({
-                        imported: Boolean(res?.imported),
-                        complete: Boolean(res?.complete)
-                    });
-                    setHasAllDLC(Boolean(dlc?.hasAllDLC));
-                    setCmInstalled(Boolean(cm?.cmInstalled));
-                } else {
-                    // 非 DEMO：保留原有 DevMode 模拟行为（TODO：未来可全面替换为后端接口）
-                    await new Promise<void>((resolve) => setTimeout(resolve, 600));
-
-                    if (cancelled) return;
-                    setCmInstalled(false);
-                    setHasAllDLC(false);
-                    setResourceState({
-                        imported: devResourceImported,
-                        complete: devResourceComplete
-                    });
-                }
-            } catch (err) {
-                console.error('PRE_CHECK 检测失败:', err);
-                if (cancelled) return;
-                setCmInstalled(false);
-                setHasAllDLC(false);
-                setResourceState({ imported: false, complete: false });
-            } finally {
-                if (!cancelled) {
-                    setCheckingEnv(false);
-                    setCheckingResources(false);
-                }
-            }
-        };
-
-        void run();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [currentStep, currentMode.id, devResourceImported, devResourceComplete]);
 
     // --- 辅助函数：格式化大小 ---
     const formatSize = (bytes: number): string => (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
@@ -577,11 +490,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
             okText: '立即前往设置',
             cancelText: '关闭',
             onOk: () => {
-                if (onNavigateToSettingsFromDiskLow) {
-                    onNavigateToSettingsFromDiskLow();
-                } else {
-                    navigate('SettingsPage');
-                }
+                navigate('SettingsPage', { state: { from: 'install-disk-low' } });
             },
             style: { maxWidth: 520 }
         });
@@ -627,11 +536,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                 cancelText: '暂不处理',
                 // 点击确定时跳转
                 onOk: () => {
-                    if (onNavigateToSettingsFromDiskLow) {
-                        onNavigateToSettingsFromDiskLow();
-                    } else {
-                        navigate('SettingsPage');
-                    }
+                    navigate('SettingsPage', { state: { from: 'install-disk-low' } });
                 },
                 style: { maxWidth: 520 }
             });
@@ -683,252 +588,53 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
 
     const startRealInstall = (): void => {
         if (currentMode.id === 'demo') {
-            // DEMO：创建后端安装任务，让 InstallProgressPage 轮询 tracker 真实进度
             Toast.info('开始 DEMO 安装，一切准备就绪');
             setRequireBackendInstall(true);
             setDemoInstallId(null);
             void (async () => {
-                try {
-                    const response = (await requestBackend('POST', '/api/installations', {
-                        versionId: 'demo-install-v1',
-                        ...(devDemoSlowProgress
-                            ? {
-                                  demoSlowProgress: true,
-                                  demoSlowTotalSeconds: devDemoSlowTotalSeconds
-                              }
-                            : {})
-                    })) as InstallationCreateResponse;
-
-                    if (!response?.id) {
-                        throw new Error('backend did not return installId');
-                    }
-
-                    console.info('[OneClickInstaller] DEMO 安装任务已创建', response);
-                    setDemoInstallId(response.id);
+                const installId = await createDemoInstall(
+                    devDemoSlowProgress
+                        ? { demoSlowProgress: true, demoSlowTotalSeconds: devDemoSlowTotalSeconds }
+                        : undefined
+                );
+                if (installId) {
+                    setDemoInstallId(installId);
                     setCurrentStep('INSTALLING');
-                } catch (err: unknown) {
-                    console.error('创建 DEMO 安装任务失败:', err);
+                } else {
                     setRequireBackendInstall(false);
-                    Toast.error('无法启动 DEMO 安装任务，请检查后端服务');
                 }
             })();
             return;
         }
 
-        // 非 DEMO：保留原有前端模拟行为
         setRequireBackendInstall(false);
         setCurrentStep('INSTALLING');
         Toast.info('开始安装，一切准备就绪');
     };
 
-    const stopCMPolling = (): void => {
-        isPollingRef.current = false;
-        if (pollingTimerRef.current) {
-            clearTimeout(pollingTimerRef.current);
-            pollingTimerRef.current = null;
-        }
-    };
-
-    const stopResourcePolling = (): void => {
-        isResourcePollingRef.current = false;
-        if (resourcePollingTimerRef.current) {
-            clearTimeout(resourcePollingTimerRef.current);
-            resourcePollingTimerRef.current = null;
-        }
-    };
-
-    const pollResourceVerifyProgress = async (installId: string): Promise<void> => {
-        isResourcePollingRef.current = true;
-
-        const poll = async (): Promise<void> => {
-            if (!isResourcePollingRef.current) return;
-            try {
-                const progress = (await requestBackend(
-                    'GET',
-                    `/api/installations/${installId}/progress?category=resource`
-                )) as InstallationProgressResponse;
-
-                // DEMO 资源校验只有一个类别，所以 totalProgress 与 resource.progress 等价
-                setImportingProgress(Math.floor(progress.totalProgress));
-
-                if (progress.status === 'completed' || progress.status === 'failed') {
-                    stopResourcePolling();
-
-                    if (progress.status === 'completed') {
-                        // 成功后再读取一次最终判定（imported/complete）
-                        const res = (await requestBackend(
-                            'GET',
-                            '/api/demo/precheck/resources'
-                        )) as { imported: boolean; complete: boolean };
-
-                        setResourceState({
-                            imported: Boolean(res.imported),
-                            complete: Boolean(res.complete)
-                        });
-                        setImportingProgress(0);
-                        Toast.success('资源包校验通过！');
-                    } else {
-                        setImportingProgress(0);
-                        setResourceState({ imported: false, complete: false });
-                        Toast.error('资源包校验失败，请检查资源完整性');
-                    }
-                    return;
-                }
-            } catch (err: unknown) {
-                console.error(`获取资源校验进度失败: ${err}`);
-                stopResourcePolling();
-                setImportingProgress(0);
-                setResourceState({ imported: false, complete: false });
-                Toast.error('获取资源校验进度失败，请检查后端服务');
-                return;
-            }
-
-            // 下一轮轮询
-            if (isResourcePollingRef.current) {
-                resourcePollingTimerRef.current = setTimeout(() => {
-                    void poll();
-                }, 100);
-            }
-        };
-
-        resourcePollingTimerRef.current = setTimeout(() => {
-            void poll();
-        }, 100);
-    };
-
-    const pollCMInstallationProgress = async (installId: string): Promise<void> => {
-        isPollingRef.current = true;
-
-        const poll = async (): Promise<void> => {
-            if (!isPollingRef.current) return;
-            try {
-                const progress = (await requestBackend(
-                    'GET', 
-                    `/api/installations/${installId}/progress?category=all`
-                )) as InstallationProgressResponse;
-                
-                setCmInstallProgress(progress.totalProgress);
-                
-                // 尝试从 categories 中获取当前项作为状态文本
-                if (progress.categories && progress.categories.length > 0) {
-                    const currentCat = progress.categories.find(c => c.status === 'active') || progress.categories[0];
-                    if (currentCat.currentItem) {
-                        setCmInstallStatusText(currentCat.currentItem);
-                    } else if (progress.status === 'installing') {
-                        setCmInstallStatusText('正在安装...');
-                    }
-                } else {
-                    if (progress.status === 'preparing') setCmInstallStatusText('正在准备...');
-                    else if (progress.status === 'installing') setCmInstallStatusText('正在安装...');
-                }
-
-                if (progress.status === 'completed' || progress.status === 'failed') {
-                    stopCMPolling();
-                    
-                    if (progress.status === 'completed') {
-                        setCmInstallProgress(100);
-                        setCmInstallStatusText('安装完成');
-                        
-                        // 延迟 200ms 关闭安装状态，让用户能看到 100% 的进度条
-                        setTimeout(() => {
-                            setCmInstalling(false);
-                            setCmInstalled(true);
-                            Toast.success('Content Manager 安装成功！');
-                        }, 200);
-                    } else {
-                        setCmInstalling(false);
-                        setCmInstallStatusText('安装失败');
-                        Toast.error(`Content Manager 安装失败: ${progress.error || '未知错误'}`);
-                    }
-                    return; // 结束轮询
-                }
-            } catch (err: unknown) {
-                console.error(`获取 CM 安装进度失败: ${err}`);
-                stopCMPolling();
-                setCmInstalling(false);
-                setCmInstallStatusText('获取进度失败');
-                Toast.error('获取安装进度失败，请检查后端连接');
-                return;
-            }
-
-            // 继续下一轮轮询，间隔 100ms
-            if (isPollingRef.current) {
-                pollingTimerRef.current = setTimeout(() => {
-                    void poll();
-                }, 100);
-            }
-        };
-
-        // 发起第一次轮询
-        pollingTimerRef.current = setTimeout(() => {
-            void poll();
-        }, 100);
-    };
-
-    const handleInstallCM = async (): Promise<void> => {
-        setCmInstalling(true);
-        setCmInstallStatusText('正在连接服务器...');
-        setCmInstallProgress(0);
-        stopCMPolling();
-
-        try {
-            const response = (await requestBackend('POST', '/api/installations', {
-                versionId: 'cm-demo-v1'
-            })) as InstallationCreateResponse;
-
-            setCmInstallStatusText('已创建安装任务...');
-            await pollCMInstallationProgress(response.id);
-        } catch (err: unknown) {
-            console.error(`创建 CM 安装任务失败: ${err}`);
-            setCmInstalling(false);
-            setCmInstallStatusText('创建任务失败');
-            Toast.error('无法启动安装任务，请检查后端服务');
-        }
-    };
+    // polling 逻辑已移至 useInstallation hook
 
     // [新增] 模拟导入资源文件动作
     const handleImportResource = (): void => {
         // DEMO：导入按钮在这里等价于“后端资源包校验”，并把 tracker 进度同步到 importingProgress。
         if (currentMode.id === 'demo') {
-            stopResourcePolling();
-            setImportingProgress(0);
-
-            void (async () => {
-                try {
-                    const response = (await requestBackend('POST', '/api/installations', {
-                        versionId: 'demo-resource-verify-v1',
-                        ...(devDemoSlowProgress
-                            ? {
-                                  demoSlowProgress: true,
-                                  demoSlowTotalSeconds: devDemoSlowTotalSeconds
-                              }
-                            : {})
-                    })) as InstallationCreateResponse;
-
-                    // 启动轮询，进度由后端 tracker 驱动
-                    await pollResourceVerifyProgress(response.id);
-                } catch (err: unknown) {
-                    console.error('创建资源校验任务失败:', err);
-                    setImportingProgress(0);
-                    setResourceState({ imported: false, complete: false });
-                    Toast.error('无法启动资源校验任务，请检查后端服务');
-                }
-            })();
+            handleResourceVerify(
+                devDemoSlowProgress
+                    ? { demoSlowProgress: true, demoSlowTotalSeconds: devDemoSlowTotalSeconds }
+                    : undefined
+            );
             return;
         }
 
-        setImportingProgress(1);
+        // 非 DEMO：本地模拟导入
+        let localProgress = 1;
         const timer = setInterval(() => {
-            setImportingProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(timer);
-                    setResourceState({ imported: true, complete: devResourceComplete }); // 导入后状态取决于完整性开关
-                    setImportingProgress(0);
-                    Toast.success('资源包导入成功！');
-                    return 0;
-                }
-                return prev + 10;
-            });
+            localProgress += 10;
+            if (localProgress >= 100) {
+                clearInterval(timer);
+                setResourceState({ imported: true, complete: devResourceComplete });
+                Toast.success('资源包导入成功！');
+            }
         }, 100);
     };
 
@@ -1004,7 +710,6 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                         formatSize={formatSize}
                         handleInstallClick={handleInstallClick}
                         setMode={setMode}
-                        onNavigate={onNavigate}
                         showSpaceSolutionModal={showSpaceSolutionModal}
                         conflictModalVisible={conflictModalVisible}
                         setConflictModalVisible={setConflictModalVisible}
@@ -1056,7 +761,7 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                     />
                 );
             case 'POST_INSTALL':
-                return <PostInstallPage onNavigate={onNavigate} setCurrentStep={setCurrentStep} />;
+                return <PostInstallPage setCurrentStep={setCurrentStep} />;
             default:
                 return (
                     <NormalInstaller
@@ -1070,7 +775,6 @@ export default function OneClickInstaller({ onNavigate, onNavigateToSettingsFrom
                         formatSize={formatSize}
                         handleInstallClick={handleInstallClick}
                         setMode={setMode}
-                        onNavigate={onNavigate}
                         showSpaceSolutionModal={showSpaceSolutionModal}
                         conflictModalVisible={conflictModalVisible}
                         setConflictModalVisible={setConflictModalVisible}
