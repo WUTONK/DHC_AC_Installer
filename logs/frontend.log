@@ -8,7 +8,7 @@ transforming...
 ✓ 2 modules transformed.
 rendering chunks...
 out/main/index.js  9.22 kB
-✓ built in 262ms
+✓ built in 48ms
 
 build the electron main process successfully
 
@@ -19,15 +19,16 @@ transforming...
 ✓ 1 modules transformed.
 rendering chunks...
 out/preload/index.js  0.51 kB
-✓ built in 8ms
+✓ built in 10ms
 
 build the electron preload files successfully
 
 -----
 
+Port 5173 is in use, trying another one...
 dev server running for the electron renderer process at:
 
-  ➜  Local:   http://localhost:5173/
+  ➜  Local:   http://localhost:5174/
   ➜  Network: use --host to expose
 
 start electron app...
@@ -37,3 +38,4 @@ Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
 `import sass from 'sass'` is deprecated.
 Please use `import * as sass from 'sass'` instead.
+ ELIFECYCLE  Command failed.
