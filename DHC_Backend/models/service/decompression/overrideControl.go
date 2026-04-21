@@ -99,13 +99,6 @@ func (o OverrideStruct) Overwrite(srcPath, dstPath string) error {
 			return fmt.Errorf("%s创建目标目录父目录失败: %v", funcIdt, err)
 		}
 
-		// 如果目标目录已存在，先删除
-		if _, err := os.Stat(dstPath); err == nil {
-			if err := os.RemoveAll(dstPath); err != nil {
-				return fmt.Errorf("%s删除已存在的目标目录失败: %v", funcIdt, err)
-			}
-		}
-
 		// 使用 filepath.WalkDir 递归复制
 		err := filepath.WalkDir(srcPath, func(srcFilePath string, d os.DirEntry, err error) error {
 			if err != nil {
@@ -568,7 +561,7 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 		if err != nil {
 			return err
 		}
-		ruleDec = &ActionDecision{action: act, target: "", source: "rule"}
+		ruleDec = &ActionDecision{action: act, target: hits[0].Target, source: "rule"}
 		if act == OverrideActionRename {
 			ruleDec.newName = hits[0].NewName
 		}
@@ -577,7 +570,11 @@ func applyDecisions(node *Node, parent *ActionDecision, rules []Rule, defaultAct
 	// 继承：仅当未命中规则且父节点存在决策时生效 不继承rename选项
 	var inheritDec *ActionDecision
 	if ruleDec == nil && parent != nil && parent.action != OverrideActionRename {
-		inheritDec = &ActionDecision{action: parent.action, target: parent.target, source: "inherit"}
+		inheritedTarget := ""
+		if parent.target != "" {
+			inheritedTarget = filepath.ToSlash(filepath.Join(parent.target, filepath.Base(node.relPath)))
+		}
+		inheritDec = &ActionDecision{action: parent.action, target: inheritedTarget, source: "inherit"}
 	}
 
 	// 默认：既无规则也无继承时，兜底采用 defaultAction
@@ -736,8 +733,30 @@ func computeUniformInfo(node *Node, uniformInfo map[*Node]*UniformInfo) {
 			source: chInfo.uniformSource,
 		}
 		if base == nil {
-			base = chDec
-		} else if base.action != chDec.action || base.target != chDec.target || chDec.action == OverrideActionRename {
+			// 提取预期父节点的目标（由于 chInfo.uniformTarget 是子节点的完整目标，预期父节点目标应为去掉最后一段）
+			parentTarget := ""
+			if chDec.target != "" {
+				parentTarget = filepath.ToSlash(filepath.Dir(chDec.target))
+				if parentTarget == "." {
+					parentTarget = ""
+				}
+			}
+			base = &ActionDecision{action: chDec.action, target: parentTarget, source: chDec.source}
+		} 
+		
+		expectedChildTarget := ""
+		if base.target != "" {
+			expectedChildTarget = filepath.ToSlash(filepath.Join(base.target, filepath.Base(ch.relPath)))
+		}
+		
+		// 如果 base.target 为空，说明是自然路径映射，子节点也必须是空目标
+		if base.target == "" && chDec.target != "" {
+			info.subtreeUniform = false
+			uniformInfo[node] = info
+			return
+		}
+
+		if base.action != chDec.action || (base.target != "" && expectedChildTarget != chDec.target) || chDec.action == OverrideActionRename {
 			// 子节点动作或目标不一致或有 rename 操作，父节点不一致
 			info.subtreeUniform = false
 			uniformInfo[node] = info
@@ -746,6 +765,15 @@ func computeUniformInfo(node *Node, uniformInfo map[*Node]*UniformInfo) {
 	}
 
 	// 所有子节点一致，父节点也一致（base 一定不为 nil，因为至少有子节点）
+	// 但是！父节点自身的决策（如果有的话，哪怕是继承的）必须与子节点一致，否则不能合并
+	if node.hasDecision && node.decidedAction != OverrideActionRename {
+		if node.decidedAction != base.action || node.decidedTarget != base.target {
+			info.subtreeUniform = false
+			uniformInfo[node] = info
+			return
+		}
+	}
+
 	info.subtreeUniform = true
 	info.uniformAction = base.action
 	info.uniformTarget = base.target
@@ -864,14 +892,13 @@ func generateExecutionPlan(node *Node, dstRoot string, srcDirName string) []Task
 
 // buildTarget: 将"目标相对路径"拼接到 dstRoot，若未指定则沿用源相对路径
 // 未来支持映射时：decidedTarget 由规则提供；未提供则按 relPath 对齐。
-// 特殊处理：当 relPath = "." 时（根节点），使用 srcDirName 来构建目标路径
 func buildTarget(dstRoot, relPath, decidedTarget, srcDirName string) string {
 	if decidedTarget != "" {
 		return filepath.Join(dstRoot, decidedTarget)
 	}
-	// 当 relPath = "." 时（根节点），使用源目录名来构建目标路径
+	// 当 relPath = "." 时（根节点），直接返回 dstRoot（表示合并到目标目录本身）
 	if relPath == "." {
-		return filepath.Join(dstRoot, srcDirName)
+		return dstRoot
 	}
 	return filepath.Join(dstRoot, relPath)
 }

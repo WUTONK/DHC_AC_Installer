@@ -3,7 +3,7 @@
   "info": {
     "title": "DHC AC Installer API",
     "description": "DHC AC Installer 前后端 API 接口规范，与后端 Gin 路由一一对应",
-    "version": "2.0.0"
+    "version": "0.1.0-alpha"
   },
   "tags": [
     {

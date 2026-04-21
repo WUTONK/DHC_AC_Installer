@@ -3,6 +3,7 @@ package modinstall
 import (
 	"DHC_Backend/models/service/infoGet"
 	"DHC_Backend/models/service/servicelog"
+	"DHC_Backend/models/service/types"
 	"fmt"
 	"time"
 )
@@ -574,6 +575,21 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 
 	servicelog.Infof("[demo] RunDemoCarsInstall done")
 	return nil
+}
+
+// ------------------------------
+// 真实安装执行器（用于 SRP 0.9.3 等实际模组）
+// ------------------------------
+
+// RunRealMapInstall 执行 SRP 0.9.3 地图的实际安装。
+func RunRealMapInstall(tracker *TaskTracker) error {
+	servicelog.Infof("[real] RunRealMapInstall begin")
+	paths := []string{
+		"tracks/demoPkg/SRP_093",
+	}
+	// 使用 MultiModInstallWithTracker 进行真实安装
+	// 显式指定从目录查找 dft.json
+	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
 }
 
 // ------------------------------

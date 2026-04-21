@@ -1,6 +1,9 @@
 package modinstall
 
-import "sync"
+import (
+	"DHC_Backend/models/service/servicelog"
+	"sync"
+)
 
 // ============================================================================
 // TaskTracker —— 借鉴 React Hook 思想的"进度追踪器"
@@ -218,10 +221,17 @@ func (t *TaskTracker) GetSnapshot() ProgressSnapshot {
 // notifyLocked 计算当前快照并触发 onChange 回调。
 // 调用时必须已经持有 t.mu 锁。
 func (t *TaskTracker) notifyLocked() {
+	snapshot := t.buildSnapshotLocked()
+
+	// 实时进度日志输出
+	if snapshot.CurrentPhase != "" {
+		servicelog.Infof("[progress] %s: %.1f%% (Total: %.1f%%)\n",
+			snapshot.PhaseName, snapshot.SubProgress, snapshot.TotalProgress)
+	}
+
 	if t.onChange == nil {
 		return
 	}
-	snapshot := t.buildSnapshotLocked()
 	t.onChange(snapshot)
 }
 

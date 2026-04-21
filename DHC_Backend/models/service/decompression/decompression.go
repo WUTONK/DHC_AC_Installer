@@ -418,12 +418,17 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 		midDirPath = dstFilePath
 	}
 
-	servicelog.Debugf("%s开始创建中间目录%s\n", funcIdt, midDirPath)
+	// 确保中间目录存在且干净
+	if infoGet.IsFileOrDirExists(midDirPath) {
+		servicelog.Infof("%s清理旧的中间目录: %s\n", funcIdt, midDirPath)
+		os.RemoveAll(midDirPath)
+	}
 
-	// 确保中间目录存在
 	if err := os.MkdirAll(midDirPath, 0755); err != nil {
 		return "", "before", fmt.Errorf("%s创建中间目录失败: %v", funcIdt, err)
 	}
+
+	servicelog.Infof("%s 准备开始解压: %s -> %s\n", funcIdt, srcPath, midDirPath)
 
 	// 鉴定是否为非压缩文件或不受支持的压缩格式 如果是 直接复制一份到中间目录
 	if comparableType == "" {
@@ -460,17 +465,15 @@ func Decompression(srcPath string, filePassword string, isMod bool, dstFilePath 
 
 		err := cmd.Run()
 		outStr, errStr := stdout.String(), stderr.String()
-		if err == nil {
-			errStr = "无错误输出"
-		}
-		servicelog.Debugf("7z解压命令输出: %s\n 7z解压命令错误: %s\n", outStr, errStr)
-
 		if err != nil {
-			servicelog.Errorf("%s解压失败: 错误=%v\n", funcIdt, err)
+			servicelog.Errorf("%s解压失败: 错误=%v, 7z标准输出=%s, 7z错误输出=%s\n", funcIdt, err, outStr, errStr)
 			return "", "before", fmt.Errorf("%s解压失败: %v", funcIdt, err)
 		}
+		servicelog.Infof("7z解压命令完成\n")
 
-		servicelog.Debugf("%s解压普通压缩文件并写入中间路径%s完成\n", funcIdt, midDirPath)
+		// 统计解压后的文件数量
+		files, _ := os.ReadDir(midDirPath)
+		servicelog.Infof("%s解压完成，中间目录文件数: %d\n", funcIdt, len(files))
 	} else {
 
 		// 获取分卷文件的目录

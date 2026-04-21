@@ -43,6 +43,12 @@ var installSetRegistry = map[string]installSetDefinition{
 			{CategoryID: "cars", CategoryName: "车辆包 (JDM Pack)", ExecutorFn: modinstall.RunDemoCarsInstall},
 		},
 	},
+	"real-install-v1": {
+		DeferCleanup: false,
+		Steps: []installStep{
+			{CategoryID: "map", CategoryName: "地图包 (SRP 0.9.3 真实装载)", ExecutorFn: modinstall.RunRealMapInstall},
+		},
+	},
 }
 
 // defaultInstallSet 当 setId 不在注册表中时使用的默认定义。

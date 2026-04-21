@@ -178,6 +178,7 @@ func DhcResoucePkgImport(pkgPath string) (ResourceMap, error) {
 // 单模组安装
 func SingleModInstall(srcPath string, d types.DftPathGetModOrPath) {
 	funcIdt := "-modinstall.SingleModInstall"
+	servicelog.Infof("%s 开始安装, srcPath: %s, dftStrategy: %s\n", funcIdt, srcPath, d)
 	// 逻辑：
 	// 传入文件并解压（非压缩包直接复制）到中间目录
 	opts := decompression.DecompressionOptions{
@@ -440,6 +441,7 @@ func MultiModInstallWithTracker(paths []string, dftFilePath string, tracker *Tas
 	}
 
 	// ── 逐个安装 ──
+	servicelog.Infof("%s 准备安装 %d 个模组\n", funcIdt, len(expandedPaths))
 	for i, path := range expandedPaths {
 		phaseID := fmt.Sprintf("mod_%d", i)
 		tracker.StartPhase(phaseID)

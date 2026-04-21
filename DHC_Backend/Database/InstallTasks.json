@@ -1,5 +1,158 @@
 [
   {
+    "id": "install_1775837693235086000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775837693,
+    "endTime": 1775837696,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674941648724000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674941,
+    "endTime": 1776674947,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776649960420385000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776649960,
+    "endTime": 1776649964,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776670694389258000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776670694,
+    "endTime": 1776670700,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776668936430945000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776668936,
+    "endTime": 1776668941,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776669321614942000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776669321,
+    "endTime": 1776669328,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776670531104954000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776670531,
+    "endTime": 1776670536,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776667545954713000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667545,
+    "endTime": 1776667551,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674247950402000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674247,
+    "endTime": 1776674253,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
     "id": "install_1775838433303948000",
     "setId": "standard",
     "status": "completed",
@@ -17,11 +170,11 @@
     }
   },
   {
-    "id": "install_1775838436116968000",
+    "id": "install_1775837682726212000",
     "setId": "standard",
     "status": "completed",
-    "startTime": 1775838436,
-    "endTime": 1775838438,
+    "startTime": 1775837682,
+    "endTime": 1775837685,
     "categories": {
       "cm": {
         "categoryId": "cm",
@@ -29,6 +182,278 @@
         "status": "completed",
         "progress": 100,
         "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776668760555848000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776668760,
+    "endTime": 1776668766,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650373444082000",
+    "setId": "real-install-v1",
+    "status": "interrupted",
+    "startTime": 1776650373,
+    "error": "进程异常退出，任务被中断",
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "waiting",
+        "progress": 0,
+        "subProgress": 0
+      }
+    }
+  },
+  {
+    "id": "install_1776650386157030000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650386,
+    "endTime": 1776650391,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674974143799000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674974,
+    "endTime": 1776674979,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776649486378141000",
+    "setId": "real-install-v1",
+    "status": "failed",
+    "startTime": 1776649486,
+    "endTime": 1776649486,
+    "error": "-modInstall.MultiModInstallWithTracker-完整性检查未通过: -modInstall.PathCorresponModIntegrityCheck-检测到资源在本地不完整,路径:tracks/demoPkg/SRP_093,状态:不完整",
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "failed",
+        "progress": 6,
+        "currentItem": "校验资源完整性",
+        "subProgress": 60
+      }
+    }
+  },
+  {
+    "id": "install_1776676637423676000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776676637,
+    "endTime": 1776676643,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776673978865968000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776673978,
+    "endTime": 1776673984,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650494898684000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650494,
+    "endTime": 1776650500,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776649915769494000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776649915,
+    "endTime": 1776649919,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776670809903064000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776670809,
+    "endTime": 1776670815,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674018746372000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674018,
+    "endTime": 1776674024,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674347638150000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674347,
+    "endTime": 1776674353,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650052232123000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650052,
+    "endTime": 1776650056,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776667385935348000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667385,
+    "endTime": 1776667391,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776673906930868000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776673906,
+    "endTime": 1776673912,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650146959634000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650146,
+    "endTime": 1776650152,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
         "subProgress": 100
       }
     }
@@ -75,28 +500,45 @@
     }
   },
   {
-    "id": "install_1775837682726212000",
-    "setId": "standard",
+    "id": "install_1776675962586055000",
+    "setId": "real-install-v1",
     "status": "completed",
-    "startTime": 1775837682,
-    "endTime": 1775837685,
+    "startTime": 1776675962,
+    "endTime": 1776675968,
     "categories": {
-      "cm": {
-        "categoryId": "cm",
-        "categoryName": "Content Manager",
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
         "status": "completed",
         "progress": 100,
-        "currentItem": "移动到桌面",
+        "currentItem": "安装 SRP_093",
         "subProgress": 100
       }
     }
   },
   {
-    "id": "install_1775837693235086000",
+    "id": "install_1776667637151783000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667637,
+    "endTime": 1776667642,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775838436116968000",
     "setId": "standard",
     "status": "completed",
-    "startTime": 1775837693,
-    "endTime": 1775837696,
+    "startTime": 1775838436,
+    "endTime": 1775838438,
     "categories": {
       "cm": {
         "categoryId": "cm",

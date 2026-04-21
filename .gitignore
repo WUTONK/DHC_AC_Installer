@@ -16,9 +16,12 @@ DHC_Backend/models/tools/7z/windows/
 DHC_Backend/resources/cache
 DHC_Backend/test/testModFile
 DHC_Backend/test/simEnv/windows_finder
-DHC_Backend/test/simEnv/acRoot
+DHC_Backend/test/simEnv/acRoot/AC_SKELETON_HASDLC
 # Large local demo package assets (~GB); keep out of git to avoid slow git add / huge repo
 DHC_Backend/test/simEnv/resources/resources/demoPkg/
+DHC_Backend/test/simEnv/resources/testPkg/tracks/demoPkg/
+DHC_Backend/test/simEnv/resources/testPkg/cars/demoPkg/
+DHC_Backend/test/simEnv/resources/testPkg/shaders/demoPkg/
 
 # Temporary document
 doc/.*

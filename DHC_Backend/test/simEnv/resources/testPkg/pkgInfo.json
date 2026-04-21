@@ -3,16 +3,26 @@
         "cars": {
             "SHMC": {
                 "r34": 8,
-                "r32": 4
+                "r32": 4,
+                "rx7": 8
             },
             "DDM": {
                 "SUPRA": 1024
             },
+            "DREAM": {
+                "AE86": 8
+            },
             "minDemo": {
+                "carMini": 1
+            },
+            "demoPkg": {
                 "carMini": 1
             }
         },
         "tracks": {
+            "demoPkg": {
+                "SRP_093": 1208110716
+            },
             "main": {
                 "SRP_093": 200000
             },
@@ -27,6 +37,11 @@
         "shaders": {
             "minDemo": {
                 "shadowMini": 1
+            }
+        },
+        "hud": {
+            "demoPkg": {
+                "hudMini": 1
             }
         }
     }

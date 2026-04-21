@@ -379,7 +379,13 @@ func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath)
 				servicelog.Warnf("检测到不在 catalog 中的资源路径: %s\n", modPath)
 				// 不添加到 modDirs，跳过该路径
 			} else {
-				modDirs[modPath] += info.Size()
+				// 使用 os.Stat 确保如果是软链接，获取的是目标文件的大小
+				actualFileInfo, err := os.Stat(path)
+				if err == nil {
+					modDirs[modPath] += actualFileInfo.Size()
+				} else {
+					modDirs[modPath] += info.Size()
+				}
 			}
 		}
 

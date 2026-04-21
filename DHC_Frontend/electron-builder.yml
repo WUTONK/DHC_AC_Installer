@@ -1,6 +1,6 @@
 appId: com.dhc.acinstaller
 productName: DHC AC Installer
-version: 1.0.0
+version: 0.1.0-alpha
 directories:
   buildResources: build
   output: dist
