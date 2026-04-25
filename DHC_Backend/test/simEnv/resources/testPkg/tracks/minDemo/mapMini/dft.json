@@ -1,6 +1,0 @@
-{
-    "modType": "map",
-    "defaultAction": { "action": "overwrite", "backup": false },
-    "rules": [],
-    "overwriteStartingDir": "content/tracks"
-}

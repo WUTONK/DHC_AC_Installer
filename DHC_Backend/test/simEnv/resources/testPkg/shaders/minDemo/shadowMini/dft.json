@@ -1,6 +1,0 @@
-{
-    "modType": "shader",
-    "defaultAction": { "action": "overwrite", "backup": false },
-    "rules": [],
-    "overwriteStartingDir": "content"
-}
