@@ -5,8 +5,86 @@ import (
 	"DHC_Backend/models/service/infoGet"
 	getfilesnumber "DHC_Backend/test/testToolsFunction/GetfilesNumber"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 )
+
+// TestOverrideControl_RuleTargetRemap 验证 rule 的 target 将「多包一层」的源路径映射到游戏 content 下（继承子路径）。
+// 与 shmnc129.rar 解压后 shmnc129/content/... 对应：pattern 命中目录节点 shmnc129/content，target 为 content。
+func TestOverrideControl_RuleTargetRemap(t *testing.T) {
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
+	root := t.TempDir()
+	inner := filepath.Join(root, "shmnc129", "content", "cars", "c1")
+	if err := os.MkdirAll(inner, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(inner, "x.txt"), []byte("ok"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dftPath := filepath.Join(root, "dft.json")
+	dft := `{
+	"modType": "car",
+	"defaultAction": {"action": "skip", "backup": false},
+	"rules": [
+		{"pattern": "shmnc129/content", "action": "overwrite", "backup": false, "target": "content"}
+	],
+	"overwriteStartingDir": "."
+}`
+	if err := os.WriteFile(dftPath, []byte(dft), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(root, "out")
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := decompression.OverrideControl(root, dst, dftPath); err != nil {
+		t.Fatalf("OverrideControl: %v", err)
+	}
+	outFile := filepath.Join(dst, "content", "cars", "c1", "x.txt")
+	if _, err := os.Stat(outFile); err != nil {
+		t.Fatalf("期望重映射到 %s: %v", outFile, err)
+	}
+}
+
+// TestOverrideControl_PatternLeadingSlash 与 TestOverrideControl_RuleTargetRemap 相同语义，但 pattern 带前导 /（与 dft 文档中 /dirname 写法一致）
+func TestOverrideControl_PatternLeadingSlash(t *testing.T) {
+	infoGet.SetDev(true)
+	infoGet.SetTestEnvType(infoGet.SimEnvHasDlc)
+
+	root := t.TempDir()
+	inner := filepath.Join(root, "shmnc129", "content", "mark.txt")
+	if err := os.MkdirAll(filepath.Dir(inner), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(inner, []byte("1"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dftPath := filepath.Join(root, "dft.json")
+	dft := `{
+	"modType": "car",
+	"defaultAction": {"action": "skip", "backup": false},
+	"rules": [
+		{"pattern": "/shmnc129/content", "action": "overwrite", "backup": false, "target": "content"}
+	],
+	"overwriteStartingDir": "."
+}`
+	if err := os.WriteFile(dftPath, []byte(dft), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(root, "out")
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := decompression.OverrideControl(root, dst, dftPath); err != nil {
+		t.Fatalf("OverrideControl: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dst, "content", "mark.txt")); err != nil {
+		t.Fatalf("expected /shmnc129/content pattern to match: %v", err)
+	}
+}
 
 func TestOverrideControl(t *testing.T) {
 	// 设置开发模式，确保使用模拟环境

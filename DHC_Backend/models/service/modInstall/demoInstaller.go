@@ -581,14 +581,12 @@ func RunDemoCarsInstall(tracker *TaskTracker) error {
 // 真实安装执行器（用于 SRP 0.9.3 等实际模组）
 // ------------------------------
 
-// RunRealMapInstall 执行 SRP 0.9.3 地图的实际安装。
+// RunRealMapInstall 执行地图的实际安装。
 func RunRealMapInstall(tracker *TaskTracker) error {
 	servicelog.Infof("[real] RunRealMapInstall begin")
 	paths := []string{
-		"tracks/demoPkg/SRP_093",
+		"tracks/miniDemo_tracks_1/mapMini",
 	}
-	// 使用 MultiModInstallWithTracker 进行真实安装
-	// 显式指定从目录查找 dft.json
 	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
 }
 
@@ -645,4 +643,42 @@ func runDetectDemoDlcCarPackWithTracker(tracker *TaskTracker) (hasAll bool) {
 	tracker.SetSubProgress("dlc_carpack_detect", 100)
 
 	return dlcPass && carPackPass
+}
+
+// ============================================================================
+// Mini 模组集真实安装执行器
+//
+// 三个独立执行器，分别安装车包、地图、HUD，各自走 MultiModInstallWithTracker。
+// 在 handler/installations.go 的 installSetRegistry 中以三个 Step 注册到
+// "real-mini-install-v1" 安装集，前端可看到三个独立 category 进度条。
+// ============================================================================
+
+// RunRealCarsInstallMini 安装 Mini 模组集中的所有车辆包。
+func RunRealCarsInstallMini(tracker *TaskTracker) error {
+	servicelog.Infof("[real-mini] RunRealCarsInstallMini begin")
+	paths := []string{
+		"cars/miniDemo_cars_1/shmnc129",
+		"cars/miniDemo_cars_2/miniCar",
+	}
+	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
+}
+
+// RunRealMapInstallMini 安装 Mini 模组集中的所有地图包。
+func RunRealMapInstallMini(tracker *TaskTracker) error {
+	servicelog.Infof("[real-mini] RunRealMapInstallMini begin")
+	paths := []string{
+		"tracks/miniDemo_tracks_1/mapMini",
+		"tracks/miniDemo_tracks_2/miniMap",
+	}
+	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
+}
+
+// RunRealHudInstallMini 安装 Mini 模组集中的所有 HUD 仪表盘。
+func RunRealHudInstallMini(tracker *TaskTracker) error {
+	servicelog.Infof("[real-mini] RunRealHudInstallMini begin")
+	paths := []string{
+		"dashboard/miniDemo_dashboard_1/wmmtHud",
+		"dashboard/miniDemo_dashboard_2/miniHud",
+	}
+	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
 }

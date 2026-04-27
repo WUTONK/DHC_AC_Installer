@@ -408,7 +408,8 @@ func stringToOverrideAction(str string) (OverrideAction, error) {
 // 返回: 是否匹配成功
 func DirectoryMatching(rulePath, targetPath string) bool {
 	// 标准化路径（统一使用 / 作为分隔符）
-	rulePath = filepath.ToSlash(rulePath)
+	// 规则中的 pattern 允许写成 "/a/b"（与手动路径一致）；relPath 无前导 "/"，需对齐后再匹配
+	rulePath = strings.TrimPrefix(filepath.ToSlash(rulePath), "/")
 	targetPath = filepath.ToSlash(targetPath)
 
 	// 如果规则路径以 /* 结尾，表示匹配该目录下的所有文件（不包括子目录）
@@ -742,13 +743,13 @@ func computeUniformInfo(node *Node, uniformInfo map[*Node]*UniformInfo) {
 				}
 			}
 			base = &ActionDecision{action: chDec.action, target: parentTarget, source: chDec.source}
-		} 
-		
+		}
+
 		expectedChildTarget := ""
 		if base.target != "" {
 			expectedChildTarget = filepath.ToSlash(filepath.Join(base.target, filepath.Base(ch.relPath)))
 		}
-		
+
 		// 如果 base.target 为空，说明是自然路径映射，子节点也必须是空目标
 		if base.target == "" && chDec.target != "" {
 			info.subtreeUniform = false

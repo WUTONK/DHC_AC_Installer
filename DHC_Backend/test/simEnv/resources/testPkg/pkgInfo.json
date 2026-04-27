@@ -1,47 +1,28 @@
 {
     "categorys": {
         "cars": {
-            "SHMC": {
-                "r34": 8,
-                "r32": 4,
-                "rx7": 8
+            "miniDemo_cars_1": {
+                "shmnc129": 1973758720
             },
-            "DDM": {
-                "SUPRA": 1024
-            },
-            "DREAM": {
-                "AE86": 8
-            },
-            "minDemo": {
-                "carMini": 1
-            },
-            "demoPkg": {
-                "carMini": 1
+            "miniDemo_cars_2": {
+                "miniCar": 1
             }
         },
         "tracks": {
-            "demoPkg": {
-                "SRP_093": 1208110716
-            },
-            "main": {
-                "SRP_093": 200000
-            },
-            "sub": {
-                "SRP_C1": 20000,
-                "NEW_LOOP": 30000
-            },
-            "minDemo": {
+            "miniDemo_tracks_1": {
                 "mapMini": 1
+            },
+            "miniDemo_tracks_2": {
+                "miniMap": 1
             }
         },
-        "shaders": {
-            "minDemo": {
-                "shadowMini": 1
-            }
-        },
-        "hud": {
-            "demoPkg": {
-                "hudMini": 1
+        "shaders": {},
+        "dashboard": {
+            "miniDemo_dashboard_1": {
+                "wmmtHud": 1
+            },
+            "miniDemo_dashboard_2": {
+                "miniHud": 1
             }
         }
     }

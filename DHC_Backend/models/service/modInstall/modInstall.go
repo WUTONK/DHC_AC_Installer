@@ -226,8 +226,9 @@ func SingleModInstall(srcPath string, d types.DftPathGetModOrPath) {
 func SingleModInstallFromDir(srcDirPath string, d types.DftPathGetModOrPath) {
 	funcIdt := "-modinstall.SingleModInstallFromDir-"
 
-	// 获取 dft 文件路径
-	dftPath := decompression.GetDftPath(srcDirPath, srcDirPath, d)
+	// srcDirPath 本身就是 mod 级目录，直接在此处查找 dft.json；
+	// 不走 GetDftPath（它会对路径做 filepath.Dir，适用于压缩包文件而非目录）。
+	dftPath := decompression.FindDftJsonWithPriority(srcDirPath)
 
 	// 获取游戏路径
 	gamePath, err := infoGet.GetGamePathAuto()
@@ -772,9 +773,9 @@ func ClearBackendModInstallIntermediateDirs() error {
 // v0.3 起接入 TaskTracker，并复用 MultiModInstallWithTracker 的完整性校验。
 func RunMinimalModsetInstall(tracker *TaskTracker) error {
 	paths := []string{
-		"cars/minDemo/carMini",
-		"tracks/minDemo/mapMini",
-		"shaders/minDemo/shadowMini",
+		"cars/miniDemo_cars_2/miniCar",
+		"tracks/miniDemo_tracks_2/miniMap",
+		"dashboard/miniDemo_dashboard_2/miniHud",
 	}
 	return MultiModInstallWithTracker(paths, string(types.DftPathFromDir), tracker)
 }

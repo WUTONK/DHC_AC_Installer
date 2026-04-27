@@ -23,6 +23,8 @@ interface UseInstallationResult {
   createDemoInstall: (
     demoSlowOptions?: DemoSlowOptions
   ) => Promise<string | null>
+
+  createRealMiniInstall: () => Promise<string | null>
 }
 
 export function useInstallation(): UseInstallationResult {
@@ -271,6 +273,28 @@ export function useInstallation(): UseInstallationResult {
     []
   )
 
+  const createRealMiniInstall = useCallback(
+    async (): Promise<string | null> => {
+      try {
+        const response = await createInstallation({
+          versionId: 'real-mini-install-v1'
+        })
+
+        if (!response?.id) {
+          throw new Error('backend did not return installId')
+        }
+
+        console.info('[useInstallation] Mini 真实安装任务已创建', response)
+        return response.id
+      } catch (err: unknown) {
+        console.error('创建 Mini 真实安装任务失败:', err)
+        Toast.error('无法启动 Mini 安装任务，请检查后端服务')
+        return null
+      }
+    },
+    []
+  )
+
   return {
     cmInstalling,
     cmInstallProgress,
@@ -280,6 +304,7 @@ export function useInstallation(): UseInstallationResult {
     importingProgress,
     handleResourceVerify,
     resourceVerifyState,
-    createDemoInstall
+    createDemoInstall,
+    createRealMiniInstall
   }
 }

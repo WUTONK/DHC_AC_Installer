@@ -283,7 +283,6 @@ func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath)
 
 	// 获取所有资源模式
 	if resource == All {
-		// 获取所有资源类型（排除 All）
 		var allResourceTypes = []ResourceType{
 			Tracks,
 			Cars,
@@ -323,7 +322,8 @@ func ImportResourceDetection(resource ResourceType, DetectionPath DetectionPath)
 			resourceDir = filepath.Join(backendRootPath, "resources", string(resource))
 		}
 		if !infoGet.IsFileOrDirExists(resourceDir) {
-			return rm, fmt.Errorf("资源目录%s不存在", resourceDir)
+			servicelog.Warnf("资源目录 %s 不存在，跳过检测（所有条目保持 NotImported）\n", resourceDir)
+			return rm, nil
 		}
 
 	} else {

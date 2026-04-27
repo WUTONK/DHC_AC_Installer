@@ -49,6 +49,14 @@ var installSetRegistry = map[string]installSetDefinition{
 			{CategoryID: "map", CategoryName: "地图包 (SRP 0.9.3 真实装载)", ExecutorFn: modinstall.RunRealMapInstall},
 		},
 	},
+	"real-mini-install-v1": {
+		DeferCleanup: false,
+		Steps: []installStep{
+			{CategoryID: "cars", CategoryName: "车辆包", ExecutorFn: modinstall.RunRealCarsInstallMini},
+			{CategoryID: "map", CategoryName: "地图包", ExecutorFn: modinstall.RunRealMapInstallMini},
+			{CategoryID: "dashboard", CategoryName: "HUD 仪表盘", ExecutorFn: modinstall.RunRealHudInstallMini},
+		},
+	},
 }
 
 // defaultInstallSet 当 setId 不在注册表中时使用的默认定义。
