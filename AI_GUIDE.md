@@ -39,6 +39,16 @@
 -   **错误处理:** 后端错误应通过 `servicelog` 记录，并透传至任务进度 API 供前端展示。
 -   **通信机制:** 前端**严禁**直接通过 HTTP 调用后端；必须使用 `window.api.requestApi` 走 Electron IPC 通道。
 
+## 📖 配置与安装必读
+
+在进行模组安装逻辑开发或排查问题前，请先阅读以下文档：
+
+1. **[dft.json 配置文件说明](doc/Backend/dft配置文件说明.md)**（权威定义）：`modType`、`rules`、`overwriteStartingDir`、`target` 等字段的完整说明。
+2. **[OverrideControl 实现参考](DHC_Backend/models/service/decompression/OVERRIDE_CONTROL.md)**：覆盖控制的代码级实现细节。
+3. **[模组安装系统文档](DHC_Backend/models/service/modInstall/README.md)**：三级路径规范、资源检测与批量安装 API。
+
+---
+
 ## 🛠️ 开发重点
 1.  **实装真实模组安装 (当前核心):** 完成从 Demo 模拟逻辑到真实模组安装逻辑的切换，确保模组文件能够准确解压、识别并覆盖到正确的 AC 游戏目录。
 2.  **后端架构分层:** 持续推进从“万能 Handler”向 `Handler -> Service -> Executor` 模式的演进。

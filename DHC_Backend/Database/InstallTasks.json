@@ -17,6 +17,448 @@
     }
   },
   {
+    "id": "install_1776650386157030000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650386,
+    "endTime": 1776650391,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1777136684373367000",
+    "setId": "real-mini-install-v1",
+    "status": "completed",
+    "startTime": 1777136684,
+    "endTime": 1777136721,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniCar",
+        "subProgress": 100
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniHud",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniMap",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674018746372000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674018,
+    "endTime": 1776674024,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776676637423676000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776676637,
+    "endTime": 1776676643,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650052232123000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650052,
+    "endTime": 1776650056,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776649960420385000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776649960,
+    "endTime": 1776649964,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1777132766352588000",
+    "setId": "real-mini-install-v1",
+    "status": "failed",
+    "startTime": 1777132766,
+    "endTime": 1777132766,
+    "error": "-modInstall.MultiModInstallWithTracker-获取资源状态失败: 资源目录/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/resources/testPkg/shaders不存在",
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "failed",
+        "progress": 0,
+        "currentItem": "校验资源完整性",
+        "subProgress": 0
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "waiting",
+        "progress": 0,
+        "subProgress": 0
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包",
+        "status": "waiting",
+        "progress": 0,
+        "subProgress": 0
+      }
+    }
+  },
+  {
+    "id": "install_1775838679600887000",
+    "setId": "demo-install-v1",
+    "status": "completed",
+    "startTime": 1775838679,
+    "endTime": 1775838699,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包 (JDM Pack)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 Mitsubishi Lancer Evo 9",
+        "subProgress": 100
+      },
+      "core": {
+        "categoryId": "core",
+        "categoryName": "基础环境 (CSP)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "基础环境安装",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (首都高)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装芝浦 PA 场景",
+        "subProgress": 100
+      },
+      "weather": {
+        "categoryId": "weather",
+        "categoryName": "天气系统 (Sol \u0026 Pure)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 Pure Textures HighRes",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650494898684000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776650494,
+    "endTime": 1776650500,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674347638150000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674347,
+    "endTime": 1776674353,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776650373444082000",
+    "setId": "real-install-v1",
+    "status": "interrupted",
+    "startTime": 1776650373,
+    "error": "进程异常退出，任务被中断",
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "waiting",
+        "progress": 0,
+        "subProgress": 0
+      }
+    }
+  },
+  {
+    "id": "install_1777133571907987000",
+    "setId": "real-mini-install-v1",
+    "status": "completed",
+    "startTime": 1777133571,
+    "endTime": 1777133577,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 carMini",
+        "subProgress": 100
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 hudMini",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 mapMini",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1777305004703285000",
+    "setId": "real-mini-install-v1",
+    "status": "completed",
+    "startTime": 1777305004,
+    "endTime": 1777305035,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniCar",
+        "subProgress": 100
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniHud",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniMap",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776670809903064000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776670809,
+    "endTime": 1776670815,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775838436116968000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775838436,
+    "endTime": 1775838438,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776674974143799000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674974,
+    "endTime": 1776674979,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776667385935348000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667385,
+    "endTime": 1776667391,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776673978865968000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776673978,
+    "endTime": 1776673984,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776673906930868000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776673906,
+    "endTime": 1776673912,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1777133696008296000",
+    "setId": "real-mini-install-v1",
+    "status": "completed",
+    "startTime": 1777133696,
+    "endTime": 1777133701,
+    "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 carMini",
+        "subProgress": 100
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 hudMini",
+        "subProgress": 100
+      },
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 mapMini",
+        "subProgress": 100
+      }
+    }
+  },
+  {
     "id": "install_1777136780638621000",
     "setId": "real-mini-install-v1",
     "status": "completed",
@@ -67,23 +509,6 @@
     }
   },
   {
-    "id": "install_1776670809903064000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776670809,
-    "endTime": 1776670815,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
     "id": "install_1776675962586055000",
     "setId": "real-install-v1",
     "status": "completed",
@@ -101,45 +526,11 @@
     }
   },
   {
-    "id": "install_1776668760555848000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776668760,
-    "endTime": 1776668766,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776650386157030000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776650386,
-    "endTime": 1776650391,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1775838436116968000",
+    "id": "install_1775837682726212000",
     "setId": "standard",
     "status": "completed",
-    "startTime": 1775838436,
-    "endTime": 1775838438,
+    "startTime": 1775837682,
+    "endTime": 1775837685,
     "categories": {
       "cm": {
         "categoryId": "cm",
@@ -152,11 +543,11 @@
     }
   },
   {
-    "id": "install_1777134702795125000",
+    "id": "install_1777137981621934000",
     "setId": "real-mini-install-v1",
     "status": "completed",
-    "startTime": 1777134702,
-    "endTime": 1777134740,
+    "startTime": 1777137981,
+    "endTime": 1777138009,
     "categories": {
       "cars": {
         "categoryId": "cars",
@@ -185,95 +576,11 @@
     }
   },
   {
-    "id": "install_1776674974143799000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776674974,
-    "endTime": 1776674979,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776674941648724000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776674941,
-    "endTime": 1776674947,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1777136684373367000",
+    "id": "install_1777139153146360000",
     "setId": "real-mini-install-v1",
     "status": "completed",
-    "startTime": 1777136684,
-    "endTime": 1777136721,
-    "categories": {
-      "cars": {
-        "categoryId": "cars",
-        "categoryName": "车辆包",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 miniCar",
-        "subProgress": 100
-      },
-      "dashboard": {
-        "categoryId": "dashboard",
-        "categoryName": "HUD 仪表盘",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 miniHud",
-        "subProgress": 100
-      },
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 miniMap",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776667385935348000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776667385,
-    "endTime": 1776667391,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1777138059368948000",
-    "setId": "real-mini-install-v1",
-    "status": "completed",
-    "startTime": 1777138059,
-    "endTime": 1777138086,
+    "startTime": 1777139153,
+    "endTime": 1777139191,
     "categories": {
       "cars": {
         "categoryId": "cars",
@@ -319,40 +626,6 @@
     }
   },
   {
-    "id": "install_1776670694389258000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776670694,
-    "endTime": 1776670700,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776670531104954000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776670531,
-    "endTime": 1776670536,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
     "id": "install_1777137145609323000",
     "setId": "real-mini-install-v1",
     "status": "completed",
@@ -386,113 +659,11 @@
     }
   },
   {
-    "id": "install_1776667637151783000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776667637,
-    "endTime": 1776667642,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
     "id": "install_1776650146959634000",
     "setId": "real-install-v1",
     "status": "completed",
     "startTime": 1776650146,
     "endTime": 1776650152,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776674018746372000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776674018,
-    "endTime": 1776674024,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1775837693235086000",
-    "setId": "standard",
-    "status": "completed",
-    "startTime": 1775837693,
-    "endTime": 1775837696,
-    "categories": {
-      "cm": {
-        "categoryId": "cm",
-        "categoryName": "Content Manager",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "移动到桌面",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776676637423676000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776676637,
-    "endTime": 1776676643,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776673978865968000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776673978,
-    "endTime": 1776673984,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776650052232123000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776650052,
-    "endTime": 1776650056,
     "categories": {
       "map": {
         "categoryId": "map",
@@ -538,113 +709,29 @@
     }
   },
   {
-    "id": "install_1776673906930868000",
+    "id": "install_1776649486378141000",
     "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776673906,
-    "endTime": 1776673912,
+    "status": "failed",
+    "startTime": 1776649486,
+    "endTime": 1776649486,
+    "error": "-modInstall.MultiModInstallWithTracker-完整性检查未通过: -modInstall.PathCorresponModIntegrityCheck-检测到资源在本地不完整,路径:tracks/demoPkg/SRP_093,状态:不完整",
     "categories": {
       "map": {
         "categoryId": "map",
         "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
+        "status": "failed",
+        "progress": 6,
+        "currentItem": "校验资源完整性",
+        "subProgress": 60
       }
     }
   },
   {
-    "id": "install_1776650494898684000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776650494,
-    "endTime": 1776650500,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1775837682726212000",
-    "setId": "standard",
-    "status": "completed",
-    "startTime": 1775837682,
-    "endTime": 1775837685,
-    "categories": {
-      "cm": {
-        "categoryId": "cm",
-        "categoryName": "Content Manager",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "移动到桌面",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776674347638150000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776674347,
-    "endTime": 1776674353,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776667545954713000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776667545,
-    "endTime": 1776667551,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1776649960420385000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776649960,
-    "endTime": 1776649964,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1777137981621934000",
+    "id": "install_1777137605800078000",
     "setId": "real-mini-install-v1",
     "status": "completed",
-    "startTime": 1777137981,
-    "endTime": 1777138009,
+    "startTime": 1777137605,
+    "endTime": 1777137643,
     "categories": {
       "cars": {
         "categoryId": "cars",
@@ -673,27 +760,44 @@
     }
   },
   {
-    "id": "install_1776650373444082000",
-    "setId": "real-install-v1",
-    "status": "interrupted",
-    "startTime": 1776650373,
-    "error": "进程异常退出，任务被中断",
+    "id": "install_1777304839462484000",
+    "setId": "real-mini-install-v1",
+    "status": "completed",
+    "startTime": 1777304839,
+    "endTime": 1777304870,
     "categories": {
+      "cars": {
+        "categoryId": "cars",
+        "categoryName": "车辆包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniCar",
+        "subProgress": 100
+      },
+      "dashboard": {
+        "categoryId": "dashboard",
+        "categoryName": "HUD 仪表盘",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniHud",
+        "subProgress": 100
+      },
       "map": {
         "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "waiting",
-        "progress": 0,
-        "subProgress": 0
+        "categoryName": "地图包",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 miniMap",
+        "subProgress": 100
       }
     }
   },
   {
-    "id": "install_1777139153146360000",
+    "id": "install_1777138059368948000",
     "setId": "real-mini-install-v1",
     "status": "completed",
-    "startTime": 1777139153,
-    "endTime": 1777139191,
+    "startTime": 1777138059,
+    "endTime": 1777138086,
     "categories": {
       "cars": {
         "categoryId": "cars",
@@ -755,73 +859,6 @@
     }
   },
   {
-    "id": "install_1776669321614942000",
-    "setId": "real-install-v1",
-    "status": "completed",
-    "startTime": 1776669321,
-    "endTime": 1776669328,
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 SRP_093",
-        "subProgress": 100
-      }
-    }
-  },
-  {
-    "id": "install_1777132766352588000",
-    "setId": "real-mini-install-v1",
-    "status": "failed",
-    "startTime": 1777132766,
-    "endTime": 1777132766,
-    "error": "-modInstall.MultiModInstallWithTracker-获取资源状态失败: 资源目录/Users/wuzitong/Desktop/programming/DHC_AC_Installer/DHC_Backend/test/simEnv/resources/testPkg/shaders不存在",
-    "categories": {
-      "cars": {
-        "categoryId": "cars",
-        "categoryName": "车辆包",
-        "status": "failed",
-        "progress": 0,
-        "currentItem": "校验资源完整性",
-        "subProgress": 0
-      },
-      "dashboard": {
-        "categoryId": "dashboard",
-        "categoryName": "HUD 仪表盘",
-        "status": "waiting",
-        "progress": 0,
-        "subProgress": 0
-      },
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包",
-        "status": "waiting",
-        "progress": 0,
-        "subProgress": 0
-      }
-    }
-  },
-  {
-    "id": "install_1776649486378141000",
-    "setId": "real-install-v1",
-    "status": "failed",
-    "startTime": 1776649486,
-    "endTime": 1776649486,
-    "error": "-modInstall.MultiModInstallWithTracker-完整性检查未通过: -modInstall.PathCorresponModIntegrityCheck-检测到资源在本地不完整,路径:tracks/demoPkg/SRP_093,状态:不完整",
-    "categories": {
-      "map": {
-        "categoryId": "map",
-        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
-        "status": "failed",
-        "progress": 6,
-        "currentItem": "校验资源完整性",
-        "subProgress": 60
-      }
-    }
-  },
-  {
     "id": "install_1776674247950402000",
     "setId": "real-install-v1",
     "status": "completed",
@@ -839,44 +876,45 @@
     }
   },
   {
-    "id": "install_1777133696008296000",
-    "setId": "real-mini-install-v1",
+    "id": "install_1776668760555848000",
+    "setId": "real-install-v1",
     "status": "completed",
-    "startTime": 1777133696,
-    "endTime": 1777133701,
+    "startTime": 1776668760,
+    "endTime": 1776668766,
     "categories": {
-      "cars": {
-        "categoryId": "cars",
-        "categoryName": "车辆包",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 carMini",
-        "subProgress": 100
-      },
-      "dashboard": {
-        "categoryId": "dashboard",
-        "categoryName": "HUD 仪表盘",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 hudMini",
-        "subProgress": 100
-      },
       "map": {
         "categoryId": "map",
-        "categoryName": "地图包",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
         "status": "completed",
         "progress": 100,
-        "currentItem": "安装 mapMini",
+        "currentItem": "安装 SRP_093",
         "subProgress": 100
       }
     }
   },
   {
-    "id": "install_1777137605800078000",
+    "id": "install_1776674941648724000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776674941,
+    "endTime": 1776674947,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1777134702795125000",
     "setId": "real-mini-install-v1",
     "status": "completed",
-    "startTime": 1777137605,
-    "endTime": 1777137643,
+    "startTime": 1777134702,
+    "endTime": 1777134740,
     "categories": {
       "cars": {
         "categoryId": "cars",
@@ -905,75 +943,103 @@
     }
   },
   {
-    "id": "install_1775838679600887000",
-    "setId": "demo-install-v1",
+    "id": "install_1776670694389258000",
+    "setId": "real-install-v1",
     "status": "completed",
-    "startTime": 1775838679,
-    "endTime": 1775838699,
+    "startTime": 1776670694,
+    "endTime": 1776670700,
     "categories": {
-      "cars": {
-        "categoryId": "cars",
-        "categoryName": "车辆包 (JDM Pack)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 Mitsubishi Lancer Evo 9",
-        "subProgress": 100
-      },
-      "core": {
-        "categoryId": "core",
-        "categoryName": "基础环境 (CSP)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "基础环境安装",
-        "subProgress": 100
-      },
       "map": {
         "categoryId": "map",
-        "categoryName": "地图包 (首都高)",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
         "status": "completed",
         "progress": 100,
-        "currentItem": "安装芝浦 PA 场景",
-        "subProgress": 100
-      },
-      "weather": {
-        "categoryId": "weather",
-        "categoryName": "天气系统 (Sol \u0026 Pure)",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 Pure Textures HighRes",
+        "currentItem": "安装 SRP_093",
         "subProgress": 100
       }
     }
   },
   {
-    "id": "install_1777133571907987000",
-    "setId": "real-mini-install-v1",
+    "id": "install_1776670531104954000",
+    "setId": "real-install-v1",
     "status": "completed",
-    "startTime": 1777133571,
-    "endTime": 1777133577,
+    "startTime": 1776670531,
+    "endTime": 1776670536,
     "categories": {
-      "cars": {
-        "categoryId": "cars",
-        "categoryName": "车辆包",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 carMini",
-        "subProgress": 100
-      },
-      "dashboard": {
-        "categoryId": "dashboard",
-        "categoryName": "HUD 仪表盘",
-        "status": "completed",
-        "progress": 100,
-        "currentItem": "安装 hudMini",
-        "subProgress": 100
-      },
       "map": {
         "categoryId": "map",
-        "categoryName": "地图包",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
         "status": "completed",
         "progress": 100,
-        "currentItem": "安装 mapMini",
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776667637151783000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667637,
+    "endTime": 1776667642,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1775837693235086000",
+    "setId": "standard",
+    "status": "completed",
+    "startTime": 1775837693,
+    "endTime": 1775837696,
+    "categories": {
+      "cm": {
+        "categoryId": "cm",
+        "categoryName": "Content Manager",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "移动到桌面",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776667545954713000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776667545,
+    "endTime": 1776667551,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
+        "subProgress": 100
+      }
+    }
+  },
+  {
+    "id": "install_1776669321614942000",
+    "setId": "real-install-v1",
+    "status": "completed",
+    "startTime": 1776669321,
+    "endTime": 1776669328,
+    "categories": {
+      "map": {
+        "categoryId": "map",
+        "categoryName": "地图包 (SRP 0.9.3 真实装载)",
+        "status": "completed",
+        "progress": 100,
+        "currentItem": "安装 SRP_093",
         "subProgress": 100
       }
     }

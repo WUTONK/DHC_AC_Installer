@@ -1,5 +1,8 @@
 # OverrideControl（覆盖控制）使用说明
 
+> **注意**：本文档为代码级实现参考。  
+> **`dft.json` 字段权威定义**请以 [`doc/Backend/dft配置文件说明.md`](../../../../doc/Backend/dft配置文件说明.md)（以下简称「主文档」）为准，两份文档如有冲突以主文档为准。
+
 把**解压后的模组目录**按 **DFT（`dft.json`）** 里的规则，复制到**游戏目录下的某根路径**（通常是 `content` 或 `content/cars` 等）。  
 核心流程：**扫描源目录树 → 给每个文件/目录选动作（规则 > 继承父目录 > 默认）→ 剪枝合并同类子树 → 生成任务并执行**。
 
@@ -44,6 +47,7 @@ decompression.OverrideControl(srcDirPath, dstDirPath, dftJsonPath string) error
 | `rules[].action` | 对该节点执行的动作 |
 | `rules[].backup` | 该规则命中且为 true 时，参与「是否需要先建备份目录」的判断 |
 | `rules[].newName` | **仅当 `action` 为 `rename` 时**：复制到目标后的文件名 |
+| `rules[].target` | **目标相对路径**（相对 `dstDirPath`）。命中该规则的节点安装到 `dstDirPath + target`；**子节点沿继承链追加自身目录名**（详见下方「target 重映射」）|
 | `overwriteStartingDir` | 相对**游戏安装根**的子路径；**空则默认为 `content`**（由 `DecodeDhcFileTagConfig` 处理） |
 
 注意：`defaultAction.action` **不能**是 `rename`（会报错）；`rename` 只能出现在规则里，且语义偏「单文件：先覆盖复制再改名」。
@@ -63,6 +67,38 @@ decompression.OverrideControl(srcDirPath, dstDirPath, dftJsonPath string) error
 
 ---
 
+## `target` 重映射与继承
+
+`rules[].target` 用于将命中节点「重定向」到游戏目录下的另一相对路径，常见场景是**去掉压缩包里多余的包裹层**。
+
+### 示例：去掉多余包裹层
+
+假设：
+- 压缩包解压后结构为 `shmnc129/content/cars/r34/...`
+- 期望安装到 `{gamePath}/content/cars/r34/...`
+- `overwriteStartingDir` 设为 `"."`（即 `dstDirPath = {gamePath}`）
+
+配置：
+```json
+{ "pattern": "shmnc129/content", "action": "overwrite", "target": "content" }
+```
+
+效果：
+- 源路径 `shmnc129/content` → 安装到 `{gamePath}/content`
+- 源路径 `shmnc129/content/cars`（**没有单独的规则命中它**）→ 自动继承父节点的 target，计算得 `content/cars` → 安装到 `{gamePath}/content/cars`
+
+### 继承规则（代码见 `applyDecisions`）
+
+**只有当子节点没有命中任何规则时**，才会继承父节点的 target：
+- 继承计算：`子 target = filepath.Join(父 target, 子目录名)`
+- 如果子节点**命中了自己的规则**（哪怕规则里没写 target），就**不会继承**父的 target，而是用规则里的 target（空则按源路径原样写入）
+
+### 注意
+
+`target` 为空（或不写）表示「按源相对路径原样写入」，即最终路径 = `dstDirPath + 源文件的 relPath`。
+
+---
+
 ## 动作（`action`）含义
 
 | 值 | 行为（简化） |
@@ -77,12 +113,18 @@ decompression.OverrideControl(srcDirPath, dstDirPath, dftJsonPath string) error
 
 ---
 
-## 目标路径怎么拼
+## 目标路径怎么拼（`buildTarget`）
 
-- 源树根在磁盘上是 `srcDirPath`，其**文件夹名**（`filepath.Base(srcDirPath)`）会对应到目标树的一层：根 `"."` 对应 `dstDirPath/<源文件夹名>/`。
-- 子路径 `relPath` 默认接到 `dstDirPath` 下：`Target = filepath.Join(dstDirPath, relPath)`（根节点例外时用源目录名）。
+最终目标路径由 `buildTarget(dstRoot, relPath, decidedTarget, srcDirName)` 计算：
 
-因此：`srcDirPath` 实际内容布局要与「期望出现在游戏里的相对结构」一致；`dstDirPath` 要与 AC 里 `content`、`content/cars` 等约定一致，避免出现多一层/少一层目录。
+1. **若 `decidedTarget` 非空**（规则命中或继承得到）：`Target = filepath.Join(dstRoot, decidedTarget)`。
+2. **若 `decidedTarget` 为空**：
+   - `relPath == "."` 时：`Target = dstRoot`（根节点合并到目标根）。
+   - 否则：`Target = filepath.Join(dstRoot, relPath)`（按源相对路径原样写入）。
+
+**典型调用链**：`dstRoot = filepath.Join(gamePath, overwriteStartingDir)`，例如 `…/Assetto Corsa/content`。
+
+**注意**：`srcDirPath` 的内部布局应与「期望在游戏目录中出现的相对结构」一致；若有多余包裹层，需使用 `rules[].target` 重映射去掉。
 
 ---
 
