@@ -1,6 +1,21 @@
 # DHC AC Installer
 
-一个使用 Electron + React + TypeScript 构建的桌面应用程序。
+一个使用 Electron + React + TypeScript 构建的桌面应用程序，后端为 Go（Gin）。
+
+## 从哪里读文档
+
+建议按下列顺序查阅
+
+1. **本 README**：运行方式、环境与仓库结构。
+2. **[AI_GUIDE.md](./AI_GUIDE.md)**：给 AI 的架构鸟瞰与深度链接索引。
+3. **API 契约**（唯一权威）：根目录 **`DHC_AC_Installer.openapi.json`**。
+4. **领域文档**（按需跳转）：解压与覆盖参见 `DHC_Backend/models/service/decompression/OVERRIDE_CONTROL.md`
+模组安装资源与路径参见 `DHC_Backend/models/service/modInstall/README.md`
+Electron 前后端打通参见 `doc/Electron前后端通信入门.md`。`dft.json`
+覆盖规则的字段语义以 **[doc/Backend/dft配置文件说明.md](./doc/Backend/dft配置文件说明.md)** 为准；示例骨架见 **`doc/Backend/ConfigurationFileTemplate/dhcFileTag_template.json`**（安装时文件名一般为包内 `dft.json`）。
+5. **脚本细节**：[启动说明.md](./启动说明.md)。
+
+后端未完成技术债：[DHC_Backend/需维护问题列表.md](./DHC_Backend/需维护问题列表.md)。
 
 ## 技术栈
   
@@ -14,16 +29,11 @@
 ```
 DHC_AC_Installer/
 ├── DHC_Frontend/           # Electron + React 前端
-│   ├── src/
-│   │   ├── main/           # Electron 主进程
-│   │   ├── preload/        # Electron 预加载脚本
-│   │   └── renderer/       # React 渲染进程
-│   │       ├── src/
-│   │       │   ├── components/  # React 组件
-│   │       │   └── App.tsx     # 主应用组件
-│   │       └── index.html
-│   ├── package.json
-│   └── electron.vite.config.ts
+├── DHC_Backend/           # Go 后端（安装、解压、进度等）
+├── doc/                     # 补充说明与设计文档（非契约）
+├── DHC_AC_Installer.openapi.json
+├── AI_GUIDE.md
+├── start_all.sh / start_backend.sh / start_frontend.sh
 └── README.md
 ```
 

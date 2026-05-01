@@ -13,7 +13,7 @@ type envType string
 const (
 	SimEnvHasDlc envType = "simEnvhasDlc" // 模拟环境（有DLC）- 测试用
 	SimEnvnoDlc  envType = "simEnvnoDlc"  // 模拟环境（无DLC）- 测试用
-	TureEnv      envType = "tureEnv"      // 真实用户游戏环境 - 生产用
+	TrueEnv      envType = "trueEnv"      // 真实用户游戏环境（生产分支）
 )
 
 // isDev 是否为开发模式，全局变量
@@ -74,7 +74,7 @@ func SetTestEnvType(et envType) {
 
 // GetGamePathAuto 根据当前模式自动选择环境类型并获取游戏路径
 // 开发模式：使用测试环境（SimEnvHasDlc 或 SimEnvnoDlc）
-// 生产模式：使用真实游戏环境（TureEnv）
+// 生产模式：使用真实游戏环境（TrueEnv）
 func GetGamePathAuto() (string, error) {
 	if isDev {
 		// 确保 testEnvType 已初始化，如果未初始化则使用默认值
@@ -83,7 +83,7 @@ func GetGamePathAuto() (string, error) {
 		}
 		return GetGamePath(testEnvType)
 	}
-	return GetGamePath(TureEnv)
+	return GetGamePath(TrueEnv)
 }
 
 // GetGamePath 从注册表中获取steam安装位置，以此获取 vdf 并解析获得神力科莎安装位置
@@ -106,7 +106,7 @@ func GetGamePath(et envType) (string, error) {
 		return gamePath, nil
 	case SimEnvnoDlc:
 		// TODO:补充无 DLC 环境
-	case TureEnv:
+	case TrueEnv:
 		// TODO:补充获取真实游戏环境
 	default:
 		return "", fmt.Errorf("%s传入envType参数未命中", funcIdt)
